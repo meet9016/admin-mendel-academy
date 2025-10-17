@@ -1,3 +1,5 @@
+"use client"
+import { useRouter } from "next/navigation";
 import React from "react";
 
 interface ComponentCardProps {
@@ -12,14 +14,14 @@ interface ComponentCardProps {
 
 const ComponentCard: React.FC<ComponentCardProps> = ({
   title,
-  name,
+  name = "",
   children,
   className = "",
   onAddProductClick = "",
   Plusicon = null,
   desc = "",
 }) => {
-
+  const router = useRouter();
   return (
     <>
       <div
@@ -43,14 +45,13 @@ const ComponentCard: React.FC<ComponentCardProps> = ({
 
           {name && (
             <button
+              onClick={() => router.push(onAddProductClick)}
               className="bg-brand-950 text-white px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2">
               {Plusicon} {name}
             </button>
           )}
         </div>
-        <div
-          className="p-0 border border-gray-100 dark:border-gray-800 sm:p-0"
-        >
+        <div className="p-4 border-t border-gray-100 dark:border-gray-800 sm:p-6">
           <div className="space-y-6">{children}</div>
         </div>
       </div>

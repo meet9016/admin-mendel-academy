@@ -6,36 +6,32 @@ import Input from '../form/input/InputField';
 import DatePicker from '../form/date-picker';
 import Radio from '../form/input/Radio';
 import TextArea from '../form/input/TextArea';
-import DropzoneComponent from './DropZone';
 import axios from 'axios';
 import { api } from '@/utils/axiosInstance';
 import endPointApi from '@/utils/endPointApi';
-import Button from '../ui/button/Button';
-import { useRouter } from 'next/navigation';
 
-const Blogs = () => {
-  const router = useRouter();
+const Question = () => {
   const [selectedValue, setSelectedValue] = useState<string>("option2");
   const [messageTwo, setMessageTwo] = useState("");
 
   const handleRadioChange = (value: string) => {
     setSelectedValue(value);
   };
-  const baseURL = process.env.NEXT_PUBLIC_APP_URL;
+    const baseURL = process.env.NEXT_PUBLIC_APP_URL;
 
-  const getBlogData = () => {
+ const getBlogData = () => {
     // Fetch theme data logic here
     api.get(`${endPointApi.getAllBlogs}`)
       .then(response => {
-        console.log("ressss", response);
-
+        console.log("ressss",response);
+        
       })
       .catch(error => {
         console.error('Error fetching theme data:', error)
       })
   }
 
-  useEffect(() => {
+  useEffect(() => { 
     getBlogData()
   }, [])
   return (
@@ -103,20 +99,9 @@ const Blogs = () => {
           </div>
         </ComponentCard>
       </div>
-      <div className="space-y-6">
-        <DropzoneComponent />
-        <div className="flex items-center gap-5">
-          <Button size="sm" variant="primary">
-            Save
-          </Button>
-          <Button size="sm" variant="outline" onClick={() => router.push("/blogs")}>
-            Cancel
-          </Button>
-        </div>
-      </div>
     </>
 
   )
 }
 
-export default Blogs
+export default Question
