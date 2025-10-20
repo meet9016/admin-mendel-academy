@@ -1,107 +1,188 @@
-"use client"
-import React, { useEffect, useState } from 'react'
-import ComponentCard from '../common/ComponentCard';
-import Label from '../form/Label';
-import Input from '../form/input/InputField';
-import DatePicker from '../form/date-picker';
-import Radio from '../form/input/Radio';
-import TextArea from '../form/input/TextArea';
-import axios from 'axios';
-import { api } from '@/utils/axiosInstance';
-import endPointApi from '@/utils/endPointApi';
+"use client";
+
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import ComponentCard from "../common/ComponentCard";
+import Label from "../form/Label";
+import Input from "../form/input/InputField";
+import TextArea from "../form/input/TextArea";
+import Select from "../form/Select";
+import { ChevronDownIcon } from "@/icons";
+import Button from "../ui/button/Button";
+import { api } from "@/utils/axiosInstance";
+import endPointApi from "@/utils/endPointApi";
+
+const categoryOptions = [
+  { value: "marketing", label: "Marketing" },
+  { value: "template", label: "Template" },
+  { value: "development", label: "Development" },
+];
 
 const Question = () => {
-  const [selectedValue, setSelectedValue] = useState<string>("option2");
-  const [messageTwo, setMessageTwo] = useState("");
+  const router = useRouter();
 
-  const handleRadioChange = (value: string) => {
-    setSelectedValue(value);
+  // One state for all fields
+  const [formData, setFormData] = useState({
+    title: "",
+    price: "",
+    duration: "",
+    description: "",
+  });
+
+  // Error state
+  const [errors, setErrors] = useState({
+    title: "",
+    duration: "",
+    description: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Handle field changes
+  const handleChange = (field: keyof typeof formData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field as keyof typeof errors]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
   };
-    const baseURL = process.env.NEXT_PUBLIC_APP_URL;
 
- const getBlogData = () => {
-    // Fetch theme data logic here
-    api.get(`${endPointApi.getAllBlogs}`)
-      .then(response => {
-        console.log("ressss",response);
-        
-      })
-      .catch(error => {
-        console.error('Error fetching theme data:', error)
-      })
-  }
+  // Validation
+  const validate = () => {
+    const newErrors = {
+      title: "",
+      price: "",
+      duration: "",
+      description: "",
+    };
 
-  useEffect(() => { 
-    getBlogData()
-  }, [])
+    let isValid = true;
+
+    if (!formData.title.trim()) {
+      newErrors.title = "Title is required";
+      isValid = false;
+    }
+    if (!formData.price.trim()) {
+      newErrors.price = "Sub is required";
+      isValid = false;
+    }
+    if (!formData.duration) {
+      newErrors.duration = "Please select a duration";
+      isValid = false;
+    }
+    if (!formData.description.trim()) {
+      newErrors.description = "Description is required";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  // Submit handler
+  const handleSubmit = async () => {
+    if (!validate()) return;
+
+    setIsSubmitting(true);
+    const body = {
+      title: formData.title,
+      description: formData.description,
+      price: formData.price,
+      duration: formData.duration,
+    };
+
+    try {
+      await api.post(`${endPointApi.createQuestion}`, body);
+      router.push("/question");
+    } catch (error) {
+      console.error("Submission error:", error);
+      // Show notification or message
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   return (
-    <>
-      <div className="space-y-6">
-        <ComponentCard title='' name=''>
-          <div className="space-y-6">
-            <div>
-              <Label>Exam Name</Label>
-              <Input type="text" placeholder="exam name" />
-            </div>
-            <div>
-              <Label>Title</Label>
+    <div className="space-y-6">
+      <ComponentCard title="" name="">
+        <div className="space-y-6">
+
+          {/* Title */}
+          <div>
+            <Label>Title</Label>
+            <Input
+              placeholder="Enter title"
+              type="text"
+              value={formData.title}
+              onChange={(e) => handleChange("title", e.target.value)}
+              error={errors.title}
+            />
+            {errors.title && <p className="text-sm text-error-500 mt-1">{errors.title}</p>}
+          </div>
+
+          {/* Subtitle & Category */}
+          <div className="flex items-start gap-4">
+            <div className="flex-1">
+              <Label>Price</Label>
               <Input
-                placeholder="title"
+                placeholder="Enter price"
                 type="text"
-              />
-            </div>
-            <div>
-              <DatePicker
-                id="date-picker"
-                label="Date Picker Input"
-                placeholder="Select a date"
-                onChange={(dates, currentDateString) => {
-                  // Handle your logic
-                  console.log({ dates, currentDateString });
+                value={formData.price}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (/^\d*$/.test(value)) {
+                    handleChange("price", value);
+                  }
                 }}
+                error={errors.price}
+
               />
-            </div>
-            <div className="flex flex-wrap items-center gap-8">
-              <Radio
-                id="radio1"
-                name="group1"
-                value="option1"
-                checked={selectedValue === "option1"}
-                onChange={handleRadioChange}
-                label="Active"
-              />
-              <Radio
-                id="radio2"
-                name="group1"
-                value="option2"
-                checked={selectedValue === "option2"}
-                onChange={handleRadioChange}
-                label="Inactive"
-              />
+              {errors.price && <p className="text-sm text-error-500 mt-1">{errors.price}</p>}
 
             </div>
-            <div>
-              <Label>Sort Description</Label>
-              <Input type="text" placeholder="sort description" />
-            </div>
-            <div className="space-y-6">
-              <div>
-                <Label>Description</Label>
-                <TextArea
-                  rows={6}
-                  value={messageTwo}
-                  error
-                  onChange={(value) => setMessageTwo(value)}
-                  hint="Please enter a valid message."
+
+            <div className="flex-1">
+              <Label>Category</Label>
+              <div className="relative">
+                <Select
+                  options={categoryOptions}
+                  placeholder="Select duration"
+                  value={formData.duration}
+                  onChange={(val) => handleChange("duration", val)}
+                  error={errors.duration}
+
+                // className="dark:bg-dark-900"
                 />
+                <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
+                  <ChevronDownIcon />
+                </span>
               </div>
+              {errors.duration && <p className="text-sm text-error-500 mt-1">{errors.duration}</p>}
             </div>
           </div>
-        </ComponentCard>
+
+          {/* Description */}
+          <div>
+            <Label>Description</Label>
+            <TextArea
+              rows={6}
+              value={formData.description}
+              onChange={(val) => handleChange("description", val)}
+              error={!!errors.description}
+            />
+            {errors.description && <p className="text-sm text-error-500 mt-1">{errors.description}</p>}
+          </div>
+        </div>
+      </ComponentCard>
+
+      {/* Buttons */}
+      <div className="flex items-center gap-5">
+        <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
+          {isSubmitting ? "Saving..." : "Save"}
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => router.push("/blogs")}>
+          Cancel
+        </Button>
       </div>
-    </>
+    </div>
+  );
+};
 
-  )
-}
-
-export default Question
+export default Question;

@@ -8,6 +8,12 @@ export interface EndPointApi {
     createBlog?: string;
     updateBlog?: string;
     deleteBlog?: string;
+
+    //Question
+    getAllQuestion?: string;
+    createQuestion?: string;
+    updateQuestion?: string;
+    deleteQuestion?: string;
 }
 
 // Define and export the API endpoint object
@@ -19,8 +25,14 @@ const endPointApi: EndPointApi = {
     //Blogs
     getAllBlogs: 'blogs/getall',
     createBlog: 'blogs',
-    updateBlog: 'blogs', // You might append the blog ID when making the request
-    deleteBlog: 'blogs', // You might append the blog ID when making the request
+    updateBlog: 'blogs',
+    deleteBlog: 'blogs',
+
+    //Question
+    getAllQuestion: 'question/getall',
+    createQuestion: 'question/create-question',
+    updateQuestion: 'question/update',
+    deleteQuestion: 'question/delete',
 };
 
 export default endPointApi;
