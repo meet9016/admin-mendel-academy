@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+@import "primereact/resources/themes/lara-light-cyan/theme.css";
+@import "primereact/resources/primereact.css";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme {
@@ -293,6 +296,7 @@
 }
 
 /* third-party libraries CSS */
+
 .apexcharts-legend-text {
   @apply !text-gray-700 dark:!text-gray-400;
 }

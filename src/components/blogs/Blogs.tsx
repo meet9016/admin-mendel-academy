@@ -82,7 +82,6 @@ const Blogs = () => {
                 onChange={handleRadioChange}
                 label="Inactive"
               />
-
             </div>
             <div>
               <Label>Sort Description</Label>
