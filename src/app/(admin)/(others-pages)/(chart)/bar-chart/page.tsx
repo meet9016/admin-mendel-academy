@@ -15,7 +15,7 @@ export default function page() {
     <div>
       <PageBreadcrumb pageTitle="Bar Chart" />
       <div className="space-y-6">
-        <ComponentCard title="Bar Chart 1">
+        <ComponentCard title="Bar Chart 1" name="">
           <BarChartOne />
         </ComponentCard>
       </div>

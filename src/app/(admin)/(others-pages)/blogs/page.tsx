@@ -160,10 +160,10 @@ export default function Page() {
   const [data, setData] = useState<BlogType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState(null);
+  const [selectedRow, setSelectedRow] = useState<BlogType | null>(null);
   console.log("*******", selectedRow);
 
-  const handleDeleteClick = (row: any) => {
+  const handleDeleteClick = (row: BlogType) => {
     setSelectedRow(row);
     setIsDeleteModalOpen(true);
   };

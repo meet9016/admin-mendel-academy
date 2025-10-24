@@ -54,7 +54,7 @@ export default function SignInForm() {
   };
 
   const validateForm = (): boolean => {
-    let newErrors: ErrorState = {};
+    const newErrors: ErrorState = {};
 
     // 1. Email Validation
     if (!formData.email) {

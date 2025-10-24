@@ -6,7 +6,6 @@ import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import DatePicker from "../form/date-picker";
 import Radio from "../form/input/Radio";
-import TextArea from "../form/input/TextArea";
 import DropzoneComponent from "./DropZone";
 import { api } from "@/utils/axiosInstance";
 import Button from "../ui/button/Button";
@@ -35,9 +34,9 @@ const Blogs = () => {
   };
 
   // 📄 Handle textarea change
-  const handleDescriptionChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, description: value }));
-  };
+  // const handleDescriptionChange = (value: string) => {
+  //   setFormData((prev) => ({ ...prev, description: value }));
+  // };
 
   // 📅 Handle date selection
   const handleDateChange = (_dates: any, currentDateString: string) => {
