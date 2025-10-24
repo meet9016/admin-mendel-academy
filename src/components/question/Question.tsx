@@ -1,27 +1,26 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import ComponentCard from "../common/ComponentCard";
+import React, { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import TextArea from "../form/input/TextArea";
 import Select from "../form/Select";
-import { ChevronDownIcon } from "@/icons";
 import Button from "../ui/button/Button";
+import { ChevronDownIcon } from "@/icons";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
+import ComponentCard from "../common/ComponentCard";
 
 const categoryOptions = [
-  { value: "marketing", label: "Marketing" },
-  { value: "template", label: "Template" },
-  { value: "development", label: "Development" },
+  { value: "3", label: "3 Month" },
+  { value: "5", label: "5 Month" },
+  { value: "6", label: "6 Month" },
 ];
 
 const Question = () => {
   const router = useRouter();
 
-  // One state for all fields
   const [formData, setFormData] = useState({
     title: "",
     price: "",
@@ -29,23 +28,42 @@ const Question = () => {
     description: "",
   });
 
-  // Error state
   const [errors, setErrors] = useState({
     title: "",
+    price: "",
     duration: "",
     description: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Handle field changes
+  const [isSubmitting, setIsSubmitting] = useState(false);
+   const searchParams = useSearchParams();
+  const id = searchParams.get("id");
+
+ useEffect(() => {
+    const fetchById = async () => {
+      try {
+        if (!id) return; // only run if id exists
+        const res = await api.get(`${endPointApi.getByIdQuestion}/${id}`);
+        console.log("ress",res.data);
+        
+        setFormData(res.data || {});
+      } catch (err) {
+        console.error("Error fetching data by ID:", err);
+      } finally {
+        // setLoading(false);
+      }
+    };
+
+    fetchById();
+  }, [id]);
+
   const handleChange = (field: keyof typeof formData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field as keyof typeof errors]) {
+    if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
-  // Validation
   const validate = () => {
     const newErrors = {
       title: "",
@@ -60,14 +78,17 @@ const Question = () => {
       newErrors.title = "Title is required";
       isValid = false;
     }
-    if (!formData.price.trim()) {
-      newErrors.price = "Sub is required";
+
+    if (!formData.price) {
+      newErrors.price = "Price is required";
       isValid = false;
     }
-    if (!formData.duration) {
-      newErrors.duration = "Please select a duration";
+
+    if (!formData.duration.trim()) {
+      newErrors.duration = "Please select a category";
       isValid = false;
     }
+
     if (!formData.description.trim()) {
       newErrors.description = "Description is required";
       isValid = false;
@@ -77,11 +98,11 @@ const Question = () => {
     return isValid;
   };
 
-  // Submit handler
   const handleSubmit = async () => {
     if (!validate()) return;
 
     setIsSubmitting(true);
+
     const body = {
       title: formData.title,
       description: formData.description,
@@ -90,20 +111,23 @@ const Question = () => {
     };
 
     try {
-      await api.post(`${endPointApi.createQuestion}`, body);
+      if(id){
+        await api.put(`${endPointApi.updateQuestion}/${id}`, body);
+      }else{
+        await api.post(`${endPointApi.createQuestion}`, body);
+      }
       router.push("/question");
     } catch (error) {
       console.error("Submission error:", error);
-      // Show notification or message
     } finally {
       setIsSubmitting(false);
     }
   };
+
   return (
     <div className="space-y-6">
       <ComponentCard title="" name="">
         <div className="space-y-6">
-
           {/* Title */}
           <div>
             <Label>Title</Label>
@@ -117,7 +141,7 @@ const Question = () => {
             {errors.title && <p className="text-sm text-error-500 mt-1">{errors.title}</p>}
           </div>
 
-          {/* Subtitle & Category */}
+          {/* Price and Category */}
           <div className="flex items-start gap-4">
             <div className="flex-1">
               <Label>Price</Label>
@@ -132,23 +156,19 @@ const Question = () => {
                   }
                 }}
                 error={errors.price}
-
               />
               {errors.price && <p className="text-sm text-error-500 mt-1">{errors.price}</p>}
-
             </div>
 
             <div className="flex-1">
-              <Label>Category</Label>
+              <Label>Duration</Label>
               <div className="relative">
                 <Select
                   options={categoryOptions}
-                  placeholder="Select duration"
+                  placeholder="Select month"
                   value={formData.duration}
                   onChange={(val) => handleChange("duration", val)}
                   error={errors.duration}
-
-                // className="dark:bg-dark-900"
                 />
                 <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
                   <ChevronDownIcon />
@@ -161,11 +181,18 @@ const Question = () => {
           {/* Description */}
           <div>
             <Label>Description</Label>
-            <TextArea
+            {/* <TextArea
               rows={6}
               value={formData.description}
               onChange={(val) => handleChange("description", val)}
-              error={!!errors.description}
+              error={errors.description}
+            /> */}
+            <Input
+              placeholder="Enter description"
+              type="text"
+              value={formData.description}
+              onChange={(e) => handleChange("description", e.target.value)}
+              error={errors.description}
             />
             {errors.description && <p className="text-sm text-error-500 mt-1">{errors.description}</p>}
           </div>
@@ -177,7 +204,7 @@ const Question = () => {
         <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
           {isSubmitting ? "Saving..." : "Save"}
         </Button>
-        <Button size="sm" variant="outline" onClick={() => router.push("/blogs")}>
+        <Button size="sm" variant="outline" onClick={() => router.push("/question")}>
           Cancel
         </Button>
       </div>

@@ -11,6 +11,7 @@ export interface EndPointApi {
 
     //Question
     getAllQuestion?: string;
+    getByIdQuestion?: string;
     createQuestion?: string;
     updateQuestion?: string;
     deleteQuestion?: string;
@@ -24,12 +25,13 @@ const endPointApi: EndPointApi = {
 
     //Blogs
     getAllBlogs: 'blogs/getall',
-    createBlog: 'blogs',
+    createBlog: 'blogs/create-blogs',
     updateBlog: 'blogs',
-    deleteBlog: 'blogs',
+    deleteBlog: 'blogs/delete',
 
     //Question
     getAllQuestion: 'question/getall',
+    getByIdQuestion : 'question/getById',
     createQuestion: 'question/create-question',
     updateQuestion: 'question/update',
     deleteQuestion: 'question/delete',

@@ -146,6 +146,7 @@ import ComponentCard from "@/components/common/ComponentCard";
 import { PlusIcon } from "@/icons";
 import { FaEdit } from "react-icons/fa";
 import { MdDeleteForever } from "react-icons/md";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 type BlogType = {
   id: number;
@@ -158,6 +159,14 @@ type BlogType = {
 export default function Page() {
   const [data, setData] = useState<BlogType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+  console.log("*******", selectedRow);
+
+  const handleDeleteClick = (row: any) => {
+    setSelectedRow(row);
+    setIsDeleteModalOpen(true);
+  };
 
   const getBlogData = async () => {
     setLoading(true);
@@ -170,6 +179,24 @@ export default function Page() {
       setLoading(false);
     }
   };
+
+  const confirmDelete = async () => {
+    if (!selectedRow) return;
+
+    try {
+      const res = await api.delete(`${endPointApi.deleteBlog}/${selectedRow.id}`);
+
+      if (res?.data?.message) {
+        getBlogData(); // Refresh the table/list after deletion
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+    } finally {
+      setIsDeleteModalOpen(false);
+      setSelectedRow(null);
+    }
+  };
+
 
   useEffect(() => {
     getBlogData();
@@ -190,18 +217,21 @@ export default function Page() {
             data={data}
             loading={loading}
             columns={[
-              { field: "exam_name", header: "Exam Name", filter: true },
-              { field: "title", header: "Title", filter: true },
+              { field: "exam_name", header: "Exam Name" },
+              { field: "title", header: "Title" },
               {
-                field: "author",
-                header: "Author",
-                body: (row) => row.author || "Unknown",
-                filter: true
+                field: "sort_description",
+                header: "sort_description",
+                body: (row) => row.sort_description || "-",
               },
+              {
+                field: "date", header: "Date", body: (row) =>
+                  row.date ? new Date(row.date).toLocaleDateString() : "-",
+              },
+              { field: "status", header: "Status" },
               {
                 field: "createdAt",
                 header: "Created At",
-                filter: true,
                 body: (row) =>
                   row.createdAt ? new Date(row.createdAt).toLocaleDateString() : "-",
               },
@@ -210,15 +240,12 @@ export default function Page() {
                 sortable: false,
                 body: (row) => (
                   <div className="flex gap-5">
-                    <button
-
-                      className="text-green-500 hover:text-green-700"
-                    >
+                    <button className="text-green-500 hover:text-green-700">
                       <FaEdit size={18} />
                     </button>
                     <button
-
                       className="text-red-500 hover:text-red-700"
+                      onClick={() => handleDeleteClick(row)}
                     >
                       <MdDeleteForever size={18} />
                     </button>
@@ -228,6 +255,11 @@ export default function Page() {
             ]}
           />
         </div>
+        <ConfirmationModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={confirmDelete}
+        />
       </ComponentCard>
     </div>
 
