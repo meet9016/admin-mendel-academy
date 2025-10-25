@@ -18,13 +18,13 @@ export default function Images() {
     <div>
       <PageBreadcrumb pageTitle="Images" />
       <div className="space-y-5 sm:space-y-6">
-        <ComponentCard title="Responsive image">
+        <ComponentCard title="Responsive image" name="">
           <ResponsiveImage />
         </ComponentCard>
-        <ComponentCard title="Image in 2 Grid">
+        <ComponentCard title="Image in 2 Grid" name="">
           <TwoColumnImageGrid />
         </ComponentCard>
-        <ComponentCard title="Image in 3 Grid">
+        <ComponentCard title="Image in 3 Grid" name="">
           <ThreeColumnImageGrid />
         </ComponentCard>
       </div>

@@ -32,7 +32,7 @@ export default function Alerts() {
             showLink={false}
           />
         </ComponentCard>
-        <ComponentCard title="Warning Alert">
+        <ComponentCard title="Warning Alert" name="">
           <Alert
             variant="warning"
             title="Warning Message"
@@ -48,7 +48,7 @@ export default function Alerts() {
             showLink={false}
           />
         </ComponentCard>{" "}
-        <ComponentCard title="Error Alert">
+        <ComponentCard title="Error Alert" name="">
           <Alert
             variant="error"
             title="Error Message"
@@ -64,7 +64,7 @@ export default function Alerts() {
             showLink={false}
           />
         </ComponentCard>{" "}
-        <ComponentCard title="Info Alert">
+        <ComponentCard title="Info Alert" name="">
           <Alert
             variant="info"
             title="Info Message"

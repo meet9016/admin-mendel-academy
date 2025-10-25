@@ -219,15 +219,15 @@ export default function Page() {
             columns={[
               { field: "exam_name", header: "Exam Name" },
               { field: "title", header: "Title" },
-              {
-                field: "sort_description",
-                header: "sort_description",
-                body: (row) => row.sort_description || "-",
-              },
-              {
-                field: "date", header: "Date", body: (row) =>
-                  row.date ? new Date(row.date).toLocaleDateString() : "-",
-              },
+              // {
+              //   field: "sort_description",
+              //   header: "sort_description",
+              //   body: (row) => row?.sort_description ?? "-",
+              // },
+              // {
+              //   field: "date", header: "Date", body: (row) =>
+              //     row.date ? new Date(row.date).toLocaleDateString() : "-",
+              // },
               { field: "status", header: "Status" },
               {
                 field: "createdAt",

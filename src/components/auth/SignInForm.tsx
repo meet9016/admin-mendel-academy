@@ -103,11 +103,16 @@ export default function SignInForm() {
         // Handle application-specific error messages from the API
         setError({ message: res.data.message || "An unknown error occurred during sign-in." });
       }
-    } catch (err: any) {
-      // Handle network or server errors (e.g., 401 Unauthorized, 500 Internal Server Error)
-      const errorMessage = err.response?.data?.message || "Invalid email or password. Please try again.";
-      setError({ message: errorMessage });
-    } finally {
+    } catch (err: unknown) {
+      if (err && typeof err === "object" && "response" in err) {
+        const error = err as { response?: { data?: { message?: string } } };
+        const errorMessage = error.response?.data?.message || "Invalid email or password. Please try again.";
+        setError({ message: errorMessage });
+      } else {
+        setError({ message: "An unexpected error occurred. Please try again." });
+      }
+    }
+    finally {
       setIsLoading(false);
     }
   };

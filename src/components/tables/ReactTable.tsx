@@ -192,31 +192,34 @@
 import React, { useState } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-export interface CommonPrimeTableProps {
-  data: any[];
-  columns: {
-    field?: string;
-    header: string;
-    body?: (rowData: any) => React.ReactNode;
-    sortable?: boolean;
-    style?: React.CSSProperties;
-    filter?: boolean; // enable header filter
-  }[];
+export interface ColumnDefinition<T> {
+  field?: keyof T | string;
+  header: string;
+  body?: (rowData: T) => React.ReactNode;
+  sortable?: boolean;
+  style?: React.CSSProperties;
+  filter?: boolean;
+}
+
+export interface CommonPrimeTableProps<T> {
+  data: T[];
+  columns: ColumnDefinition<T>[];
   scrollHeight?: string;
   loading?: boolean;
   removableSort?: boolean;
-  selectable?: boolean; // <-- new prop to enable checkbox selection
+  selectable?: boolean;
 }
 
-const ReactTable: React.FC<CommonPrimeTableProps> = ({
+
+const ReactTable = <T,>({
   data,
   columns,
   scrollHeight = "400px",
   loading = false,
   removableSort = true,
-  selectable = false, // default false
-}) => {
-  const [selectedItems, setSelectedItems] = useState<any[]>([]);
+  selectable = false,
+}: CommonPrimeTableProps<T>) => {
+  const [selectedItems, setSelectedItems] = useState([]);
   return (
     <div className="card">
       <DataTable

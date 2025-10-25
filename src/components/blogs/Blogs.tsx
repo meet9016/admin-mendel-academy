@@ -39,7 +39,7 @@ const Blogs = () => {
   // };
 
   // 📅 Handle date selection
-  const handleDateChange = (_dates: any, currentDateString: string) => {
+  const handleDateChange = (_dates: unknown, currentDateString: string) => {
     setFormData((prev) => ({ ...prev, date: currentDateString }));
   };
 
