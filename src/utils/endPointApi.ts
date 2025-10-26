@@ -5,6 +5,7 @@ export interface EndPointApi {
 
     //Blogs
     getAllBlogs?: string;
+    getByIdBlogs?: string;
     createBlog?: string;
     updateBlog?: string;
     deleteBlog?: string;
@@ -15,6 +16,20 @@ export interface EndPointApi {
     createQuestion?: string;
     updateQuestion?: string;
     deleteQuestion?: string;
+
+    //Pre-Recorded
+    getAllPreRecorded?: string;
+    getByIdPreRecorded?: string;
+    createPreRecorded?: string;
+    updatePreRecorded?: string;
+    deletePreRecorded?: string;
+
+    //Live-Courses
+    getAllLiveCourses?: string;
+    getByIdLiveCourses?: string;
+    createLiveCourses?: string;
+    updateLiveCourses?: string;
+    deleteLiveCourses?: string;
 }
 
 // Define and export the API endpoint object
@@ -25,16 +40,31 @@ const endPointApi: EndPointApi = {
 
     //Blogs
     getAllBlogs: 'blogs/getall',
+    getByIdBlogs: 'blogs/getById',
     createBlog: 'blogs/create-blogs',
-    updateBlog: 'blogs',
+    updateBlog: 'blogs/update',
     deleteBlog: 'blogs/delete',
 
     //Question
     getAllQuestion: 'question/getall',
-    getByIdQuestion : 'question/getById',
+    getByIdQuestion: 'question/getById',
     createQuestion: 'question/create-question',
     updateQuestion: 'question/update',
     deleteQuestion: 'question/delete',
+
+    //Pre-Recorded
+    getAllPreRecorded: 'prerecorded/getall',
+    getByIdPreRecorded: 'prerecorded/getById',
+    createPreRecorded: 'prerecorded/create',
+    updatePreRecorded: 'prerecorded/update',
+    deletePreRecorded: 'prerecorded/delete',
+
+    //Live-Courses
+    getAllLiveCourses: 'livecourses/getall',
+    getByIdLiveCourses: 'livecourses/getById',
+    createLiveCourses: 'livecourses/create',
+    updateLiveCourses: 'livecourses/update',
+    deleteLiveCourses: 'livecourses/delete',
 };
 
 export default endPointApi;

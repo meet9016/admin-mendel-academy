@@ -147,6 +147,7 @@ import { PlusIcon } from "@/icons";
 import { FaEdit } from "react-icons/fa";
 import { MdDeleteForever } from "react-icons/md";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
+import { useRouter } from "next/navigation";
 
 type BlogType = {
   id: number;
@@ -157,6 +158,8 @@ type BlogType = {
 };
 
 export default function Page() {
+    const router = useRouter();
+  
   const [data, setData] = useState<BlogType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -240,7 +243,9 @@ export default function Page() {
                 sortable: false,
                 body: (row) => (
                   <div className="flex gap-5">
-                    <button className="text-green-500 hover:text-green-700">
+                    <button className="text-green-500 hover:text-green-700"
+                        onClick={() => router.push(`/blogs/add?id=${row.id}`)}
+                    >
                       <FaEdit size={18} />
                     </button>
                     <button

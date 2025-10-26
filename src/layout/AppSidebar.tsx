@@ -42,6 +42,16 @@ const navItems: NavItem[] = [
     name: "Question",
     path: "/question",
   },
+  {
+    icon: <CalenderIcon />,
+    name: "Pre Recorded",
+    path: "/prerecord",
+  },
+  {
+    icon: <CalenderIcon />,
+    name: "live Courses",
+    path: "/liveCourses",
+  },
    {
     icon: <CalenderIcon />,
     name: "Calendar",

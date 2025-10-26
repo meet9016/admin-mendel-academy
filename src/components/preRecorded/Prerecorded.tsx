@@ -10,6 +10,8 @@ import { ChevronDownIcon } from "@/icons";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import ComponentCard from "../common/ComponentCard";
+import Radio from "../form/input/Radio";
+import DatePicker from "../form/date-picker";
 
 const categoryOptions = [
   { value: "3", label: "3 Month" },
@@ -17,21 +19,26 @@ const categoryOptions = [
   { value: "6", label: "6 Month" },
 ];
 
-const Question = () => {
+const Prerecorded = () => {
   const router = useRouter();
 
   const [formData, setFormData] = useState({
     title: "",
+    vimeo_video_id: "",
     price: "",
     duration: "",
     description: "",
+    date: "",
+    status: "Active",
   });
 
   const [errors, setErrors] = useState({
     title: "",
+    vimeo_video_id: "",
     price: "",
     duration: "",
     description: "",
+    date: "",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,15 +49,19 @@ const Question = () => {
     const fetchById = async () => {
       try {
         if (!id) return;
-        const res = await api.get(`${endPointApi.getByIdQuestion}/${id}`);
+        const res = await api.get(`${endPointApi.getByIdPreRecorded}/${id}`);
         const data = res.data || {};
+        console.log("data", data);
 
         // Ensure duration is a string for select matching
         setFormData({
           title: data.title ?? "",
+          vimeo_video_id: data.vimeo_video_id ?? "",
           price: data.price?.toString() ?? "",
           duration: data.duration ? String(data.duration) : '',
           description: data.description ?? "",
+           date: data.date ?? "",
+          status: data.status == "Active" ? "Active" : "Inactive",
         });
       } catch (err) {
         console.error("Error fetching data by ID:", err);
@@ -68,6 +79,15 @@ const Question = () => {
     }
   };
 
+   // 📅 Handle date selection
+  const handleDateChange = (_dates: unknown, currentDateString: string) => {
+    setFormData((prev) => ({ ...prev, date: currentDateString }));
+  };
+
+  // 🔘 Handle radio button selection
+  const handleRadioChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, status: value }));
+  };
   const validate = () => {
     0
     const newErrors = {
@@ -110,24 +130,28 @@ const Question = () => {
 
     const body = {
       title: formData.title,
-      description: formData.description,
+      vimeo_video_id: formData.vimeo_video_id,
       price: formData.price,
       duration: formData.duration,
+      description: formData.description,
+      date: formData.date,
+      status: formData.status,
     };
 
     try {
       if (id) {
-        await api.put(`${endPointApi.updateQuestion}/${id}`, body);
+        await api.put(`${endPointApi.updatePreRecorded}/${id}`, body);
       } else {
-        await api.post(`${endPointApi.createQuestion}`, body);
+        await api.post(`${endPointApi.createPreRecorded}`, body);
       }
-      router.push("/question");
+      router.push("/liveCourses");
     } catch (error) {
       console.error("Submission error:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   return (
     <div className="space-y-6">
@@ -144,6 +168,17 @@ const Question = () => {
               error={errors.title}
             />
             {errors.title && <p className="text-sm text-error-500 mt-1">{errors.title}</p>}
+          </div>
+          <div>
+            <Label>vimeo video id</Label>
+            <Input
+              placeholder="Enter vimeo video id"
+              type="text"
+              value={formData.vimeo_video_id}
+              onChange={(e) => handleChange("vimeo_video_id", e.target.value)}
+              error={errors.vimeo_video_id}
+            />
+            {errors.vimeo_video_id && <p className="text-sm text-error-500 mt-1">{errors.vimeo_video_id}</p>}
           </div>
 
           {/* Price and Category */}
@@ -186,6 +221,36 @@ const Question = () => {
             </div>
           </div>
 
+          <div>
+            <DatePicker
+              id="date-picker"
+              label="Date Picker Input"
+              placeholder="Select a date"
+              defaultDate={formData.date}
+              onChange={handleDateChange}
+            />
+            {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-8">
+            <Radio
+              id="radio1"
+              name="status"
+              value="Active"
+              checked={formData.status === "Active"}
+              onChange={handleRadioChange}
+              label="Active"
+            />
+            <Radio
+              id="radio2"
+              name="status"
+              value="Inactive"
+              checked={formData.status === "Inactive"}
+              onChange={handleRadioChange}
+              label="Inactive"
+            />
+          </div>
+
           {/* Description */}
           <div>
             <Label>Description</Label>
@@ -212,7 +277,7 @@ const Question = () => {
         <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
           {isSubmitting ? "Saving..." : "Save"}
         </Button>
-        <Button size="sm" variant="outline" onClick={() => router.push("/question")}>
+        <Button size="sm" variant="outline" onClick={() => router.push("/liveCourses")}>
           Cancel
         </Button>
       </div>
@@ -220,4 +285,4 @@ const Question = () => {
   );
 };
 
-export default Question;
+export default Prerecorded;

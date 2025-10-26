@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ComponentCard from "../common/ComponentCard";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
@@ -9,21 +9,26 @@ import Radio from "../form/input/Radio";
 import DropzoneComponent from "./DropZone";
 import { api } from "@/utils/axiosInstance";
 import Button from "../ui/button/Button";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import endPointApi from "@/utils/endPointApi";
 
 const Blogs = () => {
   const router = useRouter();
+    const searchParams = useSearchParams();
+  const id = searchParams.get("id");
+
 
   const [formData, setFormData] = useState({
     examName: "",
     title: "",
     date: "",
-    status: "option2",
+    status: "Active",
     shortDescription: "",
     description: "",
   });
 
+  console.log("formdata",formData);
+  
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -44,10 +49,33 @@ const Blogs = () => {
   };
 
   // 🔘 Handle radio button selection
-  const handleRadioChange = (value: string) => {
+  const handleRadioChange = (value: string) => {    
     setFormData((prev) => ({ ...prev, status: value }));
   };
 
+  useEffect(() => {
+    const fetchById = async () => {
+      try {
+        if (!id) return;
+        const res = await api.get(`${endPointApi.getByIdBlogs}/${id}`);
+        const data = res.data || {};
+
+        // Ensure duration is a string for select matching
+        setFormData({
+          examName: data.exam_name ?? "",
+          title: data.title ?? "",
+          date: data.date ?? "",
+          status: data.status == "Active" ? "Active" : "Inactive",
+          shortDescription: data.sort_description ?? "",
+          description: data.long_description ?? "",
+        });
+      } catch (err) {
+        console.error("Error fetching data by ID:", err);
+      }
+    };
+
+    fetchById();
+  }, [id]);
   // ✅ Form validation
   const validate = () => {
     const newErrors: { [key: string]: string } = {};
@@ -65,10 +93,8 @@ const Blogs = () => {
 
   // Submit handler
   const handleSubmit = async () => {
-    console.log("wewee");
     
     if (!validate()) return;
-    console.log("wewee5555");
 
     setIsSubmitting(true);
     const body = {
@@ -78,10 +104,14 @@ const Blogs = () => {
       long_description: formData.description,
       date: formData.date,
       image: '',
-      status: 'Active'
+      status: formData?.status
     }
     try {
-      await api.post(endPointApi.createBlog, body);
+        if (id) {
+        await api.put(`${endPointApi.updateBlog}/${id}`, body);
+      } else {
+      await api.post(`${endPointApi.createBlog}`, body);
+      }
       router.push("/blogs");
     } catch (error) {
       console.error("Submission error:", error);
@@ -104,7 +134,7 @@ const Blogs = () => {
                 value={formData.examName}
                 onChange={handleChange}
                 error={!!errors.examName}
-                errorMessage={errors.examName}
+                // errorMessage={errors.examName}
               />
             </div>
 
@@ -117,7 +147,7 @@ const Blogs = () => {
                 value={formData.title}
                 onChange={handleChange}
                 error={!!errors.title}
-                errorMessage={errors.title}
+                // errorMessage={errors.title}
               />
             </div>
 
@@ -126,6 +156,7 @@ const Blogs = () => {
                 id="date-picker"
                 label="Date Picker Input"
                 placeholder="Select a date"
+                defaultDate={formData.date}
                 onChange={handleDateChange}
               />
               {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
@@ -135,16 +166,16 @@ const Blogs = () => {
               <Radio
                 id="radio1"
                 name="status"
-                value="option1"
-                checked={formData.status === "option1"}
+                value="Active"
+                checked={formData.status === "Active"}
                 onChange={handleRadioChange}
                 label="Active"
               />
               <Radio
                 id="radio2"
                 name="status"
-                value="option2"
-                checked={formData.status === "option2"}
+                value="Inactive"
+                checked={formData.status === "Inactive"}
                 onChange={handleRadioChange}
                 label="Inactive"
               />
@@ -159,7 +190,7 @@ const Blogs = () => {
                 value={formData.shortDescription}
                 onChange={handleChange}
                 error={!!errors.shortDescription}
-                errorMessage={errors.shortDescription}
+                // errorMessage={errors.shortDescription}
               />
             </div>
 
@@ -180,7 +211,7 @@ const Blogs = () => {
                 value={formData.description}
                 onChange={handleChange}
                 error={!!errors.description}
-                errorMessage={errors.description}
+                // errorMessage={errors.description}
               />
               </div>
             </div>
