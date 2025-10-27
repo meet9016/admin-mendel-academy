@@ -95,7 +95,7 @@
 
 
 'use client'
-import { Editor } from "primereact/editor";
+// import { Editor } from "primereact/editor";
 import React from "react";
 
 interface TextareaProps {
@@ -112,18 +112,18 @@ interface TextareaProps {
 const TextArea: React.FC<TextareaProps> = ({
   // placeholder = "Enter your message", // Default placeholder
   // rows = 3, // Default number of rows
-  value = "", // Default value
-  onChange, // Callback for changes
+  // value = "", // Default value
+  // onChange, // Callback for changes
   // className = "", // Additional custom styles
   // disabled = false, // Disabled state
   error = false, // Error state
   hint = "", // Default hint text
 }) => {
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (onChange) {
-      onChange(e.target.value);
-    }
-  };
+  // const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  //   if (onChange) {
+  //     onChange(e.target.value);
+  //   }
+  // };
 
   // let textareaClasses = `w-full rounded-lg border px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden ${className}`;
 
@@ -145,7 +145,7 @@ const TextArea: React.FC<TextareaProps> = ({
         className={textareaClasses}
       /> */}
 
-      <Editor value={value} onChange={handleChange} />
+      {/* <Editor value={value} onChange={handleChange} /> */}
 
       {hint && (
         <p

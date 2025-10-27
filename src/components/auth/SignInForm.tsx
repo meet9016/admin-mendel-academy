@@ -244,7 +244,7 @@ export default function SignInForm() {
                   <Button
                     className="w-full"
                     size="sm"
-                    onClick={signIn}
+                    onClick={(e) => signIn(e)}
                     disabled={isLoading} // Disable button while loading
                   >
                     {isLoading ? "Signing in..." : "Sign in"}

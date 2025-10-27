@@ -25,6 +25,7 @@ export default function InputStates() {
     <ComponentCard
       title="Input States"
       desc="Validation styles for error, success and disabled states on form controls."
+      name=""
     >
       <div className="space-y-5 sm:space-y-6">
         {/* Error Input */}

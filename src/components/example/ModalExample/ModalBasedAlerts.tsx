@@ -11,7 +11,7 @@ export default function ModalBasedAlerts() {
   const warningModal = useModal();
   const errorModal = useModal();
   return (
-    <ComponentCard title="Modal Based Alerts">
+    <ComponentCard title="Modal Based Alerts" name="">
       <div className="flex flex-wrap items-center gap-3">
         <button
           onClick={successModal.openModal}

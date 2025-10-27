@@ -188,16 +188,20 @@
 
 
 
-"use client";
 import React, { useState } from "react";
-import { DataTable } from "primereact/datatable";
+import {
+  DataTable,
+  DataTableValue,
+  DataTablePageEvent, // ✅ import this
+} from "primereact/datatable";
 import { Column } from "primereact/column";
-export interface CommonPrimeTableProps {
-  data: unknown[];
+
+export interface CommonPrimeTableProps<T extends DataTableValue> {
+  data: T[];
   columns: {
-    field?: string;
+    field?: keyof T | string;
     header: string;
-    body?: (rowData: unknown) => React.ReactNode;
+    body?: (rowData: T) => React.ReactNode;
     sortable?: boolean;
     style?: React.CSSProperties;
     filter?: boolean;
@@ -208,7 +212,6 @@ export interface CommonPrimeTableProps {
   removableSort?: boolean;
   selectable?: boolean;
 
-  // 👇 New props for pagination
   paginator?: boolean;
   lazy?: boolean;
   page?: number;
@@ -217,22 +220,27 @@ export interface CommonPrimeTableProps {
   onPageChange?: (page: number, rows: number) => void;
 }
 
-
-
-const ReactTable = <T,>({
+const ReactTable = <T extends DataTableValue>({
   data,
   columns,
   scrollHeight = "400px",
   loading = false,
   removableSort = true,
   selectable = false,
-    totalRecords,
-    page,
-    rows,
-    onPageChange,
-
+  totalRecords,
+  page,
+  rows,
+  onPageChange,
 }: CommonPrimeTableProps<T>) => {
-  const [selectedItems, setSelectedItems] = useState([]);
+  const [selectedItems, setSelectedItems] = useState<T[]>([]);
+
+  // ✅ Strongly type the event parameter
+const handlePageChange = (e: DataTablePageEvent) => {
+  const currentPage = typeof e.page === "number" ? e.page + 1 : 1; // ✅ fallback
+  onPageChange?.(currentPage, e.rows);
+};
+
+
   return (
     <div className="card">
       <DataTable
@@ -248,18 +256,21 @@ const ReactTable = <T,>({
         totalRecords={totalRecords}
         first={page ? (page - 1) * (rows || 10) : 0}
         rows={rows}
-        onPage={(e) => onPageChange?.(e.page + 1, e.rows)} // 👈 send current page & rows back to parent
+        onPage={handlePageChange} // ✅ no 'any'
         rowsPerPageOptions={[5, 10, 20]}
         emptyMessage="No data found"
         selection={selectable ? selectedItems : undefined}
-        onSelectionChange={selectable ? (e) => setSelectedItems(e.value) : undefined}
+        onSelectionChange={
+          selectable ? (e) => setSelectedItems(e.value as T[]) : undefined
+        }
         filterDisplay="menu"
       >
         {selectable && <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />}
+
         {columns.map((col, idx) => (
           <Column
             key={idx}
-            field={col.field}
+            field={col.field as string}
             header={col.header}
             body={col.body}
             sortable={col.sortable ?? true}
@@ -274,3 +285,4 @@ const ReactTable = <T,>({
 };
 
 export default ReactTable;
+

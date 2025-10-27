@@ -13,7 +13,7 @@ interface InputProps {
   step?: number;
   disabled?: boolean;
   success?: boolean;
-  error?: boolean;
+  error?: string | boolean;
   hint?: string; // Optional hint text
   value?: string
 }

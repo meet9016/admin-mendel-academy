@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import ReactTable from "@/components/tables/ReactTable";
@@ -10,31 +10,32 @@ import { MdDeleteForever } from "react-icons/md";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 import { useRouter } from "next/navigation";
 
-type BlogType = {
+type PreRecordType = {
   id: number;
   title: string;
   exam_name: string;
   author?: string;
+  date?: string;
   createdAt?: string;
 };
 
 export default function Page() {
     const router = useRouter();
   
-  const [data, setData] = useState<BlogType[]>([]);
+  const [data, setData] = useState<PreRecordType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<BlogType | null>(null);
+  const [selectedRow, setSelectedRow] = useState<PreRecordType | null>(null);
   const [page, setPage] = useState(1);
   const [rows, setRows] = useState(5);
   const [totalRecords, setTotalRecords] = useState(0);
 
-  const handleDeleteClick = (row: BlogType) => {
+  const handleDeleteClick = (row: PreRecordType) => {
     setSelectedRow(row);
     setIsDeleteModalOpen(true);
   };
 
-  const getPreRecordData = async () => {
+    const getPreRecordData = useCallback(async () => {
     setLoading(true);
     try {
       const res = await api.get(`${endPointApi.getAllPreRecorded}?page=${page}&limit=${rows}`);
@@ -45,7 +46,7 @@ export default function Page() {
     } finally {
       setLoading(false);
     }
-  };
+   }, [page, rows]);
 
   const confirmDelete = async () => {
     if (!selectedRow) return;
@@ -64,11 +65,9 @@ export default function Page() {
     }
   };
 
-
-  useEffect(() => {
+ useEffect(() => {
     getPreRecordData();
-    }, [page, rows]);
-
+  }, [getPreRecordData]);
   return (
 
     <div className="space-y-6">
@@ -94,7 +93,7 @@ export default function Page() {
               //   body: (row) => row?.sort_description ?? "-",
               // },
               {
-                field: "date", header: "Date", body: (row) =>
+                field: "date", header: "Date", body: (row: PreRecordType) =>
                   row.date ? new Date(row.date).toLocaleDateString() : "-",
               },
               { field: "status", header: "Status" },
@@ -107,7 +106,7 @@ export default function Page() {
               {
                 header: "Action",
                 sortable: false,
-                body: (row) => (
+                body: (row: PreRecordType) => (
                   <div className="flex gap-5">
                     <button className="text-green-500 hover:text-green-700"
                         onClick={() => router.push(`/prerecord/add?id=${row.id}`)}
@@ -128,7 +127,7 @@ export default function Page() {
             page={page}
             rows={rows}
             totalRecords={totalRecords}
-            onPageChange={(newPage, newRows) => {
+             onPageChange={(newPage: number, newRows: number) => {
               setPage(newPage);
               setRows(newRows);
             }}

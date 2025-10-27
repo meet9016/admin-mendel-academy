@@ -19,7 +19,7 @@ const DropzoneComponent: React.FC = () => {
     },
   });
   return (
-    <ComponentCard title="Dropzone">
+    <ComponentCard title="Dropzone" name="">
       <div className="transition border border-gray-300 border-dashed cursor-pointer dark:hover:border-brand-500 dark:border-gray-700 rounded-xl hover:border-brand-500">
         <form
           {...getRootProps()}

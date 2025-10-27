@@ -11,8 +11,9 @@ import { api } from "@/utils/axiosInstance";
 import Button from "../ui/button/Button";
 import { useRouter, useSearchParams } from "next/navigation";
 import endPointApi from "@/utils/endPointApi";
-import { Editor } from "primereact/editor";
+import { Editor, EditorTextChangeEvent } from "primereact/editor";
 import { toast } from 'react-toastify';
+
 const Blogs = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -38,8 +39,11 @@ const Blogs = () => {
   };
 
   // Handle Editor text change
-  const handleEditorChange = (e: any) => {
-    setFormData((prev) => ({ ...prev, description: e.htmlValue }));
+  const handleEditorChange = (e: EditorTextChangeEvent) => {
+     setFormData((prev) => ({
+    ...prev,
+    description: e.htmlValue || "",
+  }));
   };
 
   // Handle date selection

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import { PlusIcon } from "@/icons";
 import ComponentCard from "@/components/common/ComponentCard";
@@ -10,24 +10,25 @@ import { FaEdit } from "react-icons/fa";
 import { MdDeleteForever } from "react-icons/md";
 import { useRouter } from "next/navigation";
 
-type BlogType = {
+type QuestionType = {
   id: number;
   title: string;
   exam_name: string;
-  author?: string;
+  price?: string;
+  date?: string;
   createdAt?: string;
 };
 
-export default function page() {
+export default function Page() {
   const router = useRouter();
 
-  const [data, setData] = useState<BlogType[]>([]);
+  const [data, setData] = useState<QuestionType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [page, setPage] = useState(1);
   const [rows, setRows] = useState(5);
   const [totalRecords, setTotalRecords] = useState(0);
 
-  const getBlogData = async () => {
+    const geQuestionData = useCallback(async () => {
     setLoading(true);
     try {
       const res = await api.get(`${endPointApi.getAllQuestion}?page=${page}&limit=${rows}`);
@@ -38,11 +39,11 @@ export default function page() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, rows]);
 
   useEffect(() => {
-    getBlogData();
-   }, [page, rows]);
+    geQuestionData();
+   }, [geQuestionData]);
 
   return (
     <div>
@@ -64,20 +65,20 @@ export default function page() {
                 {
                   field: "price",
                   header: "Price",
-                  body: (row) => row.price || "-",
+                  body: (row: QuestionType) => row.price || "-",
                 },
                 { field: "duration", header: "Duration" },
                 { field: "description", header: "Description" },
                 {
                   field: "createdAt",
                   header: "Created At",
-                  body: (row) =>
+                  body: (row: QuestionType) =>
                     row.createdAt ? new Date(row.createdAt).toLocaleDateString() : "-",
                 },
                 {
                   header: "Action",
                   sortable: false,
-                  body: (row) => (
+                  body: (row: QuestionType) => (
                     <div className="flex gap-5">
                       <button
                         onClick={() => router.push(`/question/add?id=${row.id}`)}
@@ -99,7 +100,7 @@ export default function page() {
             page={page}
             rows={rows}
             totalRecords={totalRecords}
-            onPageChange={(newPage, newRows) => {
+             onPageChange={(newPage: number, newRows: number) => {
               setPage(newPage);
               setRows(newRows);
             }}

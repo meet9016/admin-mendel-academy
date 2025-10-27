@@ -15,7 +15,7 @@ export default function DefaultModal() {
   };
   return (
     <div>
-      <ComponentCard title="Default Modal">
+      <ComponentCard title="Default Modal" name="">
         <Button size="sm" onClick={openModal}>
           Open Modal
         </Button>

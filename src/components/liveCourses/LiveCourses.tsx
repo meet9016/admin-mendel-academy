@@ -4,40 +4,41 @@ import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
-import Select from "../form/Select";
 import Button from "../ui/button/Button";
-import { ChevronDownIcon } from "@/icons";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import ComponentCard from "../common/ComponentCard";
 import Radio from "../form/input/Radio";
 import DatePicker from "../form/date-picker";
 
-const categoryOptions = [
-  { value: "3", label: "3 Month" },
-  { value: "5", label: "5 Month" },
-  { value: "6", label: "6 Month" },
-];
-
+interface FormDataType {
+  title: string;
+  instructor_name: string;
+  sub_scribe_student_count: string;
+  zoom_link: string;
+  date?: string;        // 👈 added
+  status?: string;      // 👈 added
+}
 const LiveCourses = () => {
   const router = useRouter();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormDataType>({
     title: "",
-    date: "",
     instructor_name: "",
-    status: "Active",
     sub_scribe_student_count: "",
     zoom_link: "",
+    date: "",     // 👈 optional default
+    status: "",
   });
+
 
   const [errors, setErrors] = useState({
     title: "",
-    date: "",
     instructor_name: "",
-    status: "",
     sub_scribe_student_count: "",
     zoom_link: "",
+    date: "",     // 👈 optional default
+    status: "",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -70,14 +71,14 @@ const LiveCourses = () => {
   }, [id]);
 
 
-  const handleChange = (field: keyof typeof formData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }));
-    }
-  };
+const handleChange = (field: keyof FormDataType, value: string) => {
+  setFormData((prev) => ({ ...prev, [field]: value }));
+  if (errors[field]) {
+    setErrors((prev) => ({ ...prev, [field]: "" }));
+  }
+};
 
-   // 📅 Handle date selection
+  // 📅 Handle date selection
   const handleDateChange = (_dates: unknown, currentDateString: string) => {
     setFormData((prev) => ({ ...prev, date: currentDateString }));
   };
@@ -87,12 +88,13 @@ const LiveCourses = () => {
     setFormData((prev) => ({ ...prev, status: value }));
   };
   const validate = () => {
-    0
     const newErrors = {
       title: "",
-      price: "",
-      duration: "",
-      description: "",
+    instructor_name: "",
+    sub_scribe_student_count: "",
+    zoom_link: "",
+    date: "",     // 👈 optional default
+    status: "",
     };
 
     let isValid = true;

@@ -18,7 +18,7 @@ export default function DefaultInputs() {
     console.log("Selected value:", value);
   };
   return (
-    <ComponentCard title="Default Inputs">
+    <ComponentCard title="Default Inputs" name=''>
       <div className="space-y-6">
         <div>
           <Label>Input</Label>

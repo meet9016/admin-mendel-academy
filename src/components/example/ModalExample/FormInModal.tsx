@@ -15,7 +15,7 @@ export default function FormInModal() {
     closeModal();
   };
   return (
-    <ComponentCard title="Form In Modal">
+    <ComponentCard title="Form In Modal" name="">
       <Button size="sm" onClick={openModal}>
         Open Modal
       </Button>

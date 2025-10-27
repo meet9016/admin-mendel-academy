@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { MouseEvent, ReactNode } from "react";
 
 interface ButtonProps {
   children: ReactNode; // Button text or content
@@ -6,7 +6,7 @@ interface ButtonProps {
   variant?: "primary" | "outline"; // Button variant
   startIcon?: ReactNode; // Icon before the text
   endIcon?: ReactNode; // Icon after the text
-  onClick?: () => void; // Click handler
+   onClick?: (event: MouseEvent<HTMLButtonElement>) => void;  // Click handler
   disabled?: boolean; // Disabled state
   className?: string; // Disabled state
 }

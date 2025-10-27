@@ -13,7 +13,7 @@ export default function VerticallyCenteredModal() {
     closeModal();
   };
   return (
-    <ComponentCard title="Vertically Centered Modal">
+    <ComponentCard title="Vertically Centered Modal" name="">
       <Button size="sm" onClick={openModal}>
         Open Modal
       </Button>

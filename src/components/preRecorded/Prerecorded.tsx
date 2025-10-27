@@ -19,27 +19,37 @@ const categoryOptions = [
   { value: "6", label: "6 Month" },
 ];
 
+interface FormDataType {
+  title: string;
+  vimeo_video_id: string;
+  price: string;
+  duration: string;
+  description: string;
+  date: string;
+  status: string; // ✅ Add this field
+}
 const Prerecorded = () => {
   const router = useRouter();
 
-  const [formData, setFormData] = useState({
-    title: "",
-    vimeo_video_id: "",
-    price: "",
-    duration: "",
-    description: "",
-    date: "",
-    status: "Active",
-  });
+  const [formData, setFormData] = useState<FormDataType>({
+  title: "",
+  vimeo_video_id: "",
+  price: "",
+  duration: "",
+  description: "",
+  date: "",
+     status: "Active",
+});
 
-  const [errors, setErrors] = useState({
-    title: "",
-    vimeo_video_id: "",
-    price: "",
-    duration: "",
-    description: "",
-    date: "",
-  });
+  // const [errors, setErrors] = useState({
+  //   title: "",
+  //   vimeo_video_id: "",
+  //   price: "",
+  //   duration: "",
+  //   description: "",
+  //   date: "",
+  // });
+const [errors, setErrors] = useState<Partial<Record<keyof FormDataType, string>>>({});
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const searchParams = useSearchParams();
@@ -72,12 +82,13 @@ const Prerecorded = () => {
   }, [id]);
 
 
-  const handleChange = (field: keyof typeof formData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }));
-    }
-  };
+const handleChange = (field: keyof FormDataType, value: string) => {
+  setFormData((prev) => ({ ...prev, [field]: value }));
+  if (errors[field]) {
+    setErrors((prev) => ({ ...prev, [field]: "" }));
+  }
+};
+
 
    // 📅 Handle date selection
   const handleDateChange = (_dates: unknown, currentDateString: string) => {
@@ -89,7 +100,6 @@ const Prerecorded = () => {
     setFormData((prev) => ({ ...prev, status: value }));
   };
   const validate = () => {
-    0
     const newErrors = {
       title: "",
       price: "",
@@ -211,7 +221,7 @@ const Prerecorded = () => {
                   onChange={(selectedOption) =>
                     handleChange("duration", selectedOption || "")
                   }
-                  error={errors.duration}
+                  // error={errors.duration}
                 />
                 <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
                   <ChevronDownIcon />
