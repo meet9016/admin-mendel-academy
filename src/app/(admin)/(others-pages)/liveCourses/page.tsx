@@ -25,7 +25,9 @@ export default function Page() {
   const [loading, setLoading] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<BlogType | null>(null);
-  console.log("*******", data);
+  const [page, setPage] = useState(1);
+  const [rows, setRows] = useState(5);
+  const [totalRecords, setTotalRecords] = useState(0);
 
   const handleDeleteClick = (row: BlogType) => {
     setSelectedRow(row);
@@ -35,8 +37,9 @@ export default function Page() {
   const getBlogData = async () => {
     setLoading(true);
     try {
-      const res = await api.get(`${endPointApi.getAllLiveCourses}`);
-      setData(res.data || []);
+      const res = await api.get(`${endPointApi.getAllLiveCourses}?page=${page}&limit=${rows}`);
+        setData(res.data.data || []);
+      setTotalRecords(res.data.total);
     } catch (err) {
       console.error(err);
     } finally {
@@ -61,13 +64,11 @@ export default function Page() {
     }
   };
 
-
   useEffect(() => {
     getBlogData();
-  }, []);
+  }, [page, rows]);
 
   return (
-
     <div className="space-y-6">
       <ComponentCard
         title="Live Courses List"
@@ -116,6 +117,14 @@ export default function Page() {
                 ),
               }
             ]}
+             lazy
+            page={page}
+            rows={rows}
+            totalRecords={totalRecords}
+            onPageChange={(newPage, newRows) => {
+              setPage(newPage);
+              setRows(newRows);
+            }}
           />
         </div>
         <ConfirmationModal

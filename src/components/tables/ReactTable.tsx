@@ -192,23 +192,31 @@
 import React, { useState } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-export interface ColumnDefinition<T> {
-  field?: keyof T | string;
-  header: string;
-  body?: (rowData: T) => React.ReactNode;
-  sortable?: boolean;
-  style?: React.CSSProperties;
-  filter?: boolean;
-}
-
-export interface CommonPrimeTableProps<T> {
-  data: T[];
-  columns: ColumnDefinition<T>[];
+export interface CommonPrimeTableProps {
+  data: unknown[];
+  columns: {
+    field?: string;
+    header: string;
+    body?: (rowData: unknown) => React.ReactNode;
+    sortable?: boolean;
+    style?: React.CSSProperties;
+    filter?: boolean;
+    filterPlaceholder?: string;
+  }[];
   scrollHeight?: string;
   loading?: boolean;
   removableSort?: boolean;
   selectable?: boolean;
+
+  // 👇 New props for pagination
+  paginator?: boolean;
+  lazy?: boolean;
+  page?: number;
+  rows?: number;
+  totalRecords?: number;
+  onPageChange?: (page: number, rows: number) => void;
 }
+
 
 
 const ReactTable = <T,>({
@@ -218,6 +226,11 @@ const ReactTable = <T,>({
   loading = false,
   removableSort = true,
   selectable = false,
+    totalRecords,
+    page,
+    rows,
+    onPageChange,
+
 }: CommonPrimeTableProps<T>) => {
   const [selectedItems, setSelectedItems] = useState([]);
   return (
@@ -230,8 +243,13 @@ const ReactTable = <T,>({
         removableSort={removableSort}
         tableStyle={{ minWidth: "50rem" }}
         stripedRows
-        paginator rows={5}
-        rowsPerPageOptions={[5, 10,]}
+        paginator
+        lazy
+        totalRecords={totalRecords}
+        first={page ? (page - 1) * (rows || 10) : 0}
+        rows={rows}
+        onPage={(e) => onPageChange?.(e.page + 1, e.rows)} // 👈 send current page & rows back to parent
+        rowsPerPageOptions={[5, 10, 20]}
         emptyMessage="No data found"
         selection={selectable ? selectedItems : undefined}
         onSelectionChange={selectable ? (e) => setSelectedItems(e.value) : undefined}
@@ -244,9 +262,8 @@ const ReactTable = <T,>({
             field={col.field}
             header={col.header}
             body={col.body}
-            // sortable={col.sortable}
-            sortable={col.sortable ?? true} // <-- only sortable if col.sortable is true or undefined
-            filter={col.filter ?? false} // enable header filter
+            sortable={col.sortable ?? true}
+            filter={col.filter ?? false}
             filterPlaceholder={col.filterPlaceholder ?? "Search"}
             style={{ textAlign: "left", minWidth: "120px", ...col.style }}
           />

@@ -128,15 +128,6 @@
 //   );
 // }
 
-
-
-
-
-
-
-
-
-
 "use client";
 import { useState, useEffect } from "react";
 import { api } from "@/utils/axiosInstance";
@@ -158,13 +149,15 @@ type BlogType = {
 };
 
 export default function Page() {
-    const router = useRouter();
-  
+  const router = useRouter();
+
   const [data, setData] = useState<BlogType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<BlogType | null>(null);
-  console.log("*******", selectedRow);
+  const [page, setPage] = useState(1);
+  const [rows, setRows] = useState(5);
+  const [totalRecords, setTotalRecords] = useState(0);
 
   const handleDeleteClick = (row: BlogType) => {
     setSelectedRow(row);
@@ -174,8 +167,9 @@ export default function Page() {
   const getBlogData = async () => {
     setLoading(true);
     try {
-      const res = await api.get(`${endPointApi.getAllBlogs}`);
-      setData(res.data || []);
+      const res = await api.get(`${endPointApi.getAllBlogs}?page=${page}&limit=${rows}`);
+      setData(res.data.data || []);
+      setTotalRecords(res.data.total);
     } catch (err) {
       console.error(err);
     } finally {
@@ -203,10 +197,9 @@ export default function Page() {
 
   useEffect(() => {
     getBlogData();
-  }, []);
+  }, [page, rows]);
 
   return (
-
     <div className="space-y-6">
       <ComponentCard
         title="Blog List"
@@ -244,7 +237,7 @@ export default function Page() {
                 body: (row) => (
                   <div className="flex gap-5">
                     <button className="text-green-500 hover:text-green-700"
-                        onClick={() => router.push(`/blogs/add?id=${row.id}`)}
+                      onClick={() => router.push(`/blogs/add?id=${row.id}`)}
                     >
                       <FaEdit size={18} />
                     </button>
@@ -258,6 +251,15 @@ export default function Page() {
                 ),
               }
             ]}
+            //  paginator
+            lazy
+            page={page}
+            rows={rows}
+            totalRecords={totalRecords}
+            onPageChange={(newPage, newRows) => {
+              setPage(newPage);
+              setRows(newRows);
+            }}
           />
         </div>
         <ConfirmationModal

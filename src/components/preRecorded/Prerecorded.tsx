@@ -144,7 +144,7 @@ const Prerecorded = () => {
       } else {
         await api.post(`${endPointApi.createPreRecorded}`, body);
       }
-      router.push("/liveCourses");
+      router.push("/prerecord");
     } catch (error) {
       console.error("Submission error:", error);
     } finally {

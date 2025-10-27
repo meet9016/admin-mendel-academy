@@ -11,10 +11,11 @@ import { api } from "@/utils/axiosInstance";
 import Button from "../ui/button/Button";
 import { useRouter, useSearchParams } from "next/navigation";
 import endPointApi from "@/utils/endPointApi";
-
+import { Editor } from "primereact/editor";
+import { toast } from 'react-toastify';
 const Blogs = () => {
   const router = useRouter();
-    const searchParams = useSearchParams();
+  const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
 
@@ -27,31 +28,37 @@ const Blogs = () => {
     description: "",
   });
 
-  console.log("formdata",formData);
-  
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 🔁 Handle text input changes
+  // Handle text input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 📄 Handle textarea change
-  // const handleDescriptionChange = (value: string) => {
-  //   setFormData((prev) => ({ ...prev, description: value }));
-  // };
+  // Handle Editor text change
+  const handleEditorChange = (e: any) => {
+    setFormData((prev) => ({ ...prev, description: e.htmlValue }));
+  };
 
-  // 📅 Handle date selection
+  // Handle date selection
   const handleDateChange = (_dates: unknown, currentDateString: string) => {
     setFormData((prev) => ({ ...prev, date: currentDateString }));
   };
 
-  // 🔘 Handle radio button selection
-  const handleRadioChange = (value: string) => {    
+  // Handle radio button selection
+  const handleRadioChange = (value: string) => {
     setFormData((prev) => ({ ...prev, status: value }));
   };
+
+ const decodeHtml = (html: string): string => {
+  if (typeof window === "undefined") return html;
+  const txt = document.createElement("textarea");
+  txt.innerHTML = html;
+  return txt.value;
+};
+
 
   useEffect(() => {
     const fetchById = async () => {
@@ -59,7 +66,7 @@ const Blogs = () => {
         if (!id) return;
         const res = await api.get(`${endPointApi.getByIdBlogs}/${id}`);
         const data = res.data || {};
-
+  const decodedDescription = decodeHtml(data.long_description ?? "");
         // Ensure duration is a string for select matching
         setFormData({
           examName: data.exam_name ?? "",
@@ -67,7 +74,7 @@ const Blogs = () => {
           date: data.date ?? "",
           status: data.status == "Active" ? "Active" : "Inactive",
           shortDescription: data.sort_description ?? "",
-          description: data.long_description ?? "",
+          description: decodedDescription,
         });
       } catch (err) {
         console.error("Error fetching data by ID:", err);
@@ -93,7 +100,7 @@ const Blogs = () => {
 
   // Submit handler
   const handleSubmit = async () => {
-    
+
     if (!validate()) return;
 
     setIsSubmitting(true);
@@ -107,10 +114,11 @@ const Blogs = () => {
       status: formData?.status
     }
     try {
-        if (id) {
+      if (id) {
         await api.put(`${endPointApi.updateBlog}/${id}`, body);
+        toast('Wow so easy !');
       } else {
-      await api.post(`${endPointApi.createBlog}`, body);
+        await api.post(`${endPointApi.createBlog}`, body);
       }
       router.push("/blogs");
     } catch (error) {
@@ -134,7 +142,7 @@ const Blogs = () => {
                 value={formData.examName}
                 onChange={handleChange}
                 error={!!errors.examName}
-                // errorMessage={errors.examName}
+              // errorMessage={errors.examName}
               />
             </div>
 
@@ -147,7 +155,7 @@ const Blogs = () => {
                 value={formData.title}
                 onChange={handleChange}
                 error={!!errors.title}
-                // errorMessage={errors.title}
+              // errorMessage={errors.title}
               />
             </div>
 
@@ -190,7 +198,7 @@ const Blogs = () => {
                 value={formData.shortDescription}
                 onChange={handleChange}
                 error={!!errors.shortDescription}
-                // errorMessage={errors.shortDescription}
+              // errorMessage={errors.shortDescription}
               />
             </div>
 
@@ -204,15 +212,11 @@ const Blogs = () => {
                   error={!!errors.description}
                   hint={errors.description || "Please enter a valid message."}
                 /> */}
-                <Input
-                name="description"
-                type="text"
-                placeholder="Short description"
-                value={formData.description}
-                onChange={handleChange}
-                error={!!errors.description}
-                // errorMessage={errors.description}
-              />
+                <Editor
+                  value={formData.description}
+                  onTextChange={handleEditorChange}
+                  style={{ height: "320px" }}
+                />
               </div>
             </div>
           </div>

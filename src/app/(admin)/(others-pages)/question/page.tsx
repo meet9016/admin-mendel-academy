@@ -23,13 +23,16 @@ export default function page() {
 
   const [data, setData] = useState<BlogType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [page, setPage] = useState(1);
+  const [rows, setRows] = useState(5);
+  const [totalRecords, setTotalRecords] = useState(0);
 
   const getBlogData = async () => {
     setLoading(true);
     try {
-      const res = await api.get(`${endPointApi.getAllQuestion}`);
-
-      setData(res.data || []);
+      const res = await api.get(`${endPointApi.getAllQuestion}?page=${page}&limit=${rows}`);
+      setData(res.data.data || []);
+      setTotalRecords(res.data.total);
     } catch (err) {
       console.error(err);
     } finally {
@@ -39,7 +42,7 @@ export default function page() {
 
   useEffect(() => {
     getBlogData();
-  }, []);
+   }, [page, rows]);
 
   return (
     <div>
@@ -92,6 +95,14 @@ export default function page() {
                   ),
                 }
               ]}
+               lazy
+            page={page}
+            rows={rows}
+            totalRecords={totalRecords}
+            onPageChange={(newPage, newRows) => {
+              setPage(newPage);
+              setRows(newRows);
+            }}
             />
           </div>
         </ComponentCard>
