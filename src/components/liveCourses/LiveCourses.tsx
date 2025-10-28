@@ -110,7 +110,7 @@ const LiveCourses = () => {
       isValid = false;
     }
 
-    if (!formData.date.trim()) {
+    if (!formData.date) {
       newErrors.date = "Please select a date.";
       isValid = false;
     }
