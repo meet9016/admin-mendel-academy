@@ -1,9 +1,11 @@
 import LiveCourses from '@/components/liveCourses/LiveCourses'
-import React from 'react'
+import React, { Suspense } from 'react'
 
 const page = () => {
   return (
-    <div><LiveCourses /></div>
+     <Suspense fallback={<div>Loading question form...</div>}>
+      <LiveCourses />
+    </Suspense>
   )
 }
 

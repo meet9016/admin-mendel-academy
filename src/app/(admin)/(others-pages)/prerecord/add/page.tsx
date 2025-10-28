@@ -1,9 +1,11 @@
 import Prerecorded from '@/components/preRecorded/Prerecorded'
-import React from 'react'
+import React, { Suspense } from 'react'
 
 const page = () => {
   return (
-    <div><Prerecorded /></div>
+     <Suspense fallback={<div>Loading question form...</div>}>
+      <Prerecorded />
+    </Suspense>
   )
 }
 

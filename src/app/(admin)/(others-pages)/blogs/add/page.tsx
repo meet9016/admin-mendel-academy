@@ -1,9 +1,11 @@
 import Blogs from '@/components/blogs/Blogs'
-import React from 'react'
+import React, { Suspense } from 'react'
 
 const page = () => {
   return (
-    <div><Blogs /></div>
+     <Suspense fallback={<div>Loading question form...</div>}>
+          <Blogs />
+        </Suspense>
   )
 }
 
