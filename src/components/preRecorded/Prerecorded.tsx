@@ -90,12 +90,12 @@ const Prerecorded = () => {
     }
   };
 
-    const handleEditorChange = (e: EditorTextChangeEvent) => {
-       setFormData((prev) => ({
+  const handleEditorChange = (e: EditorTextChangeEvent) => {
+    setFormData((prev) => ({
       ...prev,
       description: e.htmlValue || "",
     }));
-    };
+  };
 
   // 📅 Handle date selection
   const handleDateChange = (_dates: unknown, currentDateString: string) => {
@@ -218,11 +218,10 @@ const Prerecorded = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Price and Category */}
-            <div className="flex items-start gap-4">
-              <div className="flex-1">
-                <Label>Duration</Label>
-                <div className="relative">
+            {/* Duration  */}
+            <div className="flex-1">
+              <Label>Duration</Label>
+              <div className="relative">
 
                   <Select
                     options={categoryOptions}
@@ -236,9 +235,9 @@ const Prerecorded = () => {
                   <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
                     <ChevronDownIcon />
                   </span>
-                </div>
               </div>
             </div>
+          </div>
 
             <div>
               <DatePicker
@@ -270,10 +269,6 @@ const Prerecorded = () => {
                 label="Inactive"
               />
             </div>
-          </div>
-
-
-
           {/* Description */}
           <div>
             <Label>Description</Label>
@@ -308,8 +303,8 @@ const Prerecorded = () => {
             Cancel
           </Button>
         </div>
-      </ComponentCard>
-    </div>
+      </ComponentCard >
+    </div >
   );
 };
 

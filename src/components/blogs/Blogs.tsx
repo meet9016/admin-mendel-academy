@@ -36,19 +36,22 @@ const Blogs = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   // Handle Editor text change
   const handleEditorChange = (e: EditorTextChangeEvent) => {
-     setFormData((prev) => ({
-    ...prev,
-    description: e.htmlValue || "",
-  }));
+    setFormData((prev) => ({
+      ...prev,
+      description: e.htmlValue || "",
+    }));
+    setErrors((prev) => ({ ...prev, description: "" }));
   };
 
   // Handle date selection
   const handleDateChange = (_dates: unknown, currentDateString: string) => {
     setFormData((prev) => ({ ...prev, date: currentDateString }));
+    setErrors((prev) => ({ ...prev, date: "" }));
   };
 
   // Handle radio button selection
@@ -95,7 +98,7 @@ const Blogs = () => {
     if (!formData.title.trim()) newErrors.title = "Title is required.";
     if (!formData.date) newErrors.date = "Date is required.";
     if (!formData.shortDescription.trim()) newErrors.shortDescription = "Short description is required.";
-    // if (!formData.description.trim()) newErrors.description = "Description is required.";
+    if (!formData.description.trim()) newErrors.description = "Description is required.";
 
     setErrors(newErrors);
 
@@ -149,6 +152,7 @@ const Blogs = () => {
                   error={!!errors.examName}
                 // errorMessage={errors.examName}
                 />
+                {errors.examName && <p className="text-sm text-error-500 mt-1">{errors.examName}</p>}
               </div>
               <div>
                 <Label>Title</Label>
@@ -161,6 +165,7 @@ const Blogs = () => {
                   error={!!errors.title}
                 // errorMessage={errors.title}
                 />
+                {errors.title && <p className="text-sm text-error-500 mt-1">{errors.title}</p>}
               </div>
             </div>
 
@@ -188,6 +193,7 @@ const Blogs = () => {
                   error={!!errors.shortDescription}
                 // errorMessage={errors.shortDescription}
                 />
+                {errors.shortDescription && <p className="text-sm text-error-500 mt-1">{errors.shortDescription}</p>}
               </div>
             </div>
 
@@ -226,6 +232,7 @@ const Blogs = () => {
                   onTextChange={handleEditorChange}
                   style={{ height: "320px" }}
                 />
+                {errors.description && <p className="text-sm text-error-500 mt-1">{errors.description}</p>}
               </div>
             </div>
           </div>

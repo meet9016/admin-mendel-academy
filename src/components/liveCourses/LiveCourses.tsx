@@ -71,36 +71,57 @@ const LiveCourses = () => {
   }, [id]);
 
 
-const handleChange = (field: keyof FormDataType, value: string) => {
-  setFormData((prev) => ({ ...prev, [field]: value }));
-  if (errors[field]) {
-    setErrors((prev) => ({ ...prev, [field]: "" }));
-  }
-};
-
-  // 📅 Handle date selection
-  const handleDateChange = (_dates: unknown, currentDateString: string) => {
-    setFormData((prev) => ({ ...prev, date: currentDateString }));
+  const handleChange = (field: keyof FormDataType, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
   };
 
-  // 🔘 Handle radio button selection
+  // Handle date selection
+  const handleDateChange = (_dates: unknown, currentDateString: string) => {
+    setFormData((prev) => ({ ...prev, date: currentDateString }));
+    setErrors((prev) => ({ ...prev, date: "" }));
+  };
+
+  // Handle radio button selection
   const handleRadioChange = (value: string) => {
     setFormData((prev) => ({ ...prev, status: value }));
   };
   const validate = () => {
     const newErrors = {
       title: "",
-    instructor_name: "",
-    sub_scribe_student_count: "",
-    zoom_link: "",
-    date: "",     // 👈 optional default
-    status: "",
+      instructor_name: "",
+      sub_scribe_student_count: "",
+      zoom_link: "",
+      date: "",     //  optional default
+      status: "",
     };
 
     let isValid = true;
 
     if (!formData.title) {
       newErrors.title = "Title is required";
+      isValid = false;
+    }
+
+    if (!formData.instructor_name.trim()) {
+      newErrors.instructor_name = "Instructor name is required.";
+      isValid = false;
+    }
+
+    if (!formData.date.trim()) {
+      newErrors.date = "Please select a date.";
+      isValid = false;
+    }
+
+    if (!formData.sub_scribe_student_count.trim()) {
+      newErrors.sub_scribe_student_count = "Subscribed student count is required.";
+      isValid = false;
+    }
+
+    if (!formData.zoom_link.trim()) {
+      newErrors.zoom_link = "Zoom link is required.";
       isValid = false;
     }
 
