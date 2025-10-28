@@ -12,7 +12,7 @@ import endPointApi from "@/utils/endPointApi";
 import ComponentCard from "../common/ComponentCard";
 import Radio from "../form/input/Radio";
 import DatePicker from "../form/date-picker";
-import { Editor } from "primereact/editor";
+import { Editor, EditorTextChangeEvent } from "primereact/editor";
 
 const categoryOptions = [
   { value: "3", label: "3 Month" },
@@ -33,14 +33,14 @@ const Prerecorded = () => {
   const router = useRouter();
 
   const [formData, setFormData] = useState<FormDataType>({
-  title: "",
-  vimeo_video_id: "",
-  price: "",
-  duration: "",
-  description: "",
-  date: "",
-     status: "Active",
-});
+    title: "",
+    vimeo_video_id: "",
+    price: "",
+    duration: "",
+    description: "",
+    date: "",
+    status: "Active",
+  });
 
   // const [errors, setErrors] = useState({
   //   title: "",
@@ -50,7 +50,7 @@ const Prerecorded = () => {
   //   description: "",
   //   date: "",
   // });
-const [errors, setErrors] = useState<Partial<Record<keyof FormDataType, string>>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof FormDataType, string>>>({});
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const searchParams = useSearchParams();
@@ -83,13 +83,19 @@ const [errors, setErrors] = useState<Partial<Record<keyof FormDataType, string>>
   }, [id]);
 
 
-const handleChange = (field: keyof FormDataType, value: string) => {
-  setFormData((prev) => ({ ...prev, [field]: value }));
-  if (errors[field]) {
-    setErrors((prev) => ({ ...prev, [field]: "" }));
-  }
-};
+  const handleChange = (field: keyof FormDataType, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
 
+    const handleEditorChange = (e: EditorTextChangeEvent) => {
+       setFormData((prev) => ({
+      ...prev,
+      description: e.htmlValue || "",
+    }));
+    };
 
   // 📅 Handle date selection
   const handleDateChange = (_dates: unknown, currentDateString: string) => {
@@ -100,6 +106,7 @@ const handleChange = (field: keyof FormDataType, value: string) => {
   const handleRadioChange = (value: string) => {
     setFormData((prev) => ({ ...prev, status: value }));
   };
+
   const validate = () => {
     const newErrors = {
       title: "",
@@ -217,18 +224,19 @@ const handleChange = (field: keyof FormDataType, value: string) => {
                 <Label>Duration</Label>
                 <div className="relative">
 
-                <Select
-                  options={categoryOptions}
-                  placeholder="Select month"
-                  defaultValue={formData.duration || ''}
-                  onChange={(selectedOption) =>
-                    handleChange("duration", selectedOption || "")
-                  }
+                  <Select
+                    options={categoryOptions}
+                    placeholder="Select month"
+                    defaultValue={formData.duration || ''}
+                    onChange={(selectedOption) =>
+                      handleChange("duration", selectedOption || "")
+                    }
                   // error={errors.duration}
-                />
-                <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
-                  <ChevronDownIcon />
-                </span>
+                  />
+                  <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
+                    <ChevronDownIcon />
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -287,7 +295,7 @@ const handleChange = (field: keyof FormDataType, value: string) => {
             <Editor
               value={formData.description}
               style={{ height: "320px" }}
-              onTextChange={(e) => handleChange("description", e.htmlValue)}
+              onTextChange={handleEditorChange}
             />
             {errors.description && <p className="text-sm text-error-500 mt-1">{errors.description}</p>}
           </div>
@@ -301,8 +309,6 @@ const handleChange = (field: keyof FormDataType, value: string) => {
           </Button>
         </div>
       </ComponentCard>
-
-      {/* Buttons */}
     </div>
   );
 };

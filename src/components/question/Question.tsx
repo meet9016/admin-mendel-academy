@@ -10,7 +10,7 @@ import { ChevronDownIcon } from "@/icons";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import ComponentCard from "../common/ComponentCard";
-import { Editor } from "primereact/editor";
+import { Editor, EditorTextChangeEvent } from "primereact/editor";
 
 const categoryOptions = [
   { value: "3", label: "3 Month" },
@@ -67,6 +67,13 @@ const Question = () => {
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
     }
+  };
+
+  const handleEditorChange = (e: EditorTextChangeEvent) => {
+    setFormData((prev) => ({
+      ...prev,
+      description: e.htmlValue || "",
+    }));
   };
 
   const validate = () => {
@@ -176,7 +183,7 @@ const Question = () => {
                   onChange={(selectedOption) =>
                     handleChange("duration", selectedOption || "")
                   }
-                  // error={errors.duration}
+                // error={errors.duration}
                 />
                 <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
                   <ChevronDownIcon />
@@ -198,7 +205,7 @@ const Question = () => {
             <Editor
               value={formData.description}
               style={{ height: "320px" }}
-              onTextChange={(e) => handleChange("description", e.htmlValue)}
+              onTextChange={handleEditorChange}
             />
             {errors.description && <p className="text-sm text-error-500 mt-1">{errors.description}</p>}
           </div>
