@@ -56,12 +56,12 @@ const Blogs = () => {
     setFormData((prev) => ({ ...prev, status: value }));
   };
 
- const decodeHtml = (html: string): string => {
-  if (typeof window === "undefined") return html;
-  const txt = document.createElement("textarea");
-  txt.innerHTML = html;
-  return txt.value;
-};
+  const decodeHtml = (html: string): string => {
+    if (typeof window === "undefined") return html;
+    const txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+  };
 
 
   useEffect(() => {
@@ -70,7 +70,7 @@ const Blogs = () => {
         if (!id) return;
         const res = await api.get(`${endPointApi.getByIdBlogs}/${id}`);
         const data = res.data || {};
-  const decodedDescription = decodeHtml(data.long_description ?? "");
+        const decodedDescription = decodeHtml(data.long_description ?? "");
         // Ensure duration is a string for select matching
         setFormData({
           examName: data.exam_name ?? "",
@@ -135,43 +135,60 @@ const Blogs = () => {
   return (
     <>
       <div className="space-y-6">
-        <ComponentCard title="" name="">
+        <ComponentCard title="Add Blog" name="">
           <div className="space-y-6">
-            <div>
-              <Label>Exam Name</Label>
-              <Input
-                name="examName"
-                type="text"
-                placeholder="Exam name"
-                value={formData.examName}
-                onChange={handleChange}
-                error={!!errors.examName}
-              // errorMessage={errors.examName}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label>Exam Name</Label>
+                <Input
+                  name="examName"
+                  type="text"
+                  placeholder="Exam name"
+                  value={formData.examName}
+                  onChange={handleChange}
+                  error={!!errors.examName}
+                // errorMessage={errors.examName}
+                />
+              </div>
+              <div>
+                <Label>Title</Label>
+                <Input
+                  name="title"
+                  placeholder="Title"
+                  type="text"
+                  value={formData.title}
+                  onChange={handleChange}
+                  error={!!errors.title}
+                // errorMessage={errors.title}
+                />
+              </div>
             </div>
 
-            <div>
-              <Label>Title</Label>
-              <Input
-                name="title"
-                placeholder="Title"
-                type="text"
-                value={formData.title}
-                onChange={handleChange}
-                error={!!errors.title}
-              // errorMessage={errors.title}
-              />
-            </div>
 
-            <div>
-              <DatePicker
-                id="date-picker"
-                label="Date Picker Input"
-                placeholder="Select a date"
-                defaultDate={formData.date}
-                onChange={handleDateChange}
-              />
-              {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <DatePicker
+                  id="date-picker"
+                  label="Date Picker Input"
+                  placeholder="Select a date"
+                  defaultDate={formData.date}
+                  onChange={handleDateChange}
+                />
+                {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
+              </div>
+
+              <div>
+                <Label>Short Description</Label>
+                <Input
+                  name="shortDescription"
+                  type="text"
+                  placeholder="Short description"
+                  value={formData.shortDescription}
+                  onChange={handleChange}
+                  error={!!errors.shortDescription}
+                // errorMessage={errors.shortDescription}
+                />
+              </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-8">
@@ -193,18 +210,6 @@ const Blogs = () => {
               />
             </div>
 
-            <div>
-              <Label>Short Description</Label>
-              <Input
-                name="shortDescription"
-                type="text"
-                placeholder="Short description"
-                value={formData.shortDescription}
-                onChange={handleChange}
-                error={!!errors.shortDescription}
-              // errorMessage={errors.shortDescription}
-              />
-            </div>
 
             <div className="space-y-6">
               <div>
@@ -224,21 +229,20 @@ const Blogs = () => {
               </div>
             </div>
           </div>
+
+          <DropzoneComponent />
+          <div className="flex items-center gap-5">
+            <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Save"}
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => router.push("/blogs")}>
+              Cancel
+            </Button>
+          </div>
         </ComponentCard>
       </div>
 
-      <div className="space-y-6">
-        <DropzoneComponent />
 
-        <div className="flex items-center gap-5">
-          <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : "Save"}
-          </Button>
-          <Button size="sm" variant="outline" onClick={() => router.push("/blogs")}>
-            Cancel
-          </Button>
-        </div>
-      </div>
     </>
   );
 };

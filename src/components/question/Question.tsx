@@ -10,6 +10,7 @@ import { ChevronDownIcon } from "@/icons";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import ComponentCard from "../common/ComponentCard";
+import { Editor } from "primereact/editor";
 
 const categoryOptions = [
   { value: "3", label: "3 Month" },
@@ -130,24 +131,24 @@ const Question = () => {
 
   return (
     <div className="space-y-6">
-      <ComponentCard title="" name="">
+      <ComponentCard title="Add Question" name="">
         <div className="space-y-6">
-          {/* Title */}
-          <div>
-            <Label>Title</Label>
-            <Input
-              placeholder="Enter title"
-              type="text"
-              value={formData.title}
-              onChange={(e) => handleChange("title", e.target.value)}
-              error={errors.title}
-            />
-            {errors.title && <p className="text-sm text-error-500 mt-1">{errors.title}</p>}
-          </div>
 
-          {/* Price and Category */}
-          <div className="flex items-start gap-4">
-            <div className="flex-1">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Title */}
+            <div>
+              <Label>Title</Label>
+              <Input
+                placeholder="Enter title"
+                type="text"
+                value={formData.title}
+                onChange={(e) => handleChange("title", e.target.value)}
+                error={errors.title}
+              />
+              {errors.title && <p className="text-sm text-error-500 mt-1">{errors.title}</p>}
+            </div>
+
+            <div>
               <Label>Price</Label>
               <Input
                 placeholder="Enter price"
@@ -164,10 +165,10 @@ const Question = () => {
               {errors.price && <p className="text-sm text-error-500 mt-1">{errors.price}</p>}
             </div>
 
-            <div className="flex-1">
+
+            <div>
               <Label>Duration</Label>
               <div className="relative">
-
                 <Select
                   options={categoryOptions}
                   placeholder="Select month"
@@ -181,40 +182,38 @@ const Question = () => {
                   <ChevronDownIcon />
                 </span>
               </div>
-              {errors.duration && <p className="text-sm text-error-500 mt-1">{errors.duration}</p>}
             </div>
           </div>
-
           {/* Description */}
+
           <div>
             <Label>Description</Label>
-            {/* <TextArea
-              rows={6}
-              value={formData.description}
-              onChange={(val) => handleChange("description", val)}
-              error={errors.description}
-            /> */}
-            <Input
+            {/* <Input
               placeholder="Enter description"
               type="text"
               value={formData.description}
               onChange={(e) => handleChange("description", e.target.value)}
               error={errors.description}
+            /> */}
+            <Editor
+              value={formData.description}
+              style={{ height: "320px" }}
+              onTextChange={(e) => handleChange("description", e.htmlValue)}
             />
             {errors.description && <p className="text-sm text-error-500 mt-1">{errors.description}</p>}
           </div>
         </div>
+        <div className="flex items-center gap-5">
+          <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : "Save"}
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => router.push("/question")}>
+            Cancel
+          </Button>
+        </div>
       </ComponentCard>
 
       {/* Buttons */}
-      <div className="flex items-center gap-5">
-        <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : "Save"}
-        </Button>
-        <Button size="sm" variant="outline" onClick={() => router.push("/question")}>
-          Cancel
-        </Button>
-      </div>
     </div>
   );
 };

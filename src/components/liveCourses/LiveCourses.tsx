@@ -154,103 +154,111 @@ const handleChange = (field: keyof FormDataType, value: string) => {
 
   return (
     <div className="space-y-6">
-      <ComponentCard title="" name="">
+      <ComponentCard title="Add Live Courses" name="">
         <div className="space-y-6">
-          {/* Title */}
-          <div>
-            <Label>Course Title</Label>
-            <Input
-              placeholder="Enter course title"
-              type="text"
-              value={formData.title}
-              onChange={(e) => handleChange("title", e.target.value)}
-              error={errors.title}
-            />
-            {errors.title && <p className="text-sm text-error-500 mt-1">{errors.title}</p>}
-          </div>
-          <div>
-            <Label>Instructor Name</Label>
-            <Input
-              placeholder="Enter instructor name"
-              type="text"
-              value={formData.instructor_name}
-              onChange={(e) => handleChange("instructor_name", e.target.value)}
-              error={errors.instructor_name}
-            />
-            {errors.instructor_name && <p className="text-sm text-error-500 mt-1">{errors.instructor_name}</p>}
-          </div>
-
-          <div>
-            <DatePicker
-              id="date-picker"
-              label="Date Picker Input"
-              placeholder="Select a date"
-              defaultDate={formData.date}
-              onChange={handleDateChange}
-            />
-            {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Title */}
+            <div>
+              <Label>Course Title</Label>
+              <Input
+                placeholder="Enter course title"
+                type="text"
+                value={formData.title}
+                onChange={(e) => handleChange("title", e.target.value)}
+                error={errors.title}
+              />
+              {errors.title && <p className="text-sm text-error-500 mt-1">{errors.title}</p>}
+            </div>
+            <div>
+              <Label>Instructor Name</Label>
+              <Input
+                placeholder="Enter instructor name"
+                type="text"
+                value={formData.instructor_name}
+                onChange={(e) => handleChange("instructor_name", e.target.value)}
+                error={errors.instructor_name}
+              />
+              {errors.instructor_name && <p className="text-sm text-error-500 mt-1">{errors.instructor_name}</p>}
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-8">
-            <Radio
-              id="radio1"
-              name="status"
-              value="Active"
-              checked={formData.status === "Active"}
-              onChange={handleRadioChange}
-              label="Active"
-            />
-            <Radio
-              id="radio2"
-              name="status"
-              value="Inactive"
-              checked={formData.status === "Inactive"}
-              onChange={handleRadioChange}
-              label="Inactive"
-            />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <DatePicker
+                id="date-picker"
+                label="Date Picker Input"
+                placeholder="Select a date"
+                defaultDate={formData.date}
+                onChange={handleDateChange}
+              />
+              {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-8">
+              <Radio
+                id="radio1"
+                name="status"
+                value="Active"
+                checked={formData.status === "Active"}
+                onChange={handleRadioChange}
+                label="Active"
+              />
+              <Radio
+                id="radio2"
+                name="status"
+                value="Inactive"
+                checked={formData.status === "Inactive"}
+                onChange={handleRadioChange}
+                label="Inactive"
+              />
+            </div>
           </div>
 
-          {/* Description */}
-          <div>
-            <Label>Sub Scribe Student Count</Label>
-            <Input
-              placeholder="Enter zoom link"
-              type="text"
-              value={formData.sub_scribe_student_count}
-              onChange={(e) => handleChange("sub_scribe_student_count", e.target.value)}
-              error={errors.sub_scribe_student_count}
-            />
-            {errors.sub_scribe_student_count && <p className="text-sm text-error-500 mt-1">{errors.sub_scribe_student_count}</p>}
-          </div>
-          <div>
-            <Label>Zoom Link</Label>
-            {/* <TextArea
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Description */}
+            <div>
+              <Label>Sub Scribe Student Count</Label>
+              <Input
+                placeholder="Enter zoom link"
+                type="text"
+                value={formData.sub_scribe_student_count}
+                onChange={(e) => handleChange("sub_scribe_student_count", e.target.value)}
+                error={errors.sub_scribe_student_count}
+              />
+              {errors.sub_scribe_student_count && <p className="text-sm text-error-500 mt-1">{errors.sub_scribe_student_count}</p>}
+            </div>
+            <div>
+              <Label>Zoom Link</Label>
+              {/* <TextArea
               rows={6}
               value={formData.description}
               onChange={(val) => handleChange("description", val)}
               error={errors.description}
             /> */}
-            <Input
-              placeholder="Enter zoom link"
-              type="text"
-              value={formData.zoom_link}
-              onChange={(e) => handleChange("zoom_link", e.target.value)}
-              error={errors.zoom_link}
-            />
-            {errors.zoom_link && <p className="text-sm text-error-500 mt-1">{errors.zoom_link}</p>}
+              <Input
+                placeholder="Enter zoom link"
+                type="text"
+                value={formData.zoom_link}
+                onChange={(e) => handleChange("zoom_link", e.target.value)}
+                error={errors.zoom_link}
+              />
+              {errors.zoom_link && <p className="text-sm text-error-500 mt-1">{errors.zoom_link}</p>}
+            </div>
           </div>
+        </div>
+
+        {/* Buttons */}
+        <div className="flex items-center gap-5">
+          <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : "Save"}
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => router.push("/prerecord")}>
+            Cancel
+          </Button>
         </div>
       </ComponentCard>
 
-      {/* Buttons */}
-      <div className="flex items-center gap-5">
-        <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : "Save"}
-        </Button>
-        <Button size="sm" variant="outline" onClick={() => router.push("/prerecord")}>
-          Cancel
-        </Button>
-      </div>
     </div>
   );
 };
