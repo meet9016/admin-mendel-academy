@@ -234,10 +234,11 @@ export default function SignInForm() {
                   </div>
                   <Link
                     href="/reset-password"
-                    className="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
+                    className="text-sm text-black hover:text-black dark:text-black border-b-2 border-[#ffcc09] pb-[1px]"
                   >
                     Forgot password?
                   </Link>
+
                 </div>
                 <div>
                   {/* Use type="submit" on the Button component and link it to the form's onSubmit or keep it as-is */}
