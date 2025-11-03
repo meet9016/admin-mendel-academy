@@ -13,6 +13,7 @@ import ComponentCard from "../common/ComponentCard";
 import Radio from "../form/input/Radio";
 import DatePicker from "../form/date-picker";
 import { Editor, EditorTextChangeEvent } from "primereact/editor";
+import { decodeHtml } from "@/utils/helper";
 
 const categoryOptions = [
   { value: "3", label: "3 Month" },
@@ -22,7 +23,11 @@ const categoryOptions = [
 
 interface FormDataType {
   title: string;
+  category: string;
+  total_reviews: string;
+  subtitle: string;
   vimeo_video_id: string;
+  rating: string;
   price: string;
   duration: string;
   description: string;
@@ -34,8 +39,12 @@ const Prerecorded = () => {
 
   const [formData, setFormData] = useState<FormDataType>({
     title: "",
+    category: "",
+    total_reviews: "",
+    subtitle: "",
     vimeo_video_id: "",
     price: "",
+    rating: "",
     duration: "",
     description: "",
     date: "",
@@ -62,15 +71,19 @@ const Prerecorded = () => {
         if (!id) return;
         const res = await api.get(`${endPointApi.getByIdPreRecorded}/${id}`);
         const data = res.data || {};
-        console.log("data", data);
+        const decodedDescription = decodeHtml(data.description ?? "");
 
         // Ensure duration is a string for select matching
         setFormData({
           title: data.title ?? "",
+          category: data.category ?? "",
+          total_reviews: data.total_reviews ?? "",
+          subtitle: data.subtitle ?? "",
           vimeo_video_id: data.vimeo_video_id ?? "",
           price: data.price?.toString() ?? "",
+          rating: data.rating ?? "",
           duration: data.duration ? String(data.duration) : '',
-          description: data.description ?? "",
+          description: decodedDescription,
           date: data.date ?? "",
           status: data.status == "Active" ? "Active" : "Inactive",
         });
@@ -148,6 +161,10 @@ const Prerecorded = () => {
 
     const body = {
       title: formData.title,
+      category: formData.category,
+      total_reviews: formData.total_reviews,
+      subtitle: formData.subtitle,
+      rating: formData.rating,
       vimeo_video_id: formData.vimeo_video_id,
       price: formData.price,
       duration: formData.duration,
@@ -189,6 +206,39 @@ const Prerecorded = () => {
               {errors.title && <p className="text-sm text-error-500 mt-1">{errors.title}</p>}
             </div>
             <div>
+              <Label>Sub title</Label>
+              <Input
+                placeholder="Enter sub title"
+                type="text"
+                value={formData.subtitle}
+                onChange={(e) => handleChange("subtitle", e.target.value)}
+                error={errors.subtitle}
+              />
+              {errors.subtitle && <p className="text-sm text-error-500 mt-1">{errors.subtitle}</p>}
+            </div>
+            <div>
+              <Label>Category</Label>
+              <Input
+                placeholder="Enter category"
+                type="text"
+                value={formData.category}
+                onChange={(e) => handleChange("category", e.target.value)}
+                error={errors.category}
+              />
+              {errors.category && <p className="text-sm text-error-500 mt-1">{errors.category}</p>}
+            </div>
+            <div>
+              <Label>Total Reviews</Label>
+              <Input
+                placeholder="Enter total reviews"
+                type="text"
+                value={formData.total_reviews}
+                onChange={(e) => handleChange("total_reviews", e.target.value)}
+                error={errors.total_reviews}
+              />
+              {errors.total_reviews && <p className="text-sm text-error-500 mt-1">{errors.total_reviews}</p>}
+            </div>
+            <div>
               <Label>vimeo video id</Label>
               <Input
                 placeholder="Enter vimeo video id"
@@ -216,59 +266,68 @@ const Prerecorded = () => {
               {errors.price && <p className="text-sm text-error-500 mt-1">{errors.price}</p>}
             </div>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <Label>Rating</Label>
+              <Input
+                placeholder="Enter rating"
+                type="text"
+                value={formData.rating}
+                onChange={(e) => handleChange("rating", e.target.value)}
+                error={errors.rating}
+              />
+              {errors.rating && <p className="text-sm text-error-500 mt-1">{errors.rating}</p>}
+            </div>
+
             {/* Duration  */}
-            <div className="flex-1">
+            <div>
               <Label>Duration</Label>
               <div className="relative">
 
-                  <Select
-                    options={categoryOptions}
-                    placeholder="Select month"
-                    defaultValue={formData.duration || ''}
-                    onChange={(selectedOption) =>
-                      handleChange("duration", selectedOption || "")
-                    }
-                  // error={errors.duration}
-                  />
-                  <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
-                    <ChevronDownIcon />
-                  </span>
+                <Select
+                  options={categoryOptions}
+                  placeholder="Select month"
+                  defaultValue={formData.duration || ''}
+                  onChange={(selectedOption) =>
+                    handleChange("duration", selectedOption || "")
+                  }
+                // error={errors.duration}
+                />
+                <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
+                  <ChevronDownIcon />
+                </span>
               </div>
             </div>
-          </div>
-
             <div>
               <DatePicker
                 id="date-picker"
-                label="Date Picker Input"
+                label="Date Picker"
                 placeholder="Select a date"
                 defaultDate={formData.date}
                 onChange={handleDateChange}
               />
               {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
             </div>
+          </div>
 
-
-            <div className="flex flex-wrap items-center gap-8">
-              <Radio
-                id="radio1"
-                name="status"
-                value="Active"
-                checked={formData.status === "Active"}
-                onChange={handleRadioChange}
-                label="Active"
-              />
-              <Radio
-                id="radio2"
-                name="status"
-                value="Inactive"
-                checked={formData.status === "Inactive"}
-                onChange={handleRadioChange}
-                label="Inactive"
-              />
-            </div>
+          <div className="flex flex-wrap items-center gap-8">
+            <Radio
+              id="radio1"
+              name="status"
+              value="Active"
+              checked={formData.status === "Active"}
+              onChange={handleRadioChange}
+              label="Active"
+            />
+            <Radio
+              id="radio2"
+              name="status"
+              value="Inactive"
+              checked={formData.status === "Inactive"}
+              onChange={handleRadioChange}
+              label="Inactive"
+            />
+          </div>
           {/* Description */}
           <div>
             <Label>Description</Label>
@@ -299,7 +358,7 @@ const Prerecorded = () => {
           <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
             {isSubmitting ? "Saving..." : "Save"}
           </Button>
-          <Button size="sm" variant="outline" onClick={() => router.push("/liveCourses")}>
+          <Button size="sm" variant="outline" onClick={() => router.push("/prerecord")}>
             Cancel
           </Button>
         </div>

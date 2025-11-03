@@ -1,9 +1,12 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { useDropzone } from "react-dropzone";
 
-const DropzoneComponent: React.FC = () => {
-  const [preview, setPreview] = useState<string | null>(null);
+interface DropzoneProps {
+  preview: string | null;
+  setPreview: React.Dispatch<React.SetStateAction<string | null>>;
+}
+const DropzoneComponent: React.FC<DropzoneProps> = ({ preview, setPreview }) => {
 
   const onDrop = (acceptedFiles: File[]) => {
     console.log("Files dropped:", acceptedFiles);
@@ -77,6 +80,7 @@ const DropzoneComponent: React.FC = () => {
         </div>
         {/* Preview Box */}
         <div className="transition border border-brand-500 border-dashed cursor-pointer dark:border-brand-500 rounded-xl flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-900">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={
               preview

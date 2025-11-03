@@ -13,12 +13,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import endPointApi from "@/utils/endPointApi";
 import { Editor, EditorTextChangeEvent } from "primereact/editor";
 import { toast } from 'react-toastify';
+import { decodeHtml } from "@/utils/helper";
 
 const Blogs = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
-
 
   const [formData, setFormData] = useState({
     examName: "",
@@ -31,6 +31,7 @@ const Blogs = () => {
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
 
   // Handle text input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,14 +59,6 @@ const Blogs = () => {
   const handleRadioChange = (value: string) => {
     setFormData((prev) => ({ ...prev, status: value }));
   };
-
-  const decodeHtml = (html: string): string => {
-    if (typeof window === "undefined") return html;
-    const txt = document.createElement("textarea");
-    txt.innerHTML = html;
-    return txt.value;
-  };
-
 
   useEffect(() => {
     const fetchById = async () => {
@@ -117,7 +110,7 @@ const Blogs = () => {
       sort_description: formData.shortDescription,
       long_description: formData.description,
       date: formData.date,
-      image: '',
+      image: preview,
       status: formData?.status
     }
     try {
@@ -237,7 +230,10 @@ const Blogs = () => {
             </div>
           </div>
 
-          <DropzoneComponent />
+          <DropzoneComponent
+            preview={preview}
+            setPreview={setPreview}
+          />
           <div className="flex items-center gap-5">
             <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting ? "Saving..." : "Save"}

@@ -161,8 +161,11 @@ type QuestionType = {
   id: number;
   title: string;
   price?: string;
-  date?: string;
-  duration?: string;
+  features?: string;
+  rating?: string;
+  tag?: string;
+  total_reviews?: string;
+  // duration?: string;
   createdAt?: string;
   description?: string;
 };
@@ -287,9 +290,11 @@ export default function Page() {
               }}
               columns={[
                 { field: "title", header: "Title", sortable: true },
+                { field: "tag", header: "Tag", sortable: true },
+                { field: "rating", header: "Rating", sortable: true },
+                { field: "features", header: "Features" },
                 { field: "price", header: "Price", sortable: true },
-                { field: "duration", header: "Duration", sortable: true },
-                { field: "description", header: "Description", sortable: true },
+                // { field: "description", header: "Description", sortable: true },
                 {
                   field: "createdAt",
                   header: "Created At",

@@ -4,7 +4,6 @@ import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import ComponentCard from "@/components/common/ComponentCard";
 import { PlusIcon } from "@/icons";
-import ConfirmationModal from "@/components/common/ConfirmationModal";
 import { useRouter } from "next/navigation";
 import PrimeReactTable from "@/components/tables/PrimeReactTable";
 import { Tag } from "primereact/tag";
@@ -14,6 +13,8 @@ type PreRecordType = {
   id: number;
   title: string;
   vimeo_video_id: string;
+  total_reviews: number;
+  rating: number;
   price: number;
   date?: string;
   createdAt?: string;
@@ -80,65 +81,6 @@ export default function Page() {
         onAddProductClick="/prerecord/add"
       >
         <div className="card">
-          {/* <ReactTable
-            selectable={true}
-            data={data}
-            loading={loading}
-            columns={[
-              { field: "title", header: "Title" },
-              { field: "vimeo_video_id", header: "vimeo_video_id" },
-              { field: "price", header: "price" },
-              { field: "duration", header: "duration" },
-              // {
-              //   field: "sort_description",
-              //   header: "sort_description",
-              //   body: (row) => row?.sort_description ?? "-",
-              // },
-              {
-                field: "date", header: "Date", body: (row: PreRecordType) =>
-                  row.date ? new Date(row.date).toLocaleDateString() : "-",
-              },
-              { field: "status", header: "Status" },
-            //   {
-            //     field: "createdAt",
-            //     header: "Created At",
-            //     body: (row) =>
-            //       row.createdAt ? new Date(row.createdAt).toLocaleDateString() : "-",
-            //   },
-              {
-                header: "Action",
-                sortable: false,
-                body: (row: PreRecordType) => (
-                  <div className="flex gap-5">
-                    <button className="text-green-500 hover:text-green-700"
-                        onClick={() => router.push(`/prerecord/add?id=${row.id}`)}
-                    >
-                      <FaEdit size={18} />
-                    </button>
-                    <button
-                      className="text-red-500 hover:text-red-700"
-                      onClick={() => handleDeleteClick(row)}
-                    >
-                      <MdDeleteForever size={18} />
-                    </button>
-                  </div>
-                ),
-              }
-            ]}
-              lazy
-            page={page}
-            rows={rows}
-            totalRecords={totalRecords}
-             onPageChange={(newPage: number, newRows: number) => {
-              setPage(newPage);
-              setRows(newRows);
-            }}
-          /> */}
-
-
-
-
-
           <PrimeReactTable
             data={data}
             loading={loading}
@@ -149,8 +91,10 @@ export default function Page() {
               setRows(newRows);
             }}
             columns={[
-              { field: "title", header: "Title", sortable: true },
-              { field: "vimeo_video_id", header: "Vimeo_Video_id", sortable: true },
+              { field: "title", header: "Title", sortable: true},
+              { field: "total_reviews", header: "Total reviews"},
+              { field: "rating", header: "Rating"},
+              { field: "vimeo_video_id", header: "Vimeo video id"},
               { field: "price", header: "Price", sortable: true },
               { field: "duration", header: "Duration", sortable: true },
               {

@@ -194,12 +194,10 @@ export default function BlogListPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const [selectedRow, setSelectedRow] = useState<BlogType | null>(null);
 
-
-
   const getBlogData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.get(`${endPointApi.getAllBlogs}`);
+      const res = await api.get(`${endPointApi.getAllBlogs}?page=${page}&rows=${rows}`);
       setData(res.data.data || []);
       setTotalRecords(res.data.total || 0);
     } catch (err) {
@@ -207,11 +205,12 @@ export default function BlogListPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, rows]);
+  }, [page, rows]); // ✅ now correct
 
   useEffect(() => {
     getBlogData();
   }, [getBlogData]);
+
 
   const handleDeleteClick = (row: BlogType) => {
     setSelectedRow(row);
