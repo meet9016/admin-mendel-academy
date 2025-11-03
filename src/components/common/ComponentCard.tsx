@@ -4,7 +4,7 @@ import React from "react";
 
 interface ComponentCardProps {
   title: string;
-  name: string;
+  name?: string;
   children: React.ReactNode;
   className?: string; // Additional custom classes for styling
   onAddProductClick?: string; // new prop for click handler
@@ -46,7 +46,7 @@ const ComponentCard: React.FC<ComponentCardProps> = ({
           {name && (
             <button
               onClick={() => router.push(onAddProductClick)}
-              className="bg-brand-950 text-white px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2">
+              className="bg-[#ffca00] text-white px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2">
               {Plusicon} {name}
             </button>
           )}

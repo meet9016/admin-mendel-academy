@@ -222,9 +222,9 @@ export default function Page() {
       <div className="space-y-6">
         <ComponentCard
           title="Question List"
-          Plusicon={<PlusIcon />}
-          name="Add Question"
-          onAddProductClick="/question/add"
+          // Plusicon={<PlusIcon />}
+          // name="Add Question"
+          // onAddProductClick="/question/add"
         >
           <div className="card">
             {/* <ReactTable

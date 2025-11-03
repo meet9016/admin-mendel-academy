@@ -76,9 +76,9 @@ export default function Page() {
     <div className="space-y-6">
       <ComponentCard
         title="Prerecord List"
-        Plusicon={<PlusIcon />}
-        name="Add Prerecord"
-        onAddProductClick="/prerecord/add"
+        // Plusicon={<PlusIcon />}
+        // name="Add Prerecord"
+        // onAddProductClick="/prerecord/add"
       >
         <div className="card">
           <PrimeReactTable

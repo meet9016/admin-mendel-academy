@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import ComponentCard from "@/components/common/ComponentCard";
-import { PlusIcon } from "@/icons";
+// import { PlusIcon } from "@/icons";
 import { useRouter } from "next/navigation";
 import PrimeReactTable from "@/components/tables/PrimeReactTable";
 import { Tag } from "primereact/tag";
@@ -74,9 +74,9 @@ export default function Page() {
     <div className="space-y-6">
       <ComponentCard
         title="Live Courses List"
-        Plusicon={<PlusIcon />}
-        name="Add Live Courses"
-        onAddProductClick="/liveCourses/add"
+      // Plusicon={<PlusIcon />}
+      // name="Add Live Courses"
+      // onAddProductClick="/liveCourses/add"
       >
         <div className="card">
           {/* <ReactTable
