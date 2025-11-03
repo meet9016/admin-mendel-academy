@@ -5,6 +5,7 @@ import Label from "@/components/form/Label";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
 import React, { useState } from "react";
+import Button from "../ui/button/Button";
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -165,9 +166,17 @@ export default function SignUpForm() {
                 </div>
                 {/* <!-- Button --> */}
                 <div>
-                  <button className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600">
+                  {/* <button className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600">
                     Sign Up
-                  </button>
+                  </button> */}
+                                    <Button
+                    className="w-full"
+                    size="sm"
+                    // onClick={(e) => signIn(e)}
+                    // disabled={isLoading} // Disable button while loading
+                  >
+                    Sign in
+                  </Button>
                 </div>
               </div>
             </form>

@@ -148,8 +148,8 @@
 
 "use client";
 import React, { useCallback, useEffect, useState } from "react";
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import { PlusIcon } from "@/icons";
+// import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+// import { PlusIcon } from "@/icons";
 import ComponentCard from "@/components/common/ComponentCard";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
@@ -218,7 +218,7 @@ export default function Page() {
   };
   return (
     <div>
-      <PageBreadcrumb pageTitle="Question" />
+      {/* <PageBreadcrumb pageTitle="Question" /> */}
       <div className="space-y-6">
         <ComponentCard
           title="Question List"
