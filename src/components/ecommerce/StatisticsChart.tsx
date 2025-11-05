@@ -17,7 +17,7 @@ export default function StatisticsChart() {
       position: "top",
       horizontalAlign: "left",
     },
-    colors: ["#465FFF", "#9CB9FF"], // Define line colors
+    colors: ["#ffcc09", "#ffcc09"], // Define line colors
     chart: {
       fontFamily: "Outfit, sans-serif",
       height: 310,
