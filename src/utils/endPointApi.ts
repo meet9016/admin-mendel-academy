@@ -30,6 +30,9 @@ export interface EndPointApi {
     createLiveCourses?: string;
     updateLiveCourses?: string;
     deleteLiveCourses?: string;
+
+    //Exam-List
+    createExamList?: string;
 }
 
 // Define and export the API endpoint object
@@ -65,6 +68,9 @@ const endPointApi: EndPointApi = {
     createLiveCourses: 'livecourses/create',
     updateLiveCourses: 'livecourses/update',
     deleteLiveCourses: 'livecourses/delete',
+
+    //Exam-List
+    createExamList: 'examlist/create'
 };
 
 export default endPointApi;
