@@ -158,8 +158,11 @@ const MedicalExam = () => {
 
             const res = await api.post(`${endPointApi.createExamList}`, body);
 
-            if (res.data) console.log("Success", res.data);
-            else console.log("API Failed");
+            if (res.data) {
+                router.push('/medicalexamlist')
+            } else {
+                console.log("API Failed");
+            }
         } catch (err) {
             console.log("ERROR:", err);
         }
@@ -309,7 +312,7 @@ const MedicalExam = () => {
             </div>
 
             <div className="flex items-center gap-5">
-                <Button size="sm" variant="primary" onClick={handleSave}>
+                <Button size="sm" variant="primary" onClick={handleSave} >
                     Save
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => router.push("/medicalexamlist")}>

@@ -32,6 +32,7 @@ export interface EndPointApi {
     deleteLiveCourses?: string;
 
     //Exam-List
+    getAllExamList?: string;
     createExamList?: string;
 }
 
@@ -70,6 +71,7 @@ const endPointApi: EndPointApi = {
     deleteLiveCourses: 'livecourses/delete',
 
     //Exam-List
+    getAllExamList: 'examlist/getall',
     createExamList: 'examlist/create'
 };
 
