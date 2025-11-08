@@ -1,9 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ComponentCard from "@/components/common/ComponentCard";
 // import { PlusIcon } from "@/icons";
-import { useRouter } from "next/navigation";
 import PrimeReactTable from "@/components/tables/PrimeReactTable";
+import { api } from "@/utils/axiosInstance";
+import endPointApi from "@/utils/endPointApi";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
+import CommonDialog from "@/components/tables/CommonDialog";
 
 
 type PreRecordType = {
@@ -28,22 +31,40 @@ export default function Page() {
     const [totalRecords, setTotalRecords] = useState<number>(0);
 
 
-    // const confirmDelete = async () => {
-    //     if (!selectedRow) return;
 
-    //     try {
-    //         const res = await api.delete(`${endPointApi.deletePreRecorded}/${selectedRow.id}`);
+    const getBlogData = useCallback(async () => {
+        setLoading(true);
+        try {
+            const res = await api.get(`${endPointApi.getAllBlogs}?page=${page}&rows=${rows}`);
+            setData(res.data.data || []);
+            setTotalRecords(res.data.total || 0);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    }, [page, rows]); // ✅ now correct
 
-    //         if (res?.data?.message) {
-    //             // getPreRecordData(); // Refresh the table/list after deletion
-    //         }
-    //     } catch (error) {
-    //         console.error("Delete error:", error);
-    //     } finally {
-    //         setIsDeleteModalOpen(false);
-    //         setSelectedRow(null);
-    //     }
-    // };
+    useEffect(() => {
+        getBlogData();
+    }, [getBlogData]);
+
+    const confirmDelete = async () => {
+        if (!selectedRow) return;
+
+        try {
+            const res = await api.delete(`${endPointApi.deletePreRecorded}/${selectedRow.id}`);
+
+            if (res?.data?.message) {
+                // getPreRecordData(); // Refresh the table/list after deletion
+            }
+        } catch (error) {
+            console.error("Delete error:", error);
+        } finally {
+            setIsDeleteModalOpen(false);
+            setSelectedRow(null);
+        }
+    };
 
     return (
 
@@ -65,21 +86,21 @@ export default function Page() {
                             setRows(newRows);
                         }}
                         columns={[
-                            { field: "title", header: "Title", sortable: true },
-                            { field: "price", header: "Price" },
-                            { field: "description", header: "Description" },
+                            { header: "Title", sortable: true },
+                            { header: "Price" },
+                            { header: "Description" },
                             { header: "Status" },
 
                         ]}
-                       
+
                     />
                 </div>
-                {/* <ConfirmationModal
-          isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-          onConfirm={confirmDelete}
-        /> */}
-                {/* <CommonDialog
+                <ConfirmationModal
+                    isOpen={isDeleteModalOpen}
+                    onClose={() => setIsDeleteModalOpen(false)}
+                    onConfirm={confirmDelete}
+                />
+                <CommonDialog
                     visible={isDeleteModalOpen}
                     header="Confirm Delete"
                     footerType="confirm-delete"
@@ -94,7 +115,7 @@ export default function Page() {
                             </span>
                         )}
                     </div>
-                </CommonDialog> */}
+                </CommonDialog>
             </ComponentCard>
         </div>
 

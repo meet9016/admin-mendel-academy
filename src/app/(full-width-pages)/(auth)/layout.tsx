@@ -2,7 +2,7 @@ import GridShape from "@/components/common/GridShape";
 import ThemeTogglerTwo from "@/components/common/ThemeTogglerTwo";
 
 import { ThemeProvider } from "@/context/ThemeContext";
-// import Image from "next/image";
+import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
@@ -28,7 +28,16 @@ export default function AuthLayout({
                     src="./images/logo/mendel-icon.png"
                     alt="Logo"
                   /> */}
-                  <img src="./images/logo/mendel-icon.png" />
+                  {/* <img src="./images/logo/mendel-icon.png" /> */}
+
+                  <Image
+                    src="/images/logo/mendel-icon.png"
+                    alt="Mendel Icon"
+                    width={50}
+                    height={50}
+                    priority
+                  />
+
                 </Link>
                 <p className="text-center text-black dark:text-white/60">
                   Free and Open-Source Tailwind CSS Admin Dashboard Template

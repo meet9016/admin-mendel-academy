@@ -14,12 +14,13 @@ import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 
 interface PlanData {
-    planDay: string
-    planPrice: string
-    planType: string
-    planSubtitles: string[]
-    isPopular: boolean
+    planDay: number | string;
+    planPrice: string;
+    planType: string;
+    planSubtitles: string[];
+    isPopular: boolean;
 }
+
 interface FormData {
     country: string;
     status: string;
@@ -59,7 +60,7 @@ const MedicalExam = () => {
 
 
     //  Handle updates to any field in formData
-    const handleChange = (field: keyof FormData, value: any) => {
+    const handleChange = <K extends keyof FormData>(field: K, value: FormData[K]) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
         setFormErrors((prev) => ({ ...prev, [field]: "" }));
     };
@@ -193,7 +194,9 @@ const MedicalExam = () => {
                             type="text"
                             placeholder="Enter exam name"
                             value={formData.examName}
-                            onChange={(e: any) => handleChange("examName", e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                handleChange("examName", e.target.value)
+                            }
                             error={!!formErrors?.examName}
                             hint={formErrors?.examName}
                         />
@@ -209,7 +212,9 @@ const MedicalExam = () => {
                             type="text"
                             placeholder="Enter country"
                             value={formData.country}
-                            onChange={(e: any) => handleChange("country", e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                handleChange("country", e.target.value)
+                            }
                         // error={!!formErrors?.examName}
                         // hint={formErrors?.examName}
                         />
@@ -255,7 +260,9 @@ const MedicalExam = () => {
                                     type="text"
                                     placeholder={`Exam detail step ${index + 1}`}
                                     value={step}
-                                    onChange={(e: any) => handleStepChange(index, e.target.value)}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                        handleStepChange(index, e.target.value)
+                                    }
                                     error={!!formErrors?.[`examSteps[${index}]`]}
                                     hint={formErrors?.[`examSteps[${index}]`]}
 
@@ -282,7 +289,7 @@ const MedicalExam = () => {
                             style={{ height: "320px" }}
                             value={formData.description}
                             onTextChange={(e) => {
-                                handleChange("description", e.htmlValue);
+                                handleChange("description", e.htmlValue ?? "");
                                 setFormErrors((prev) => ({ ...prev, description: "" }));
                             }}
                         />
@@ -298,14 +305,16 @@ const MedicalExam = () => {
 
             {/* PLAN SECTION */}
             <div className="grid grid-cols-2 gap-6">
-                
+
                 {formData.plans.map((plan, index) => (
                     <PlanSection
                         key={index}
-                        data={plan as any}
-                        onChange={(updated) => handlePlanChange(index, updated as any)}
+                        data={plan}
+                        // onChange={(updated) => handlePlanChange(index, updated as any)}
+                        onChange={(updated: PlanData) => handlePlanChange(index, updated)}
+
                         onPopularChange={() => handlePopularChange(index)}
-                        // errors={formErrors?.[`plans[${index}]`] || {}}
+                    // errors={formErrors?.[`plans[${index}]`] || {}}
                     />
                 ))}
             </div>

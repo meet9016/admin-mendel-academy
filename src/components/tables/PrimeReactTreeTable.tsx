@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { DataTable } from "primereact/datatable";
+import { DataTable, DataTableExpandedRows, DataTableRowEvent } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { GoPencil } from "react-icons/go";
@@ -26,7 +26,7 @@ interface PrimeReactTreeTableProps<T> {
 }
 
 export default function PrimeReactTreeTable<
-    T extends { id: number | string; children?: any[] }
+    T extends { id: number | string; children?: Record<string, unknown>[] }
 >({
     data,
     loading,
@@ -36,15 +36,16 @@ export default function PrimeReactTreeTable<
     onEdit,
     onDelete,
 }: PrimeReactTreeTableProps<T>) {
-    const [expandedRows, setExpandedRows] = useState<any>(null);
+    // ✅ Fixed: proper type instead of `any`
+    const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | null>(null);
 
     /** ✅ Allow expansion only if there are children */
     const allowExpansion = (rowData: T) =>
         Array.isArray(rowData.children) && rowData.children.length > 0;
 
     /** ✅ Allow only ONE row to expand at a time */
-    const onRowExpand = (event: any) => {
-        console.log(expandedRows, 'aaaaaaa')
+    // const onRowExpand = (event: { data: T }) => {
+    const onRowExpand = (event: DataTableRowEvent) => {
         setExpandedRows({ [event.data.id]: true });
     };
 
@@ -66,8 +67,14 @@ export default function PrimeReactTreeTable<
         return (
             <div className="p-3">
                 <h5 className="font-semibold mb-3">
-                      Details for {(data as any)["category_name"] || (data as any)["exam_name"]}
+                    Details for{" "}
+                    {String(
+                        (data as Record<string, unknown>)["category_name"] ??
+                        (data as Record<string, unknown>)["exam_name"] ??
+                        "-"
+                    )}
                 </h5>
+
                 <DataTable value={data.children} dataKey="id" responsiveLayout="scroll">
                     {Object.keys(firstChild).map((key, index) => (
                         <Column
@@ -115,7 +122,7 @@ export default function PrimeReactTreeTable<
                 rows={rows}
                 rowsPerPageOptions={[10, 15, 20]}
                 dataKey="id"
-                expandedRows={expandedRows}
+                expandedRows={expandedRows as DataTableExpandedRows}
                 onRowExpand={onRowExpand}
                 onRowCollapse={onRowCollapse}
                 rowExpansionTemplate={rowExpansionTemplate}
