@@ -1,12 +1,12 @@
 
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState } from "react";
 // import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 // import { PlusIcon } from "@/icons";
 import ComponentCard from "@/components/common/ComponentCard";
-import { api } from "@/utils/axiosInstance";
-import endPointApi from "@/utils/endPointApi";
-import { useRouter } from "next/navigation";
+// import { api } from "@/utils/axiosInstance";
+// import endPointApi from "@/utils/endPointApi";
+// import { useRouter } from "next/navigation";
 import PrimeReactTable from "@/components/tables/PrimeReactTable";
 import CommonDialog from "@/components/tables/CommonDialog";
 import { PlusIcon } from "@/icons";
@@ -18,14 +18,16 @@ type QuestionType = {
 };
 
 export default function Page() {
-    const router = useRouter();
+    // const router = useRouter();
 
-    const [data, setData] = useState<QuestionType[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [selectedRow, setSelectedRow] = useState<QuestionType | null>(null);
+    const [data] = useState<QuestionType[]>([]);
+    const [loading] = useState<boolean>(false);
+    const [selectedRow] = useState<QuestionType | null>(null);
     const [page, setPage] = useState<number>(1);
+    console.log("page",page);
+    
     const [rows, setRows] = useState<number>(10);
-    const [totalRecords, setTotalRecords] = useState<number>(0);
+    const [totalRecords] = useState<number>(0);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
 
     // const geQuestionData = useCallback(async () => {

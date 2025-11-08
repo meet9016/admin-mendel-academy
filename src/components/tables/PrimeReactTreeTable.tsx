@@ -66,7 +66,7 @@ export default function PrimeReactTreeTable<
         return (
             <div className="p-3">
                 <h5 className="font-semibold mb-3">
-                    Details for {data["category_name"] || data["exam_name"]}
+                      Details for {(data as any)["category_name"] || (data as any)["exam_name"]}
                 </h5>
                 <DataTable value={data.children} dataKey="id" responsiveLayout="scroll">
                     {Object.keys(firstChild).map((key, index) => (

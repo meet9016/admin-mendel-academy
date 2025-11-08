@@ -7,6 +7,13 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 
+interface Plan {
+  plan_day: string | number;
+  plan_type: string;
+  plan_pricing: number;
+  most_popular?: boolean;
+}
+
 export default function DemoPage() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -21,12 +28,12 @@ export default function DemoPage() {
       const apiData = res.data.data || [];
 
       //  Flatten data for DataTable
-      const formattedData = apiData.map((item) => ({
+      const formattedData = (apiData).map((item) => ({
         id: item._id,
         category_name: item.category_name,
         exam_name: item.exams?.[0]?.exam_name || "-",
         status: item.exams?.[0]?.status || "Inactive",
-        children: item.choose_plan_list?.map((plan, idx) => ({
+        children: item.choose_plan_list?.map((plan: Plan) => ({
           // id: `${item.category_name}-${idx}`,
           plan_day: plan.plan_day,
           plan_type: plan.plan_type,
@@ -71,7 +78,7 @@ export default function DemoPage() {
             {
               field: "status",
               header: "Status / Price",
-              body: (row) => {
+              body: (row :{ status?: string }) => {
                 const status = row.status || "Inactive";
                 const severity =
                   status === "Active"

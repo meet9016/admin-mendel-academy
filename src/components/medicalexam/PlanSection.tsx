@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React from 'react'
 import ComponentCard from '../common/ComponentCard'
 import Label from '../form/Label'
 import Select from '../form/Select'
@@ -60,7 +60,7 @@ const PlanSection: React.FC<PlanSectionProps> = ({ data, onChange, onPopularChan
                             { value: "90", label: "90 Days" },
                             { value: "Custom", label: "Custom" },
                         ]}
-                        value={data.planDay}
+                       value={String(data.planDay)}
                         onChange={(val) => handleChange("planDay", val)}
                         placeholder="Select plan duration"
                         error={!!errors?.planDay}

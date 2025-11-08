@@ -9,7 +9,6 @@ import Select from "../form/Select";
 import Button from "../ui/button/Button";
 import { useRouter } from "next/navigation";
 import PlanSection from "./PlanSection";
-import { FormSchema } from "./medicalExamSchema";
 import Radio from "../form/input/Radio";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
@@ -29,7 +28,6 @@ interface FormData {
     examSteps: string[];
     description: string;
     plans: PlanData[];
-
 }
 
 const MedicalExam = () => {
@@ -300,13 +298,14 @@ const MedicalExam = () => {
 
             {/* PLAN SECTION */}
             <div className="grid grid-cols-2 gap-6">
+                
                 {formData.plans.map((plan, index) => (
                     <PlanSection
                         key={index}
-                        data={plan}
-                        onChange={(updated) => handlePlanChange(index, updated)}
+                        data={plan as any}
+                        onChange={(updated) => handlePlanChange(index, updated as any)}
                         onPopularChange={() => handlePopularChange(index)}
-                        errors={formErrors?.[`plans[${index}]`] || {}}
+                        // errors={formErrors?.[`plans[${index}]`] || {}}
                     />
                 ))}
             </div>
