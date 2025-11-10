@@ -6,6 +6,7 @@ import { PlusIcon } from "@/icons";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
+import CommonDialog from "@/components/tables/CommonDialog";
 
 interface Plan {
   plan_day: string | number;
@@ -28,13 +29,13 @@ type FormattedData = {
 };
 
 export default function DemoPage() {
-  // const [data, setData] = useState([]);
   const [data, setData] = useState<FormattedData[]>([]);
-
-  const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
-  const [rows, setRows] = useState(10);
-  const [totalRecords, setTotalRecords] = useState(0);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(1);
+  const [rows, setRows] = useState<number>(10);
+  const [totalRecords, setTotalRecords] = useState<number>(0);
+  const [selectedRow, setSelectedRow] = useState<FormattedData | null>(null);
 
   // const getExamData = useCallback(async () => {
   //   setLoading(true);
@@ -67,6 +68,8 @@ export default function DemoPage() {
   // }, [page, rows]);
 
 
+
+
   const getExamData = useCallback(async () => {
     setLoading(true);
     try {
@@ -92,7 +95,7 @@ export default function DemoPage() {
           }));
 
         return {
-          id: String(item._id ?? ""),
+          id: String(item.id ?? item.exams?.[0]?.id ?? ""), 
           category_name: item.category_name ?? "-",
           exam_name: item.exams?.[0]?.exam_name ?? "-",
           status: item.exams?.[0]?.status ?? "Inactive",
@@ -109,8 +112,22 @@ export default function DemoPage() {
     }
   }, [page, rows]);
 
-
-
+  const confirmDelete = async () => {
+    if (!selectedRow) return;
+    try {
+      await api.delete(`${endPointApi.deleteExamList}/${selectedRow.id}`);
+      getExamData();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsDeleteModalOpen(false);
+      setSelectedRow(null);
+    }
+  };
+  const handleDeleteClick = (row: FormattedData) => {
+    setSelectedRow(row);
+    setIsDeleteModalOpen(true);
+  };
 
   useEffect(() => {
     getExamData();
@@ -152,9 +169,26 @@ export default function DemoPage() {
             },
           ]}
           onEdit={(row) => console.log("Edit", row)}
-          onDelete={(row) => console.log("Delete", row)}
+          onDelete={handleDeleteClick}
         />
       </ComponentCard>
+
+      <CommonDialog
+        visible={isDeleteModalOpen}
+        header="Confirm Delete"
+        footerType="confirm-delete"
+        onHide={() => setIsDeleteModalOpen(false)}
+        onSave={confirmDelete}
+      >
+        <div className="confirmation-content flex items-center gap-3">
+          <i className="pi pi-exclamation-triangle text-3xl text-red-500" />
+          {selectedRow && (
+            <span>
+              Are you sure you want to delete <b>{selectedRow.category_name}</b>?
+            </span>
+          )}
+        </div>
+      </CommonDialog>
     </div>
   );
 }

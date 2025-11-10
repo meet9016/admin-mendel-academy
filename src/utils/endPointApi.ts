@@ -34,6 +34,7 @@ export interface EndPointApi {
     //Exam-List
     getAllExamList?: string;
     createExamList?: string;
+    deleteExamList?: string;
 }
 
 // Define and export the API endpoint object
@@ -72,7 +73,8 @@ const endPointApi: EndPointApi = {
 
     //Exam-List
     getAllExamList: 'examlist/getall',
-    createExamList: 'examlist/create'
+    createExamList: 'examlist/create',
+    deleteExamList: 'examlist/delete',
 };
 
 export default endPointApi;
