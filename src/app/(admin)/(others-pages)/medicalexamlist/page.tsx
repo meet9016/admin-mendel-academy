@@ -76,9 +76,10 @@ export default function DemoPage() {
       const res = await api.get(`${endPointApi.getAllExamList}?page=${page}&rows=${rows}`);
 
       type ApiItem = {
+        id?: string;
         _id?: string;
         category_name?: string;
-        exams?: { exam_name?: string; status?: string }[];
+        exams?: { id?: string; exam_name?: string; status?: string }[];
         choose_plan_list?: Plan[];
       };
 
@@ -95,7 +96,8 @@ export default function DemoPage() {
           }));
 
         return {
-          id: String(item.id ?? item.exams?.[0]?.id ?? ""), 
+          // id: String(item.id ?? item.exams?.[0]?.id ?? ""),
+          id: String(item.id ?? item.exams?.[0]?.id ?? ""),
           category_name: item.category_name ?? "-",
           exam_name: item.exams?.[0]?.exam_name ?? "-",
           status: item.exams?.[0]?.status ?? "Inactive",
