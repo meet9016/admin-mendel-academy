@@ -363,10 +363,11 @@ const AppSidebar: React.FC = () => {
             </>
           ) : (
             <Image
-              src="/images/logo/logo-icon.svg"
+              // src="/images/logo/logo-icon.svg"
+              src="https://mendelacademy.com/mendel-logo/mendel-logo-main.svg"
               alt="Logo"
-              width={32}
-              height={32}
+              width={35}
+              height={35}
             />
           )}
         </Link>

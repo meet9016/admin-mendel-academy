@@ -12,6 +12,8 @@ import PlanSection from "./PlanSection";
 import Radio from "../form/input/Radio";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
+import DropzoneComponent from "../blogs/DropZone";
+import EnrollSection from "./EnrollSection";
 
 interface PlanData {
     planDay: number | string;
@@ -39,6 +41,7 @@ const MedicalExam = () => {
     ];
 
     const [formErrors, setFormErrors] = useState<Record<string, string> | null>(null);
+    const [preview, setPreview] = useState<string | null>(null);
 
 
     //  Main single state
@@ -146,7 +149,8 @@ const MedicalExam = () => {
                     .filter(plan => plan.planDay && plan.planPrice && plan.planType)
                     .map(plan => ({
                         plan_pricing: plan.planPrice,
-                        plan_day: Number(plan.planDay),
+                        // plan_day: Number(plan.planDay),
+                        plan_day: plan.planDay === "Custom" ? 0 : Number(plan.planDay),
                         plan_type: plan.planType,
                         plan_sub_title: plan.planSubtitles,
                         most_popular: plan.isPopular,
@@ -175,7 +179,7 @@ const MedicalExam = () => {
         <div className="space-y-6">
             <ComponentCard title="Add Medical Exam" name="">
                 {/* Category + Exam Name */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                         <Label>Course Category</Label>
                         <Select
@@ -201,6 +205,25 @@ const MedicalExam = () => {
                             hint={formErrors?.examName}
                         />
                     </div>
+
+                    <div className="flex flex-wrap items-center gap-8">
+                        <Radio
+                            id="radio1"
+                            name="status"
+                            value="Active"
+                            checked={formData.status === "Active"}
+                            onChange={handleRadioChange}
+                            label="Active"
+                        />
+                        <Radio
+                            id="radio2"
+                            name="status"
+                            value="Inactive"
+                            checked={formData.status === "Inactive"}
+                            onChange={handleRadioChange}
+                            label="Inactive"
+                        />
+                    </div>
                 </div>
 
 
@@ -219,7 +242,7 @@ const MedicalExam = () => {
                         // hint={formErrors?.examName}
                         />
                     </div>
-                    <div className="flex flex-wrap items-center gap-8">
+                    {/* <div className="flex flex-wrap items-center gap-8">
                         <Radio
                             id="radio1"
                             name="status"
@@ -235,6 +258,15 @@ const MedicalExam = () => {
                             checked={formData.status === "Inactive"}
                             onChange={handleRadioChange}
                             label="Inactive"
+                        />
+                    </div> */}
+
+
+                    <div>
+                        <Label>Title</Label>
+                        <Input
+                            type="text"
+                            placeholder="Enter Title"
                         />
                     </div>
                 </div>
@@ -283,7 +315,8 @@ const MedicalExam = () => {
                 </div>
 
                 {/* Description */}
-                <div className="grid grid-cols-1 gap-6">
+                <div className="grid grid-cols-1 gap-3">
+                    <Label>Description</Label>
                     <div>
                         <Editor
                             style={{ height: "320px" }}
@@ -298,9 +331,18 @@ const MedicalExam = () => {
                         )}
                     </div>
                 </div>
+                <DropzoneComponent
+                    preview={preview}
+                    setPreview={setPreview}
+                />
             </ComponentCard>
 
 
+
+            {/* ENROLL SECTION */}
+            <div>
+                <EnrollSection />
+            </div>
 
 
             {/* PLAN SECTION */}
