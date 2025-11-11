@@ -37,44 +37,10 @@ export default function DemoPage() {
   const [totalRecords, setTotalRecords] = useState<number>(0);
   const [selectedRow, setSelectedRow] = useState<FormattedData | null>(null);
 
-  // const getExamData = useCallback(async () => {
-  //   setLoading(true);
-  //   try {
-  //     const res = await api.get(`${endPointApi.getAllExamList}?page=${page}&rows=${rows}`);
-  //     const apiData = res.data.data || [];
-
-  //     //  Flatten data for DataTable
-  //    const formattedData = (apiData as any[]).map((item: any) => ({
-  //       id: item._id,
-  //       category_name: item.category_name,
-  //       exam_name: item.exams?.[0]?.exam_name || "-",
-  //       status: item.exams?.[0]?.status || "Inactive",
-  //       children: item.choose_plan_list?.map((plan: Plan) => ({
-  //         // id: `${item.category_name}-${idx}`,
-  //         plan_day: plan.plan_day,
-  //         plan_type: plan.plan_type,
-  //         plan_pricing: plan.plan_pricing,
-  //         plan_popular: plan.most_popular
-  //       })),
-  //     }));
-
-  //     setData(formattedData);
-  //     setTotalRecords(res.data.total || 0);
-  //   } catch (error) {
-  //     console.log("ERROR", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }, [page, rows]);
-
-
-
-
   const getExamData = useCallback(async () => {
     setLoading(true);
     try {
       const res = await api.get(`${endPointApi.getAllExamList}?page=${page}&rows=${rows}`);
-
       type ApiItem = {
         id?: string;
         _id?: string;

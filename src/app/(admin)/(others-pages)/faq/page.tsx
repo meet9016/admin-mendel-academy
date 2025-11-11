@@ -1,15 +1,13 @@
 
 "use client";
-import React, { useState } from "react";
-// import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-// import { PlusIcon } from "@/icons";
+import React, { useCallback, useEffect, useState } from "react";
 import ComponentCard from "@/components/common/ComponentCard";
-// import { api } from "@/utils/axiosInstance";
-// import endPointApi from "@/utils/endPointApi";
-// import { useRouter } from "next/navigation";
 import PrimeReactTable from "@/components/tables/PrimeReactTable";
 import CommonDialog from "@/components/tables/CommonDialog";
 import { PlusIcon } from "@/icons";
+import { api } from "@/utils/axiosInstance";
+import endPointApi from "@/utils/endPointApi";
+import { useRouter } from "next/navigation";
 
 type QuestionType = {
     id: number;
@@ -18,53 +16,51 @@ type QuestionType = {
 };
 
 export default function Page() {
-    // const router = useRouter();
+    const router = useRouter();
 
-    const [data] = useState<QuestionType[]>([]);
-    const [loading] = useState<boolean>(false);
-    const [selectedRow] = useState<QuestionType | null>(null);
+    const [data, setData] = useState<QuestionType[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [selectedRow, setSelectedRow] = useState<QuestionType | null>(null);
     const [page, setPage] = useState<number>(1);
-    console.log("page",page);
-    
     const [rows, setRows] = useState<number>(10);
-    const [totalRecords] = useState<number>(0);
+    const [totalRecords, setTotalRecords] = useState<number>(0);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
 
-    // const geQuestionData = useCallback(async () => {
-    //     setLoading(true);
-    //     try {
-    //         const res = await api.get(`${endPointApi.getAllQuestion}?page=${page}&limit=${rows}`);
-    //         setData(res.data.data || []);
-    //         setTotalRecords(res.data.total);
-    //     } catch (err) {
-    //         console.error(err);
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // }, [page, rows]);
+    const getFaqData = useCallback(async () => {
+        setLoading(true);
+        try {
+            const res = await api.get(`${endPointApi.getAllFaq}?page=${page}&rows=${rows}`);
+            setData(res.data || []);
+            setTotalRecords(res.data.total || 0);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    }, [page, rows]);
 
-    // useEffect(() => {
-    //     geQuestionData();
-    // }, [geQuestionData]);
+    useEffect(() => {
+        getFaqData();
+    }, [getFaqData]);
 
 
-    // const handleDeleteClick = (row: QuestionType) => {
-    //     setSelectedRow(row);
-    //     setIsDeleteModalOpen(true);
-    // };
+    const handleDeleteClick = (row: QuestionType) => {
+        setSelectedRow(row);
+        setIsDeleteModalOpen(true);
+    };
 
-    // const confirmDelete = async () => {
-    //     if (!selectedRow) return;
-    //     try {
-    //         await api.delete(`${endPointApi.deleteQuestion}/${selectedRow.id}`);
-    //         geQuestionData();
-    //     } catch (err) {
-    //         console.error(err);
-    //     } finally {
-    //         setIsDeleteModalOpen(false);
-    //         setSelectedRow(null);
-    //     }
-    // };
+    const confirmDelete = async () => {
+        if (!selectedRow) return;
+        try {
+            await api.delete(`${endPointApi.deleteFaq}/${selectedRow.id}`);
+            getFaqData();
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsDeleteModalOpen(false);
+            setSelectedRow(null);
+        }
+    };
     return (
         <div>
             {/* <PageBreadcrumb pageTitle="Question" /> */}
@@ -82,17 +78,23 @@ export default function Page() {
                             totalRecords={totalRecords}
                             rows={rows}
                             onPageChange={(newPage, newRows) => {
-                                setPage(newPage);
+                                setPage(newPage);   
                                 setRows(newRows);
                             }}
                             columns={[
-                                { field: "title", header: "Title", sortable: true },
-                                { field: "description", header: "Description" },
-
-
+                                { field: "title", header: "Title" },
+                                {
+                                    field: "description", header: "Description",
+                                    body: (rowData: QuestionType) => (
+                                        <div
+                                            className="prose prose-sm max-w-none"
+                                            dangerouslySetInnerHTML={{ __html: rowData.description || "" }}
+                                        />
+                                    ),
+                                },
                             ]}
-                            // onEdit={(row) => router.push(`/question/add?id=${row.id}`)}
-                            // onDelete={handleDeleteClick}
+                            onEdit={(row) => router.push(`/faq/add?id=${row.id}`)}
+                            onDelete={handleDeleteClick}
                         />
                     </div>
                 </ComponentCard>
@@ -102,7 +104,7 @@ export default function Page() {
                     header="Confirm Delete"
                     footerType="confirm-delete"
                     onHide={() => setIsDeleteModalOpen(false)}
-                    // onSave={confirmDelete}
+                    onSave={confirmDelete}
                 >
                     <div className="confirmation-content flex items-center gap-3">
                         <i className="pi pi-exclamation-triangle text-3xl text-red-500" />

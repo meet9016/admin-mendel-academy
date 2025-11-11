@@ -76,6 +76,11 @@ const navItems: NavItem[] = [
     subItems: [{ name: "FAQ", path: "/faq", pro: false }, { name: "Terms $ Condition", path: "/term-condition", pro: false }],
   },
   {
+    icon: <CalenderIcon />,
+    name: "Payment",
+    path: "/payment",
+  },
+  {
     icon: <UserCircleIcon />,
     name: "User Profile",
     path: "/profile",

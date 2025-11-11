@@ -205,7 +205,7 @@ export default function BlogListPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, rows]); // ✅ now correct
+  }, [page, rows]);
 
   useEffect(() => {
     getBlogData();
@@ -248,8 +248,8 @@ export default function BlogListPage() {
             setRows(newRows);
           }}
           columns={[
-            { field: "exam_name", header: "Exam Name", sortable: true },
-            { field: "title", header: "Title", sortable: true },
+            { field: "exam_name", header: "Exam Name" },
+            { field: "title", header: "Title" },
             {
               field: "createdAt",
               header: "Created At",

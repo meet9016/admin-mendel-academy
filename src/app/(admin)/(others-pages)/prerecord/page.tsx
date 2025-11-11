@@ -91,12 +91,12 @@ export default function Page() {
               setRows(newRows);
             }}
             columns={[
-              { field: "title", header: "Title", sortable: true},
+              { field: "title", header: "Title"},
               { field: "total_reviews", header: "Total reviews"},
               { field: "rating", header: "Rating"},
               { field: "vimeo_video_id", header: "Vimeo video id"},
-              { field: "price", header: "Price", sortable: true },
-              { field: "duration", header: "Duration", sortable: true },
+              { field: "price", header: "Price" },
+              { field: "duration", header: "Duration"},
               {
                 field: "status",
                 header: "Status",

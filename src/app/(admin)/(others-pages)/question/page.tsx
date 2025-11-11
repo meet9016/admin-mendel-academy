@@ -289,11 +289,11 @@ export default function Page() {
                 setRows(newRows);
               }}
               columns={[
-                { field: "title", header: "Title", sortable: true },
-                { field: "tag", header: "Tag", sortable: true },
-                { field: "rating", header: "Rating", sortable: true },
+                { field: "title", header: "Title" },
+                { field: "tag", header: "Tag" },
+                { field: "rating", header: "Rating" },
                 { field: "features", header: "Features" },
-                { field: "price", header: "Price", sortable: true },
+                { field: "price", header: "Price"},
                 // { field: "description", header: "Description", sortable: true },
                 {
                   field: "createdAt",

@@ -35,6 +35,13 @@ export interface EndPointApi {
     getAllExamList?: string;
     createExamList?: string;
     deleteExamList?: string;
+
+    //FAQ
+    getAllFaq?: string;
+    createFaq?: string;
+    updateFaq?: string;
+    deleteFaq?: string;
+    getByIdFaq?: string;
 }
 
 // Define and export the API endpoint object
@@ -75,6 +82,13 @@ const endPointApi: EndPointApi = {
     getAllExamList: 'examlist/getall',
     createExamList: 'examlist/create',
     deleteExamList: 'examlist/delete',
+
+    //FAQ
+    getAllFaq: 'faq/getall',
+    createFaq: 'faq/create',
+    updateFaq: 'faq/update',
+    deleteFaq: 'faq/delete',
+    getByIdFaq: 'faq/getById',
 };
 
 export default endPointApi;
