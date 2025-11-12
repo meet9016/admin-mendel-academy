@@ -35,6 +35,8 @@ export interface EndPointApi {
     getAllExamList?: string;
     createExamList?: string;
     deleteExamList?: string;
+    getByIdExamList?: string;
+    updateExamList?: string;
 
     //FAQ
     getAllFaq?: string;
@@ -85,6 +87,8 @@ const endPointApi: EndPointApi = {
     getAllExamList: 'examlist/getall',
     createExamList: 'examlist/create',
     deleteExamList: 'examlist/delete',
+    getByIdExamList: 'examlist/getById',
+    updateExamList: 'examlist/update',
 
     //FAQ
     getAllFaq: 'faq/getall',

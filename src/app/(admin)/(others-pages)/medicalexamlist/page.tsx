@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import CommonDialog from "@/components/tables/CommonDialog";
+import { useRouter } from "next/navigation";
 
 interface Plan {
   plan_day: string | number;
@@ -36,6 +37,7 @@ export default function DemoPage() {
   const [rows, setRows] = useState<number>(10);
   const [totalRecords, setTotalRecords] = useState<number>(0);
   const [selectedRow, setSelectedRow] = useState<FormattedData | null>(null);
+  const router = useRouter();
 
   const getExamData = useCallback(async () => {
     setLoading(true);
@@ -136,7 +138,8 @@ export default function DemoPage() {
               },
             },
           ]}
-          onEdit={(row) => console.log("Edit", row)}
+          // onEdit={(row) => console.log("Edit", row)}
+          onEdit={(row) => router.push(`/medicalexamlist/add?id=${row.id}`)}
           onDelete={handleDeleteClick}
         />
       </ComponentCard>
