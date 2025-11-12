@@ -5,8 +5,28 @@ import Input from '../form/input/InputField'
 import DropzoneComponent from '../blogs/DropZone'
 import { Editor } from 'primereact/editor'
 
-const EnrollSection = () => {
+interface EnrollData {
+    title: string
+    description: string
+    image: File | null
+}
+
+interface EnrollSectionProps {
+    onChange: (data: EnrollData) => void
+}
+
+const EnrollSection: React.FC<EnrollSectionProps> = ({ onChange }) => {
     const [preview, setPreview] = useState<string | null>(null);
+    const [data, setData] = useState<EnrollData>({
+        title: '',
+        description: '',
+        image: null,
+    });
+    const handleChange = (field: keyof EnrollData, value: any) => {
+        const updated = { ...data, [field]: value };
+        setData(updated);
+        onChange(updated); // send data to parent
+    };
     return (
         <div>
             <div className="space-y-6">
@@ -17,6 +37,8 @@ const EnrollSection = () => {
                             <Input
                                 type="text"
                                 placeholder="Enter Title"
+                                value={data.title}
+                                onChange={(e) => handleChange('title', e.target.value)}
                             />
                         </div>
                     </div>
@@ -25,12 +47,15 @@ const EnrollSection = () => {
                             <Label>Description</Label>
                             <Editor
                                 style={{ height: "320px" }}
+                                value={data.description}
+                                onTextChange={(e) => handleChange('description', e.htmlValue ?? '')}
                             />
                         </div>
                     </div>
                     <DropzoneComponent
                         preview={preview}
                         setPreview={setPreview}
+                        onFileSelect={(file: File) => handleChange("image", file)}
                     />
                 </ComponentCard>
             </div>

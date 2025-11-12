@@ -60,6 +60,14 @@ const MedicalExam = () => {
         ],
     });
 
+    const [enrollData, setEnrollData] = useState({
+        title: "",
+        description: "",
+        image: null as File | null,
+    });
+    const [mainImage, setMainImage] = useState<File | null>(null);
+
+
 
 
     //  Handle updates to any field in formData
@@ -132,34 +140,110 @@ const MedicalExam = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const handleSave = async () => {
         try {
-            const body = {
-                category_name: formData.category,
-                exams: [
-                    {
-                        exam_name: formData.examName,
-                        country: formData.country,
-                        status: formData?.status,
-                        sub_titles: formData.examSteps,
-                        description: formData.description,
-                    },
-                ],
-                choose_plan_list: formData.plans
-                    .filter(plan => plan.planDay && plan.planPrice && plan.planType)
-                    .map(plan => ({
-                        plan_pricing: plan.planPrice,
-                        // plan_day: Number(plan.planDay),
-                        plan_day: plan.planDay === "Custom" ? 0 : Number(plan.planDay),
-                        plan_type: plan.planType,
-                        plan_sub_title: plan.planSubtitles,
-                        most_popular: plan.isPopular,
-                    })),
-            };
 
-            console.log("Final Body:", body);
+            const formDataToSend = new FormData();
 
-            const res = await api.post(`${endPointApi.createExamList}`, body);
+            // Category
+            formDataToSend.append("category_name", formData.category);
+
+            // Exams
+            formDataToSend.append("exams[0][exam_name]", formData.examName);
+            formDataToSend.append("exams[0][country]", formData.country);
+            formDataToSend.append("exams[0][status]", formData.status);
+            formDataToSend.append("exams[0][title]", formData.examName); // optional if API expects
+            formDataToSend.append("exams[0][description]", formData.description);
+            formData.examSteps.forEach((step, i) => {
+                formDataToSend.append(`exams[0][sub_titles][${i}]`, step);
+            });
+
+
+            // Choose Plan List
+            formData.plans.forEach((plan, i) => {
+                if (plan.planPrice && plan.planDay && plan.planType) {
+                    formDataToSend.append(`choose_plan_list[${i}][plan_pricing]`, plan.planPrice);
+                    formDataToSend.append(`choose_plan_list[${i}][plan_day]`, plan.planDay.toString());
+                    formDataToSend.append(`choose_plan_list[${i}][plan_type]`, plan.planType);
+                    plan.planSubtitles.forEach((sub, j) => {
+                        formDataToSend.append(`choose_plan_list[${i}][plan_sub_title][${j}]`, sub);
+                    });
+                    formDataToSend.append(`choose_plan_list[${i}][most_popular]`, String(plan.isPopular));
+                }
+            });
+
+
+            // Enroll Section
+            formDataToSend.append("who_can_enroll_title", enrollData.title);
+            formDataToSend.append("who_can_enroll_description", enrollData.description);
+            if (enrollData.image) {
+                formDataToSend.append("who_can_enroll_image", enrollData.image);
+            }
+
+
+            // Exam main image
+            if (mainImage) {
+                formDataToSend.append("image", mainImage);
+            }
+
+
+            const res = await api.post(`${endPointApi.createExamList}`, formDataToSend);
 
             if (res.data) {
                 router.push('/medicalexamlist')
@@ -334,6 +418,7 @@ const MedicalExam = () => {
                 <DropzoneComponent
                     preview={preview}
                     setPreview={setPreview}
+                    onFileSelect={(file: File) => setMainImage(file)}
                 />
             </ComponentCard>
 
@@ -341,7 +426,7 @@ const MedicalExam = () => {
 
             {/* ENROLL SECTION */}
             <div>
-                <EnrollSection />
+                <EnrollSection onChange={(data) => setEnrollData(data)} />
             </div>
 
 
