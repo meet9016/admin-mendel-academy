@@ -42,6 +42,9 @@ export interface EndPointApi {
     updateFaq?: string;
     deleteFaq?: string;
     getByIdFaq?: string;
+
+    //Payment
+    getAllPayment?: string;
 }
 
 // Define and export the API endpoint object
@@ -89,6 +92,9 @@ const endPointApi: EndPointApi = {
     updateFaq: 'faq/update',
     deleteFaq: 'faq/delete',
     getByIdFaq: 'faq/getById',
+
+    //Payment
+    getAllPayment: 'payment/getall',
 };
 
 export default endPointApi;

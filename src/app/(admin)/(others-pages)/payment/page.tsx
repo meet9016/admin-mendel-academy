@@ -1,46 +1,68 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import ComponentCard from '@/components/common/ComponentCard'
 import PrimeReactTable from '@/components/tables/PrimeReactTable'
 import { IoCloseSharp } from "react-icons/io5";
-type PaymentType = {
-    transactionId: string
-    user: string
-    dateTime: string
-    method: string
-    amount: string
-    course: string
-    status: string
-    email?: string
-    gateway?: string
+import endPointApi from '@/utils/endPointApi';
+import { api } from '@/utils/axiosInstance';
+import { useRouter } from 'next/navigation';
+
+interface PrimeReactTableProps<T> {
+  data: T[];
+  columns: { field: keyof T; header: string }[];
+  onView?: (row: T) => void;
+  onDelete?: (row: T) => void;
 }
-const page = () => {
+
+type PaymentType = {
+  id: number
+  transaction_id: string
+  full_name: string
+  payment_method: string
+  amount: string
+  createdAt: string
+  email?: string
+  gateway?: string
+  status: string
+}
+
+export default function page() {
+    const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
     const [selectedPayment, setSelectedPayment] = useState<PaymentType | null>(null)
-    const [paymentData] = useState<PaymentType[]>([
-        {
-            transactionId: 'TXN123456',
-            user: 'John Doe',
-            dateTime: '2025-11-10 14:30',
-            method: 'Stripe',
-            amount: '$120',
-            course: 'React Mastery',
-            status: 'Success',
-        },
-        {
-            transactionId: 'TXN789012',
-            user: 'Jane Smith',
-            dateTime: '2025-11-09 10:15',
-            method: 'Razorpay',
-            amount: '$80',
-            course: 'Next.js Bootcamp',
-            status: 'Pending',
-        },
-    ]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [paymentData, setPaymentData] = useState<PaymentType[]>([]);
+    const [page, setPage] = useState<number>(1);
+    const [rows, setRows] = useState<number>(10);
+    const [totalRecords, setTotalRecords] = useState<number>(0);
+    const [selectedRow, setSelectedRow] = useState<PaymentType | null>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
 
     const handleView = (rowData: PaymentType) => {
         setIsModalOpen(true);
         setSelectedPayment(rowData);
+    };
+
+    const getFaqData = useCallback(async () => {
+        setLoading(true);
+        try {
+            const res = await api.get(`${endPointApi.getAllPayment}?page=${page}&rows=${rows}`);
+            setPaymentData(res.data.data || []);
+            setTotalRecords(res.data.total || 0);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    }, [page, rows]);
+
+    useEffect(() => {
+        getFaqData();
+    }, [getFaqData]);
+
+    const handleDeleteClick = (row: PaymentType) => {
+        setSelectedRow(row);
+        setIsDeleteModalOpen(true);
     };
 
     return (
@@ -51,16 +73,16 @@ const page = () => {
                 <PrimeReactTable
                     data={paymentData}
                     columns={[
-                        { header: 'Transaction ID', field: 'transactionId', },
-                        { header: 'User', field: 'user', },
-                        { header: 'Date & Time', field: 'dateTime' },
-                        { header: 'Method', field: 'method' },
-                        { header: 'Amount', field: 'amount' },
-                        { header: 'Course', field: 'course' },
-                        { header: 'Status', field: 'status' },
+                        {field: 'transaction_id', header: 'Transaction ID' },
+                        {field: 'full_name', header: 'User' },
+                        {field: 'email', header: 'Email' },
+                        {field: 'createdAt', header: 'Date & Time' },
+                        {field: 'payment_method', header: 'Method' },
+                        {field: 'amount', header: 'Amount' },
+                        {field: 'status', header: 'Status' }
                     ]}
-                    onEdit={() => console.log("EDIT")}
-                    onDelete={() => console.log("DELETE")}
+                    // onEdit={(row) => router.push(`/faq/add?id=${row.id}`)}
+                    onDelete={handleDeleteClick}
                     onView={handleView}
                 />
             </ComponentCard>
@@ -82,7 +104,7 @@ const page = () => {
 
                         {/* Details Section */}
                         <div className="grid grid-cols-2 gap-x-10 gap-y-4 text-sm">
-                            <p><span className="font-semibold text-gray-700">Transaction ID:</span> {selectedPayment.transactionId}</p>
+                            <p><span className="font-semibold text-gray-700">Transaction ID:</span> {selectedPayment.transaction_id}</p>
                             <p className="flex items-center gap-2">
                                 <span className="font-semibold text-gray-700">Status:</span>
                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${selectedPayment.status === 'Success'
@@ -93,13 +115,13 @@ const page = () => {
                                 </span>
                             </p>
 
-                            <p><span className="font-semibold text-gray-700">User Name:</span> {selectedPayment.user}</p>
+                            <p><span className="font-semibold text-gray-700">User Name:</span> {selectedPayment.full_name}</p>
                             <p><span className="font-semibold text-gray-700">Email:</span> {selectedPayment.email}</p>
                             <p><span className="font-semibold text-gray-700">Amount:</span> {selectedPayment.amount}</p>
-                            <p><span className="font-semibold text-gray-700">Payment Method:</span> {selectedPayment.method}</p>
-                            <p><span className="font-semibold text-gray-700">Date & Time:</span> {selectedPayment.dateTime}</p>
+                            <p><span className="font-semibold text-gray-700">Payment Method:</span> {selectedPayment.payment_method}</p>
+                            <p><span className="font-semibold text-gray-700">Date & Time:</span> {selectedPayment.createdAt}</p>
                             <p><span className="font-semibold text-gray-700">Payment Gateway:</span> {selectedPayment.gateway}</p>
-                            <p className="col-span-2"><span className="font-semibold text-gray-700">Course/Combo:</span> {selectedPayment.course}</p>
+                            <p className="col-span-2"><span className="font-semibold text-gray-700">Course/Combo:</span> {''}</p>
                         </div>
 
                         {/* Divider */}
@@ -120,5 +142,3 @@ const page = () => {
         </div>
     )
 }
-
-export default page
