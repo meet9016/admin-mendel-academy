@@ -64,6 +64,14 @@ export default function PrimeReactTreeTable<
         }
 
         const firstChild = data.children[0];
+
+        const headerNameMap: Record<string, string> = {
+            plan_day: "Plan Day",
+            plan_type: "Plan Type",
+            plan_pricing: "Plan Pricing",
+            plan_popular: "Most Popular",
+        };
+
         return (
             <div className="p-3">
                 <h5 className="font-semibold mb-3">
@@ -77,10 +85,15 @@ export default function PrimeReactTreeTable<
 
                 <DataTable value={data.children} dataKey="id" responsiveLayout="scroll">
                     {Object.keys(firstChild).map((key, index) => (
+                        // <Column
+                        //     key={index}
+                        //     field={key}
+                        //     header={key.charAt(0).toUpperCase() + key.slice(1)}
+                        // />
                         <Column
                             key={index}
                             field={key}
-                            header={key.charAt(0).toUpperCase() + key.slice(1)}
+                            header={headerNameMap[key] || key.charAt(0).toUpperCase() + key.slice(1)}
                         />
                     ))}
                 </DataTable>

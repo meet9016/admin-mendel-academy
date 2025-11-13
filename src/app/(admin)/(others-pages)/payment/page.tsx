@@ -6,24 +6,25 @@ import { IoCloseSharp } from "react-icons/io5";
 import endPointApi from '@/utils/endPointApi';
 import { api } from '@/utils/axiosInstance';
 import { useRouter } from 'next/navigation';
+import CommonDialog from '@/components/tables/CommonDialog';
 
 interface PrimeReactTableProps<T> {
-  data: T[];
-  columns: { field: keyof T; header: string }[];
-  onView?: (row: T) => void;
-  onDelete?: (row: T) => void;
+    data: T[];
+    columns: { field: keyof T; header: string }[];
+    onView?: (row: T) => void;
+    onDelete?: (row: T) => void;
 }
 
 type PaymentType = {
-  id: number
-  transaction_id: string
-  full_name: string
-  payment_method: string
-  amount: string
-  createdAt: string
-  email?: string
-  gateway?: string
-  status: string
+    id: number
+    transaction_id: string
+    full_name: string
+    payment_method: string
+    amount: string
+    createdAt: string
+    email?: string
+    gateway?: string
+    status: string
 }
 
 export default function page() {
@@ -43,7 +44,7 @@ export default function page() {
         setSelectedPayment(rowData);
     };
 
-    const getFaqData = useCallback(async () => {
+    const getPaymentData = useCallback(async () => {
         setLoading(true);
         try {
             const res = await api.get(`${endPointApi.getAllPayment}?page=${page}&rows=${rows}`);
@@ -57,13 +58,26 @@ export default function page() {
     }, [page, rows]);
 
     useEffect(() => {
-        getFaqData();
-    }, [getFaqData]);
+        getPaymentData();
+    }, [getPaymentData]);
 
     const handleDeleteClick = (row: PaymentType) => {
         setSelectedRow(row);
         setIsDeleteModalOpen(true);
     };
+    const confirmDelete = async () => {
+        if (!selectedRow) return;
+        try {
+            await api.delete(`${endPointApi.deleteExamList}/${selectedRow.id}`);
+            getPaymentData();
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsDeleteModalOpen(false);
+            setSelectedRow(null);
+        }
+    };
+
 
     return (
         <div className="space-y-6">
@@ -73,19 +87,35 @@ export default function page() {
                 <PrimeReactTable
                     data={paymentData}
                     columns={[
-                        {field: 'transaction_id', header: 'Transaction ID' },
-                        {field: 'full_name', header: 'User' },
-                        {field: 'email', header: 'Email' },
-                        {field: 'createdAt', header: 'Date & Time' },
-                        {field: 'payment_method', header: 'Method' },
-                        {field: 'amount', header: 'Amount' },
-                        {field: 'status', header: 'Status' }
+                        { field: 'transaction_id', header: 'Transaction ID' },
+                        { field: 'full_name', header: 'User' },
+                        { field: 'email', header: 'Email' },
+                        { field: 'createdAt', header: 'Date & Time' },
+                        { field: 'payment_method', header: 'Method' },
+                        { field: 'amount', header: 'Amount' },
+                        { field: 'status', header: 'Status' }
                     ]}
-                    // onEdit={(row) => router.push(`/faq/add?id=${row.id}`)}
                     onDelete={handleDeleteClick}
                     onView={handleView}
                 />
             </ComponentCard>
+
+            <CommonDialog
+                visible={isDeleteModalOpen}
+                header="Confirm Delete"
+                footerType="confirm-delete"
+                onHide={() => setIsDeleteModalOpen(false)}
+                onSave={confirmDelete}
+            >
+                <div className="confirmation-content flex items-center gap-3">
+                    <i className="pi pi-exclamation-triangle text-3xl text-red-500" />
+                    {selectedRow && (
+                        <span>
+                            Are you sure you want to delete <b>{selectedRow.transaction_id}</b>?
+                        </span>
+                    )}
+                </div>
+            </CommonDialog>
 
             {isModalOpen && selectedPayment && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
