@@ -61,10 +61,9 @@ export default function DemoPage() {
             plan_pricing: Number(plan.plan_pricing ?? 0),
             plan_popular: Boolean(plan.most_popular),
           }));
-
         return {
-          // id: String(item.id ?? item.exams?.[0]?.id ?? ""),
-          id: String(item.id ?? item.exams?.[0]?.id ?? ""),
+          id: String(item._id),
+          exam_id: String(item.id ?? item.exams?.[0]?.id ?? ""),
           category_name: item.category_name ?? "-",
           exam_name: item.exams?.[0]?.exam_name ?? "-",
           status: item.exams?.[0]?.status ?? "Inactive",
@@ -138,7 +137,7 @@ export default function DemoPage() {
             },
           ]}
           // onEdit={(row) => console.log("Edit", row)}
-          onEdit={(row) => router.push(`/medicalexamlist/add?id=${row.id}`)}
+           onEdit={(row) => router.push(`/medicalexamlist/add?id=${row.id}`)}
           onDelete={handleDeleteClick}
         />
       </ComponentCard>
