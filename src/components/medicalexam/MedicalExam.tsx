@@ -172,7 +172,7 @@ const MedicalExam = () => {
                             : [""],
                     description: decodedDescription,
                     plans: (() => {
-                        // 🧩 Map existing plans (if any)
+                        //  Map existing plans (if any)
                         const existingPlans =
                             data.choose_plan_list && data.choose_plan_list.length > 0
                                 ? data.choose_plan_list.map((plan: any) => ({
@@ -410,9 +410,9 @@ const MedicalExam = () => {
                 </div>
 
                 {/* Description */}
-                <div className="grid grid-cols-1 gap-3">
-                    <Label>Description</Label>
+                <div className="grid grid-cols-2 gap-3">
                     <div>
+                    <Label>Description</Label>     
                         <Editor
                             style={{ height: "320px" }}
                             value={formData.description}
@@ -425,12 +425,15 @@ const MedicalExam = () => {
                             <p className="text-red-500 text-sm">{formErrors.description}</p>
                         )}
                     </div>
-                </div>
+                    <div>
+<Label>Select Image</Label>
                 <DropzoneComponent
                     preview={preview}
                     setPreview={setPreview}
                     onFileSelect={(file: File) => setMainImage(file)}
                 />
+                    </div>
+                </div>
             </ComponentCard>
 
             {/* ENROLL SECTION */}

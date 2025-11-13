@@ -61,15 +61,19 @@ export default function PrimeReactTable<T extends { id: number; status?: string 
         />
       )}
 
-      <Button
-        icon={<GoPencil size={16} />}
-        rounded
-        outlined
-        severity="success"
-        onClick={() => onEdit?.(rowData)}
-        className="p-0 flex items-center justify-center"
-        style={{ height: "2rem", width: "2rem", borderRadius: "50%" }}
-      />
+      {
+         pathname !== "/payment" && pathname !== "/contactus" &&(
+          <Button
+            icon={<GoPencil size={16} />}
+            rounded
+            outlined
+            severity="success"
+            onClick={() => onEdit?.(rowData)}
+            className="p-0 flex items-center justify-center"
+            style={{ height: "2rem", width: "2rem", borderRadius: "50%" }}
+          />
+        )
+      }
       <Button
         icon={<RiDeleteBin5Line size={16} />}
         rounded
