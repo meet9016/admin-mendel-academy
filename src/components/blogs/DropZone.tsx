@@ -134,7 +134,6 @@
 
 
 
-
 "use client";
 import React from "react";
 import { useDropzone } from "react-dropzone";
@@ -173,10 +172,10 @@ const DropzoneComponent: React.FC<DropzoneProps> = ({
     <div className="space-y-6">
       <div
         {...getRootProps()}
-        // 🔹 Added fixed height here ↓
+        // 🔹 Fixed overall height
         className={`transition border border-gray-300 border-dashed rounded-xl 
           p-8 flex flex-col items-center justify-center cursor-pointer 
-          h-64 sm:h-72 md:h-80
+          h-80 sm:h-90
           ${
             isDragActive
               ? "border-brand-500 bg-gray-100 dark:bg-gray-800"
@@ -187,27 +186,27 @@ const DropzoneComponent: React.FC<DropzoneProps> = ({
 
         {/* If preview exists, show image inside box */}
         {preview ? (
-          <div className="relative w-full h-full flex flex-col items-center justify-center">
+          <div className="relative flex flex-col items-center justify-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={preview}
               alt="Preview"
-              // 🔹 Fit image nicely inside fixed box
-              className="h-full max-h-full object-contain rounded-lg"
+              // 🔹 Fixed image size (same for all)
+              className="w-60 h-60 sm:w-72 sm:h-72 object-cover rounded-lg border border-gray-300 shadow-md"
             />
-            <p className="text-sm text-gray-600 dark:text-gray-300 mt-3 text-center">
-              Drag and drop another image or click to change
+            <p className="text-sm text-gray-600 dark:text-gray-300 mt-4 text-center">
+              Drag & drop another image or click to change
             </p>
           </div>
         ) : (
           // Default state (no image)
-          <div className="dz-message flex flex-col items-center">
-            <div className="mb-[22px] flex justify-center">
-              <div className="flex h-[68px] w-[68px] items-center justify-center rounded-full bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-400">
+          <div className="dz-message flex flex-col items-center text-center">
+            <div className="mb-6 flex justify-center">
+              <div className="flex h-[80px] w-[80px] items-center justify-center rounded-full bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-400">
                 <svg
                   className="fill-current"
-                  width="29"
-                  height="28"
+                  width="34"
+                  height="34"
                   viewBox="0 0 29 28"
                   xmlns="http://www.w3.org/2000/svg"
                 >
@@ -224,7 +223,7 @@ const DropzoneComponent: React.FC<DropzoneProps> = ({
               {isDragActive ? "Drop Files Here" : "Drag & Drop Files Here"}
             </h4>
 
-            <span className="text-center mb-5 block w-full max-w-[290px] text-sm text-gray-700 dark:text-gray-400">
+            <span className="mb-4 block w-full max-w-[290px] text-sm text-gray-700 dark:text-gray-400">
               Drag and drop your PNG, JPG, WebP, SVG images here or browse
             </span>
 
