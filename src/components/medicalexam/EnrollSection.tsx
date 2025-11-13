@@ -41,7 +41,7 @@ const EnrollSection: React.FC<EnrollSectionProps> = ({ data, onChange, previewWh
         </div>
 
         {/* ✅ Description Editor */}
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-2 gap-6">
           <div>
             <Label>Description</Label>
             <Editor
@@ -52,14 +52,17 @@ const EnrollSection: React.FC<EnrollSectionProps> = ({ data, onChange, previewWh
               }
             />
           </div>
-        </div>
-
+          <div>
+              <Label>Select Image</Label>
         {/* ✅ Image Dropzone */}
         <DropzoneComponent
           preview={previewWho}
           setPreview={setPreviewWho}
           onFileSelect={(file: File) => handleChange("image", file)}
         />
+          </div>
+        </div>
+
       </ComponentCard>
     </div>
   );
