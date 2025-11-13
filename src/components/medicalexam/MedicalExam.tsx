@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Label from "../form/Label";
 import ComponentCard from "../common/ComponentCard";
 import Input from "../form/input/InputField";
@@ -12,8 +12,12 @@ import PlanSection from "./PlanSection";
 import Radio from "../form/input/Radio";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
+import DropzoneComponent from "../blogs/DropZone";
+import EnrollSection from "./EnrollSection";
+import { decodeHtml } from "@/utils/helper";
 
 interface PlanData {
+    id: number | string;
     planDay: number | string;
     planPrice: string;
     planType: string;
@@ -22,49 +26,67 @@ interface PlanData {
 }
 
 interface FormData {
+    id: string;
     country: string;
     status: string;
     category: string;
     examName: string;
+    title: string;
     examSteps: string[];
     description: string;
     plans: PlanData[];
 }
 
 const MedicalExam = () => {
-    const router = useRouter()
+    const router = useRouter();
+   const [id, setId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      setId(params.get("id"));
+    }
+  }, []);
+
     const categoryOptions = [
         { value: "USMLE Program", label: "USMLE Program" },
         { value: "International Exams", label: "International Exams" },
     ];
 
     const [formErrors, setFormErrors] = useState<Record<string, string> | null>(null);
-
+    const [preview, setPreview] = useState<string | null>(null);
+    const [previewWho, setPreviewWho] = useState<string | null>(null);
 
     //  Main single state
     const [formData, setFormData] = useState<FormData>({
+        id: "",
         country: "",
         status: "Active",
         category: "",
         examName: "",
+        title: "",
         examSteps: [""],
         description: "",
         plans: [
-            { planDay: "", planPrice: "", planType: "", planSubtitles: [""], isPopular: false },
-            { planDay: "", planPrice: "", planType: "", planSubtitles: [""], isPopular: false },
-            { planDay: "", planPrice: "", planType: "", planSubtitles: [""], isPopular: false },
-            { planDay: "", planPrice: "", planType: "", planSubtitles: [""], isPopular: false },
+            { id: "", planDay: "", planPrice: "", planType: "", planSubtitles: [""], isPopular: false },
+            { id: "", planDay: "", planPrice: "", planType: "", planSubtitles: [""], isPopular: false },
+            { id: "", planDay: "", planPrice: "", planType: "", planSubtitles: [""], isPopular: false },
+            { id: "", planDay: "", planPrice: "", planType: "", planSubtitles: [""], isPopular: false },
         ],
     });
 
-
+    const [enrollData, setEnrollData] = useState({
+        title: "",
+        description: "",
+        image: null as File | null,
+    });
+    const [mainImage, setMainImage] = useState<File | null>(null);
 
     //  Handle updates to any field in formData
     const handleChange = <K extends keyof FormData>(field: K, value: FormData[K]) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
         setFormErrors((prev) => ({ ...prev, [field]: "" }));
     };
-
 
     //  Steps (array)
     const addStep = () => {
@@ -127,35 +149,133 @@ const MedicalExam = () => {
     //     }
     // };
 
+    useEffect(() => {
+        const fetchById = async () => {
+            try {
+                if (!id) return;
 
+                const res = await api.get(`${endPointApi.getByIdExamList}/${id}`);
+                const data = res.data || {};
+                const decodedDescription = decodeHtml(data.exams[0].description ?? "");
+
+                //  Set form data from API
+                setFormData({
+                    id: data.exams[0]._id ?? "",
+                    category: data?.category_name ?? "",
+                    country: data.exams[0].country ?? "",
+                    status: data.exams[0].status ?? "Active",
+                    examName: data.exams[0].exam_name ?? "",
+                    title: data.exams[0].title ?? "",
+                    examSteps:
+                        data.exams[0].sub_titles && data.exams[0].sub_titles.length > 0
+                            ? data.exams[0].sub_titles
+                            : [""],
+                    description: decodedDescription,
+                    plans: (() => {
+                        // 🧩 Map existing plans (if any)
+                        const existingPlans =
+                            data.choose_plan_list && data.choose_plan_list.length > 0
+                                ? data.choose_plan_list.map((plan: any) => ({
+                                    planDay: plan.plan_day ?? "",
+                                    planPrice: plan.plan_pricing ?? "",
+                                    planType: plan.plan_type ?? "",
+                                    planSubtitles:
+                                        plan.plan_sub_title && plan.plan_sub_title.length > 0
+                                            ? plan.plan_sub_title
+                                            : [""],
+                                    isPopular:
+                                        plan.most_popular === true || plan.most_popular === "true",
+                                    id: plan._id
+                                }))
+                                : [];
+
+                        const emptyPlan = {
+                            planDay: "",
+                            planPrice: "",
+                            planType: "",
+                            planSubtitles: [""],
+                            isPopular: false,
+                        };
+
+                        while (existingPlans.length < 4) {
+                            existingPlans.push({ ...emptyPlan });
+                        }
+
+                        return existingPlans;
+                    })(),
+                });
+
+                setPreview(data?.exams[0]?.image)
+                //  Enroll Section
+                setEnrollData({
+                    title: data?.who_can_enroll_title ?? "",
+                    description: data?.who_can_enroll_description ?? "",
+                    image: data?.who_can_enroll_image ?? "",
+                });
+                setPreviewWho(data?.who_can_enroll_image)
+            } catch (err) {
+                console.error("Error fetching data by ID:", err);
+            }
+        };
+
+        fetchById();
+    }, [id]);
 
     const handleSave = async () => {
         try {
-            const body = {
-                category_name: formData.category,
-                exams: [
-                    {
-                        exam_name: formData.examName,
-                        country: formData.country,
-                        status: formData?.status,
-                        sub_titles: formData.examSteps,
-                        description: formData.description,
-                    },
-                ],
-                choose_plan_list: formData.plans
-                    .filter(plan => plan.planDay && plan.planPrice && plan.planType)
-                    .map(plan => ({
-                        plan_pricing: plan.planPrice,
-                        plan_day: Number(plan.planDay),
-                        plan_type: plan.planType,
-                        plan_sub_title: plan.planSubtitles,
-                        most_popular: plan.isPopular,
-                    })),
-            };
+            const formDataToSend = new FormData();
+            // Category
+            if (id) {
+                // formDataToSend.append("_id", id);
+                formDataToSend.append("exams[0][_id]", formData.id);
+            }
+            formDataToSend.append("category_name", formData.category);
+            // Exams
+            formDataToSend.append("exams[0][exam_name]", formData.examName);
+            formDataToSend.append("exams[0][country]", formData.country);
+            formDataToSend.append("exams[0][status]", formData.status);
+            formDataToSend.append("exams[0][title]", formData.title);
+            formDataToSend.append("exams[0][description]", formData.description);
+            formData.examSteps.forEach((step, i) => {
+                formDataToSend.append(`exams[0][sub_titles][${i}]`, step);
+            });
 
-            console.log("Final Body:", body);
+            // Choose Plan List
+            formData.plans.forEach((plan, i) => {
+                // if (plan.planPrice && plan.planDay && plan.planType) {
+                if ((plan.planDay && plan.planType) || plan.planDay === "Custom") {
+                    if (plan?.id !== undefined && plan?.id !== null) {
+                        formDataToSend.append(`choose_plan_list[${i}][_id]`, String(plan.id));
+                    }
 
-            const res = await api.post(`${endPointApi.createExamList}`, body);
+                    formDataToSend.append(`choose_plan_list[${i}][plan_pricing]`, plan.planPrice);
+                    formDataToSend.append(`choose_plan_list[${i}][plan_day]`, plan.planDay.toString());
+                    formDataToSend.append(`choose_plan_list[${i}][plan_type]`, plan.planType);
+                    plan.planSubtitles.forEach((sub, j) => {
+                        formDataToSend.append(`choose_plan_list[${i}][plan_sub_title][${j}]`, sub);
+                    });
+                    formDataToSend.append(`choose_plan_list[${i}][most_popular]`, String(plan.isPopular));
+                }
+            });
+
+            // Enroll Section
+            formDataToSend.append("who_can_enroll_title", enrollData.title);
+            formDataToSend.append("who_can_enroll_description", enrollData.description);
+            if (enrollData.image) {
+                formDataToSend.append("who_can_enroll_image", enrollData.image);
+            }
+
+            // Exam main image
+            if (mainImage) {
+                formDataToSend.append("image", mainImage);
+            }
+            let res;
+
+            if (id) {
+                res = await api.put(`${endPointApi.updateExamList}/${id}`, formDataToSend);
+            } else {
+                res = await api.post(`${endPointApi.createExamList}`, formDataToSend);
+            }
 
             if (res.data) {
                 router.push('/medicalexamlist')
@@ -167,15 +287,11 @@ const MedicalExam = () => {
         }
     };
 
-
-
-
-
     return (
         <div className="space-y-6">
             <ComponentCard title="Add Medical Exam" name="">
                 {/* Category + Exam Name */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                         <Label>Course Category</Label>
                         <Select
@@ -201,24 +317,7 @@ const MedicalExam = () => {
                             hint={formErrors?.examName}
                         />
                     </div>
-                </div>
 
-
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <Label htmlFor="price">Country name</Label>
-                        <Input
-                            type="text"
-                            placeholder="Enter country"
-                            value={formData.country}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                handleChange("country", e.target.value)
-                            }
-                        // error={!!formErrors?.examName}
-                        // hint={formErrors?.examName}
-                        />
-                    </div>
                     <div className="flex flex-wrap items-center gap-8">
                         <Radio
                             id="radio1"
@@ -235,6 +334,34 @@ const MedicalExam = () => {
                             checked={formData.status === "Inactive"}
                             onChange={handleRadioChange}
                             label="Inactive"
+                        />
+                    </div>
+                </div>
+
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <Label htmlFor="price">Country name</Label>
+                        <Input
+                            type="text"
+                            placeholder="Enter country"
+                            value={formData.country}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                handleChange("country", e.target.value)
+                            }
+                        // error={!!formErrors?.examName}
+                        // hint={formErrors?.examName}
+                        />
+                    </div>
+                    <div>
+                        <Label>Title</Label>
+                        <Input
+                            type="text"
+                            placeholder="Enter Title"
+                            value={formData.title}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                handleChange("title", e.target.value)
+                            }
                         />
                     </div>
                 </div>
@@ -283,7 +410,8 @@ const MedicalExam = () => {
                 </div>
 
                 {/* Description */}
-                <div className="grid grid-cols-1 gap-6">
+                <div className="grid grid-cols-1 gap-3">
+                    <Label>Description</Label>
                     <div>
                         <Editor
                             style={{ height: "320px" }}
@@ -298,10 +426,22 @@ const MedicalExam = () => {
                         )}
                     </div>
                 </div>
+                <DropzoneComponent
+                    preview={preview}
+                    setPreview={setPreview}
+                    onFileSelect={(file: File) => setMainImage(file)}
+                />
             </ComponentCard>
 
-
-
+            {/* ENROLL SECTION */}
+            <div>
+                <EnrollSection
+                    data={enrollData}
+                    onChange={(data) => setEnrollData(data)}
+                    previewWho={previewWho}
+                    setPreviewWho={setPreviewWho}
+                />
+            </div>
 
             {/* PLAN SECTION */}
             <div className="grid grid-cols-2 gap-6">
@@ -310,9 +450,7 @@ const MedicalExam = () => {
                     <PlanSection
                         key={index}
                         data={plan}
-                        // onChange={(updated) => handlePlanChange(index, updated as any)}
                         onChange={(updated: PlanData) => handlePlanChange(index, updated)}
-
                         onPopularChange={() => handlePopularChange(index)}
                     // errors={formErrors?.[`plans[${index}]`] || {}}
                     />

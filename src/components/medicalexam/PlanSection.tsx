@@ -7,8 +7,9 @@ import Input from '../form/input/InputField';
 import Checkbox from '../form/input/Checkbox';
 import { FaMinus, FaPlus } from 'react-icons/fa6';
 
-// ✅ Reusable, strict type
+// Reusable, strict type
 export interface PlanData {
+  id?: string | number;
   planDay: number | string;
   planPrice: string;
   planType: string;
@@ -16,7 +17,7 @@ export interface PlanData {
   isPopular: boolean;
 }
 
-// ✅ Props with proper types (no `any`)
+//  Props with proper types (no `any`)
 export interface PlanSectionProps {
   data: PlanData;
   onChange: (updatedData: PlanData) => void;
@@ -30,7 +31,7 @@ const PlanSection: React.FC<PlanSectionProps> = ({
   onPopularChange,
   errors,
 }) => {
-  // ✅ Update single field with generic safety
+  //  Update single field with generic safety
   const handleChange = <K extends keyof PlanData>(
     field: K,
     value: PlanData[K]
@@ -38,18 +39,18 @@ const PlanSection: React.FC<PlanSectionProps> = ({
     onChange({ ...data, [field]: value });
   };
 
-  // ✅ Add subtitle
+  //  Add subtitle
   const addSubtitle = () => {
     onChange({ ...data, planSubtitles: [...data.planSubtitles, ''] });
   };
 
-  // ✅ Remove subtitle
+  // Remove subtitle
   const removeSubtitle = (index: number) => {
     const updated = data.planSubtitles.filter((_, i) => i !== index);
     onChange({ ...data, planSubtitles: updated });
   };
 
-  // ✅ Update subtitle text
+  // Update subtitle text
   const handleSubtitleChange = (index: number, value: string) => {
     const updated = [...data.planSubtitles];
     updated[index] = value;
@@ -75,19 +76,21 @@ const PlanSection: React.FC<PlanSectionProps> = ({
             hint={errors?.planDay}
           />
         </div>
-        <div>
-          <Label>Plan Price</Label>
-          <Input
-            type="text"
-            placeholder="Enter price"
-            value={data.planPrice}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              handleChange('planPrice', e.target.value)
-            }
-            error={!!errors?.planPrice}
-            hint={errors?.planPrice}
-          />
-        </div>
+        {data.planDay !== "Custom" && (
+          <div>
+            <Label>Plan Price</Label>
+            <Input
+              type="text"
+              placeholder="Enter price"
+              value={data.planPrice}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                handleChange('planPrice', e.target.value)
+              }
+              error={!!errors?.planPrice}
+              hint={errors?.planPrice}
+            />
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-6 mt-4">

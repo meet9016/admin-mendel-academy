@@ -5,8 +5,9 @@ import { useDropzone } from "react-dropzone";
 interface DropzoneProps {
   preview: string | null;
   setPreview: React.Dispatch<React.SetStateAction<string | null>>;
+  onFileSelect?: (file: File) => void; // ✅ new optional prop
 }
-const DropzoneComponent: React.FC<DropzoneProps> = ({ preview, setPreview }) => {
+const DropzoneComponent: React.FC<DropzoneProps> = ({ preview, setPreview, onFileSelect }) => {
 
   const onDrop = (acceptedFiles: File[]) => {
     console.log("Files dropped:", acceptedFiles);
@@ -14,8 +15,12 @@ const DropzoneComponent: React.FC<DropzoneProps> = ({ preview, setPreview }) => 
       const file = acceptedFiles[0];
       const imageUrl = URL.createObjectURL(file);
       setPreview(imageUrl);
+      if (onFileSelect) {
+        onFileSelect(file);
+      }
     }
   };
+
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

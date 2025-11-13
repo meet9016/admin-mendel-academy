@@ -8,6 +8,8 @@ import { RiDeleteBin5Line } from "react-icons/ri";
 import { useState } from "react";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
+import { FaRegEye } from "react-icons/fa6";
+import { usePathname } from "next/navigation";
 
 type ColumnType<T> = {
   field?: keyof T;
@@ -27,6 +29,7 @@ interface PrimeReactTableProps<T> {
   onSelectionChange?: (selected: T[]) => void;
   onEdit?: (row: T) => void;
   onDelete?: (row: T) => void;
+  onView?: (row: T) => void;
   showSelection?: boolean;
 }
 
@@ -38,12 +41,26 @@ export default function PrimeReactTable<T extends { id: number; status?: string 
   rows = 10,
   onEdit,
   onDelete,
+  onView,
 }: PrimeReactTableProps<T>) {
   const [selectedRows, setSelectedRows] = useState<T[]>([]);
+  const pathname = usePathname();
 
   // Action Buttons
   const actionBodyTemplate = (rowData: T) => (
     <div className="flex gap-3">
+      {pathname === "/payment" && (
+        <Button
+          icon={<FaRegEye size={16} />}
+          rounded
+          outlined
+          severity="info"
+          onClick={() => onView?.(rowData)}
+          className="p-0 flex items-center justify-center"
+          style={{ height: "2rem", width: "2rem", borderRadius: "50%" }}
+        />
+      )}
+
       <Button
         icon={<GoPencil size={16} />}
         rounded
@@ -67,7 +84,7 @@ export default function PrimeReactTable<T extends { id: number; status?: string 
 
   return (
     <div className="card">
-    {/* @ts-expect-error PrimeReact type mismatch (safe to ignore) */}
+      {/* @ts-expect-error PrimeReact type mismatch (safe to ignore) */}
       <DataTable<T>
         value={data}
         loading={loading}

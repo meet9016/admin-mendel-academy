@@ -76,6 +76,11 @@ const navItems: NavItem[] = [
     subItems: [{ name: "FAQ", path: "/faq", pro: false }, { name: "Terms $ Condition", path: "/term-condition", pro: false }],
   },
   {
+    icon: <CalenderIcon />,
+    name: "Payment",
+    path: "/payment",
+  },
+  {
     icon: <UserCircleIcon />,
     name: "User Profile",
     path: "/profile",
@@ -358,10 +363,11 @@ const AppSidebar: React.FC = () => {
             </>
           ) : (
             <Image
-              src="/images/logo/logo-icon.svg"
+              // src="/images/logo/logo-icon.svg"
+              src="https://mendelacademy.com/mendel-logo/mendel-logo-main.svg"
               alt="Logo"
-              width={32}
-              height={32}
+              width={35}
+              height={35}
             />
           )}
         </Link>

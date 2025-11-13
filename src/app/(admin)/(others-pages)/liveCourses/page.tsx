@@ -139,10 +139,10 @@ export default function Page() {
               setRows(newRows);
             }}
             columns={[
-              { field: "course_title", header: "Course Title", sortable: true },
-              { field: "instructor_name", header: "Instruction Name", sortable: true },
-              { field: "sub_scribe_student_count", header: " Sub Scribe Count", sortable: true },
-              { field: "zoom_link", header: "Zoom Link", sortable: true },
+              { field: "course_title", header: "Course Title"},
+              { field: "instructor_name", header: "Instruction Name" },
+              { field: "sub_scribe_student_count", header: " Sub Scribe Count" },
+              { field: "zoom_link", header: "Zoom Link" },
               {
                 field: "date", header: "Date", body: (row: LiveCoursesType) =>
                   row.date ? new Date(row.date).toLocaleDateString() : "-",
