@@ -62,7 +62,7 @@ export default function PrimeReactTable<T extends { id: number; status?: string 
       )}
 
       {
-        pathname !== "/payment" && (
+         pathname !== "/payment" && pathname !== "/contactus" &&(
           <Button
             icon={<GoPencil size={16} />}
             rounded
