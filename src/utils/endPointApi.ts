@@ -47,6 +47,10 @@ export interface EndPointApi {
 
     //Payment
     getAllPayment?: string;
+
+    //Contact-Us
+    getAllContact?:string;
+    deleteContact?: string;
 }
 
 // Define and export the API endpoint object
@@ -99,6 +103,10 @@ const endPointApi: EndPointApi = {
 
     //Payment
     getAllPayment: 'payment/getall',
+
+     //Contact-Us
+     getAllContact: 'contactus/getall',
+     deleteContact: 'contactus/delete'
 };
 
 export default endPointApi;

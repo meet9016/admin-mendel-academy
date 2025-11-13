@@ -73,7 +73,7 @@ const navItems: NavItem[] = [
   {
     name: "Content Management",
     icon: <ListIcon />,
-    subItems: [{ name: "FAQ", path: "/faq", pro: false }, { name: "Terms $ Condition", path: "/term-condition", pro: false }],
+    subItems: [{ name: "FAQ", path: "/faq", pro: false }, { name: "Terms $ Condition", path: "/term-condition", pro: false }, {name: "Contact Us", path: '/contactus', pro: false}],
   },
   {
     icon: <CalenderIcon />,
