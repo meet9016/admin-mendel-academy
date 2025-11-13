@@ -52,13 +52,12 @@ export default function DemoPage() {
       };
 
       const apiData: ApiItem[] = Array.isArray(res.data.data) ? res.data.data : [];
-
       const formattedData: FormattedData[] = apiData.map((item) => {
         const children =
           Array.isArray(item.choose_plan_list) &&
           item.choose_plan_list.map((plan: Plan) => ({
-            plan_day: String(plan.plan_day ?? "-"),
             plan_type: plan.plan_type ?? "-",
+            plan_day: String(plan.plan_day ?? "-"),
             plan_pricing: Number(plan.plan_pricing ?? 0),
             plan_popular: Boolean(plan.most_popular),
           }));

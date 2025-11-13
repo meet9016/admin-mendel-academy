@@ -29,6 +29,7 @@ interface FormData {
     status: string;
     category: string;
     examName: string;
+    title: string;
     examSteps: string[];
     description: string;
     plans: PlanData[];
@@ -46,6 +47,8 @@ const MedicalExam = () => {
 
     const [formErrors, setFormErrors] = useState<Record<string, string> | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
+    const [previewWho, setPreviewWho] = useState<string | null>(null);
+    console.log("preview", preview);
 
 
     //  Main single state
@@ -54,6 +57,7 @@ const MedicalExam = () => {
         status: "Active",
         category: "",
         examName: "",
+        title: "",
         examSteps: [""],
         description: "",
         plans: [
@@ -145,39 +149,63 @@ const MedicalExam = () => {
 
                 const res = await api.get(`${endPointApi.getByIdExamList}/${id}`);
                 const data = res.data || {};
-                const decodedDescription = decodeHtml(data.description ?? "");
+                const decodedDescription = decodeHtml(data.exams[0].description ?? "");
 
                 //  Set form data from API
                 setFormData({
-                    country: data.country ?? "",
-                    status: data.status ?? "Active",
-                    category: data.category_name ?? "",
-                    examName: data.exam_name ?? "",
-                    examSteps: data.sub_titles && data.sub_titles.length > 0 ? data.sub_titles : [""],
+                    id: data.exams[0]._id ?? "",
+                    category: data?.category_name ?? "",
+                    country: data.exams[0].country ?? "",
+                    status: data.exams[0].status ?? "Active",
+                    examName: data.exams[0].exam_name ?? "",
+                    title: data.exams[0].title ?? "",
+                    examSteps:
+                        data.exams[0].sub_titles && data.exams[0].sub_titles.length > 0
+                            ? data.exams[0].sub_titles
+                            : [""],
                     description: decodedDescription,
-                    plans:
-                        data.choose_plan_list && data.choose_plan_list.length > 0
-                            ? data.choose_plan_list.map((plan: any) => ({
-                                planDay: plan.plan_day ?? "",
-                                planPrice: plan.plan_pricing ?? "",
-                                planType: plan.plan_type ?? "",
-                                planSubtitles: plan.plan_sub_title && plan.plan_sub_title.length > 0 ? plan.plan_sub_title : [""],
-                                isPopular: plan.most_popular === true || plan.most_popular === "true",
-                            }))
-                            : [
-                                { planDay: "", planPrice: "", planType: "", planSubtitles: [""], isPopular: false },
-                                { planDay: "", planPrice: "", planType: "", planSubtitles: [""], isPopular: false },
-                                { planDay: "", planPrice: "", planType: "", planSubtitles: [""], isPopular: false },
-                                { planDay: "", planPrice: "", planType: "", planSubtitles: [""], isPopular: false },
-                            ],
+                    plans: (() => {
+                        // 🧩 Map existing plans (if any)
+                        const existingPlans =
+                            data.choose_plan_list && data.choose_plan_list.length > 0
+                                ? data.choose_plan_list.map((plan: any) => ({
+                                    planDay: plan.plan_day ?? "",
+                                    planPrice: plan.plan_pricing ?? "",
+                                    planType: plan.plan_type ?? "",
+                                    planSubtitles:
+                                        plan.plan_sub_title && plan.plan_sub_title.length > 0
+                                            ? plan.plan_sub_title
+                                            : [""],
+                                    isPopular:
+                                        plan.most_popular === true || plan.most_popular === "true",
+                                    id: plan._id
+                                }))
+                                : [];
+
+                        const emptyPlan = {
+                            planDay: "",
+                            planPrice: "",
+                            planType: "",
+                            planSubtitles: [""],
+                            isPopular: false,
+                        };
+
+                        while (existingPlans.length < 4) {
+                            existingPlans.push({ ...emptyPlan });
+                        }
+
+                        return existingPlans;
+                    })(),
                 });
 
+                setPreview(data?.exams[0]?.image)
                 //  Enroll Section
                 setEnrollData({
-                    title: data.who_can_enroll_title ?? "",
-                    description: data.who_can_enroll_description ?? "",
-                    image: null,
+                    title: data?.who_can_enroll_title ?? "",
+                    description: data?.who_can_enroll_description ?? "",
+                    image: data?.who_can_enroll_image ?? "",
                 });
+                setPreviewWho(data?.who_can_enroll_image)
             } catch (err) {
                 console.error("Error fetching data by ID:", err);
             }
@@ -190,6 +218,10 @@ const MedicalExam = () => {
         try {
             const formDataToSend = new FormData();
             // Category
+            if (id) {
+                // formDataToSend.append("_id", id);
+                formDataToSend.append("exams[0][_id]", formData.id);
+            }
             formDataToSend.append("category_name", formData.category);
             // Exams
             formDataToSend.append("exams[0][exam_name]", formData.examName);
@@ -205,6 +237,9 @@ const MedicalExam = () => {
             formData.plans.forEach((plan, i) => {
                 // if (plan.planPrice && plan.planDay && plan.planType) {
                 if ((plan.planDay && plan.planType) || plan.planDay === "Custom") {
+                    if(id){
+                        formDataToSend.append(`choose_plan_list[${i}][_id]`, plan.id);
+                    }
                     formDataToSend.append(`choose_plan_list[${i}][plan_pricing]`, plan.planPrice);
                     formDataToSend.append(`choose_plan_list[${i}][plan_day]`, plan.planDay.toString());
                     formDataToSend.append(`choose_plan_list[${i}][plan_type]`, plan.planType);
@@ -226,8 +261,13 @@ const MedicalExam = () => {
             if (mainImage) {
                 formDataToSend.append("image", mainImage);
             }
+            let res;
 
-            const res = await api.post(`${endPointApi.createExamList}`, formDataToSend);
+            if (id) {
+                res = await api.put(`${endPointApi.updateExamList}/${id}`, formDataToSend);
+            } else {
+                res = await api.post(`${endPointApi.createExamList}`, formDataToSend);
+            }
 
             if (res.data) {
                 router.push('/medicalexamlist')
@@ -310,6 +350,10 @@ const MedicalExam = () => {
                         <Input
                             type="text"
                             placeholder="Enter Title"
+                            value={formData.title}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                handleChange("title", e.target.value)
+                            }
                         />
                     </div>
                 </div>
@@ -383,7 +427,12 @@ const MedicalExam = () => {
 
             {/* ENROLL SECTION */}
             <div>
-                <EnrollSection data={enrollData} onChange={(data) => setEnrollData(data)} />
+                <EnrollSection
+                    data={enrollData}
+                    onChange={(data) => setEnrollData(data)}
+                    previewWho={previewWho}
+                    setPreviewWho={setPreviewWho}
+                />
             </div>
 
             {/* PLAN SECTION */}
