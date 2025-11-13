@@ -4,7 +4,7 @@ import ComponentCard from '../common/ComponentCard'
 import Label from '../form/Label'
 import Input from '../form/input/InputField'
 import Button from '../ui/button/Button'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { Editor, EditorTextChangeEvent } from 'primereact/editor';
 import { api } from '@/utils/axiosInstance';
 import endPointApi from '@/utils/endPointApi';
@@ -12,8 +12,14 @@ import { decodeHtml } from '@/utils/helper';
 
 const Faq = () => {
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const id = searchParams.get("id");
+ const [id, setId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      setId(params.get("id"));
+    }
+  }, []);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 

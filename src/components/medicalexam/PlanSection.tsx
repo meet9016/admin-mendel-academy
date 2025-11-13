@@ -9,6 +9,7 @@ import { FaMinus, FaPlus } from 'react-icons/fa6';
 
 // Reusable, strict type
 export interface PlanData {
+  id?: string | number;
   planDay: number | string;
   planPrice: string;
   planType: string;

@@ -7,7 +7,7 @@ import { FaPlus, FaMinus } from "react-icons/fa6";
 import { Editor } from "primereact/editor";
 import Select from "../form/Select";
 import Button from "../ui/button/Button";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import PlanSection from "./PlanSection";
 import Radio from "../form/input/Radio";
 import { api } from "@/utils/axiosInstance";
@@ -17,6 +17,7 @@ import EnrollSection from "./EnrollSection";
 import { decodeHtml } from "@/utils/helper";
 
 interface PlanData {
+    id: number | string;
     planDay: number | string;
     planPrice: string;
     planType: string;
@@ -25,6 +26,7 @@ interface PlanData {
 }
 
 interface FormData {
+    id: string;
     country: string;
     status: string;
     category: string;
@@ -37,8 +39,14 @@ interface FormData {
 
 const MedicalExam = () => {
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const id = searchParams.get("id");
+   const [id, setId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      setId(params.get("id"));
+    }
+  }, []);
 
     const categoryOptions = [
         { value: "USMLE Program", label: "USMLE Program" },
@@ -48,11 +56,10 @@ const MedicalExam = () => {
     const [formErrors, setFormErrors] = useState<Record<string, string> | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
     const [previewWho, setPreviewWho] = useState<string | null>(null);
-    console.log("preview", preview);
-
 
     //  Main single state
     const [formData, setFormData] = useState<FormData>({
+        id: "",
         country: "",
         status: "Active",
         category: "",
@@ -61,10 +68,10 @@ const MedicalExam = () => {
         examSteps: [""],
         description: "",
         plans: [
-            { planDay: "", planPrice: "", planType: "", planSubtitles: [""], isPopular: false },
-            { planDay: "", planPrice: "", planType: "", planSubtitles: [""], isPopular: false },
-            { planDay: "", planPrice: "", planType: "", planSubtitles: [""], isPopular: false },
-            { planDay: "", planPrice: "", planType: "", planSubtitles: [""], isPopular: false },
+            { id: "", planDay: "", planPrice: "", planType: "", planSubtitles: [""], isPopular: false },
+            { id: "", planDay: "", planPrice: "", planType: "", planSubtitles: [""], isPopular: false },
+            { id: "", planDay: "", planPrice: "", planType: "", planSubtitles: [""], isPopular: false },
+            { id: "", planDay: "", planPrice: "", planType: "", planSubtitles: [""], isPopular: false },
         ],
     });
 
@@ -227,7 +234,7 @@ const MedicalExam = () => {
             formDataToSend.append("exams[0][exam_name]", formData.examName);
             formDataToSend.append("exams[0][country]", formData.country);
             formDataToSend.append("exams[0][status]", formData.status);
-            formDataToSend.append("exams[0][title]", formData.examName);
+            formDataToSend.append("exams[0][title]", formData.title);
             formDataToSend.append("exams[0][description]", formData.description);
             formData.examSteps.forEach((step, i) => {
                 formDataToSend.append(`exams[0][sub_titles][${i}]`, step);
@@ -237,9 +244,10 @@ const MedicalExam = () => {
             formData.plans.forEach((plan, i) => {
                 // if (plan.planPrice && plan.planDay && plan.planType) {
                 if ((plan.planDay && plan.planType) || plan.planDay === "Custom") {
-                    if(id){
-                        formDataToSend.append(`choose_plan_list[${i}][_id]`, plan.id);
+                    if (plan?.id !== undefined && plan?.id !== null) {
+                        formDataToSend.append(`choose_plan_list[${i}][_id]`, String(plan.id));
                     }
+
                     formDataToSend.append(`choose_plan_list[${i}][plan_pricing]`, plan.planPrice);
                     formDataToSend.append(`choose_plan_list[${i}][plan_day]`, plan.planDay.toString());
                     formDataToSend.append(`choose_plan_list[${i}][plan_type]`, plan.planType);
