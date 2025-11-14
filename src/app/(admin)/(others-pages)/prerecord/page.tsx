@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import PrimeReactTable from "@/components/tables/PrimeReactTable";
 import { Tag } from "primereact/tag";
 import CommonDialog from "@/components/tables/CommonDialog";
+import { PlusIcon } from "@/icons";
 
 type PreRecordType = {
   id: number;
@@ -76,9 +77,9 @@ export default function Page() {
     <div className="space-y-6">
       <ComponentCard
         title="Prerecord List"
-        // Plusicon={<PlusIcon />}
-        // name="Add Prerecord"
-        // onAddProductClick="/prerecord/add"
+        Plusicon={<PlusIcon />}
+        name="Add Prerecord"
+        onAddProductClick="/prerecord/add"
       >
         <div className="card">
           <PrimeReactTable

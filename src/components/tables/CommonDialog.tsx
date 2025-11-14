@@ -45,18 +45,18 @@ export default function CommonDialog({
         ) : (
             <>
                 <Button
+                    label="Yes"
+                    // icon={<FiCheck size={18} style={{ marginRight: "6px" }} />}
+                    // severity="danger"
+                    onClick={onSave}
+                    className="flex items-center popup-yes"
+                />
+                  <Button
                     label="No"
-                    icon={<RxCross2 size={18} style={{ marginRight: "6px" }} />}
+                    // icon={<RxCross2 size={18} style={{ marginRight: "6px" }} />}
                     outlined
                     onClick={onCancel || onHide}
-                    className="flex items-center"
-                />
-                <Button
-                    label="Yes"
-                    icon={<FiCheck size={18} style={{ marginRight: "6px" }} />}
-                    severity="danger"
-                    onClick={onSave}
-                    className="flex items-center"
+                    className="flex items-center popup-no"
                 />
             </>
         );

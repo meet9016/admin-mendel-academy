@@ -742,3 +742,38 @@ span.flatpickr-weekday,
   opacity: 0.8;
   cursor: grabbing; /* Changes the cursor to indicate dragging */
 }
+
+
+:root {
+  --theme-color: #FFCA00;
+}
+
+/* delete popUp */
+.popup-yes{
+ border: 1px solid #FFCA00;
+ background-color: #FFCA00;
+ color: black;
+}
+.popup-no{
+ border: 1px solid #FFCA00;
+ color: black;
+}
+
+/* Change checkbox border + background */
+.p-checkbox .p-checkbox-box {
+    border-color: #FFCA00 !important;
+}
+
+.p-checkbox .p-checkbox-box.p-highlight {
+    background: #FFCA00 !important;
+    border-color: #FFCA00 !important;
+}
+
+/* Tick mark color */
+.p-checkbox .p-checkbox-box.p-highlight .p-checkbox-icon {
+    color: #000 !important; /* or #fff based on your theme */
+}
+
+tr.selected-row {
+  background-color: #FFCA00 !important;
+}
