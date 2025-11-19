@@ -827,3 +827,17 @@ tr.selected-row {
     border-color: #eef2ff;
     color: #000000;
 }
+
+.bg-brand-500{
+  background-color: #ffca00;
+}
+
+.border-brand-500{
+  border-color: #FFCA00;
+}
+
+/* calender css Add */
+.flatpickr-day.selected{
+  background-color: #FFCA00 !important;
+  border-color: #FFCA00 !important;
+}
