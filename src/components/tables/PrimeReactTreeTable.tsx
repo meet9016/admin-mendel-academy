@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState } from "react";
 import { DataTable, DataTableExpandedRows, DataTableRowEvent } from "primereact/datatable";
 import { Column } from "primereact/column";
