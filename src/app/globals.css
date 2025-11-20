@@ -841,3 +841,9 @@ tr.selected-row {
   background-color: #FFCA00 !important;
   border-color: #FFCA00 !important;
 }
+
+.checked\:bg-brand-500{
+  &:checked{
+    background-color: #FFCA00 ;
+  }
+}

@@ -39,14 +39,14 @@ interface FormData {
 
 const MedicalExam = () => {
     const router = useRouter();
-   const [id, setId] = useState<string | null>(null);
+    const [id, setId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      setId(params.get("id"));
-    }
-  }, []);
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search);
+            setId(params.get("id"));
+        }
+    }, []);
 
     const categoryOptions = [
         { value: "USMLE Program", label: "USMLE Program" },
@@ -212,7 +212,7 @@ const MedicalExam = () => {
                     description: data?.who_can_enroll_description ?? "",
                     image: data?.who_can_enroll_image ?? "",
                 });
-                setPreviewWho(data?.who_can_enroll_image)
+                (data?.who_can_enroll_image)
             } catch (err) {
                 console.error("Error fetching data by ID:", err);
             }
@@ -412,7 +412,7 @@ const MedicalExam = () => {
                 {/* Description */}
                 <div className="grid grid-cols-2 gap-3">
                     <div>
-                    <Label>Description</Label>     
+                        <Label>Description</Label>
                         <Editor
                             style={{ height: "320px" }}
                             value={formData.description}
@@ -426,12 +426,12 @@ const MedicalExam = () => {
                         )}
                     </div>
                     <div>
-<Label>Select Image</Label>
-                <DropzoneComponent
-                    preview={preview}
-                    setPreview={setPreview}
-                    onFileSelect={(file: File) => setMainImage(file)}
-                />
+                        <Label>Select Image</Label>
+                        <DropzoneComponent
+                            preview={preview}
+                            setPreview={setPreview}
+                            onFileSelect={(file: File) => setMainImage(file)}
+                        />
                     </div>
                 </div>
             </ComponentCard>
