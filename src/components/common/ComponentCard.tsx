@@ -46,7 +46,7 @@ const ComponentCard: React.FC<ComponentCardProps> = ({
           {name && (
             <button
               onClick={() => router.push(onAddProductClick)}
-              className="bg-[#ffca00] text-white px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2">
+              className="bg-[#ffca00] px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2">
               {Plusicon} {name}
             </button>
           )}

@@ -742,3 +742,108 @@ span.flatpickr-weekday,
   opacity: 0.8;
   cursor: grabbing; /* Changes the cursor to indicate dragging */
 }
+
+
+:root {
+  --theme-color: #FFCA00;
+}
+
+/* delete popUp */
+.popup-yes{
+ border: 1px solid #FFCA00;
+ background-color: #FFCA00;
+ color: black;
+}
+.popup-no{
+ border: 1px solid #FFCA00;
+ color: black;
+}
+
+/* Change checkbox border + background */
+.p-checkbox .p-checkbox-box {
+    border-color: #FFCA00 !important;
+}
+
+.p-checkbox .p-checkbox-box.p-highlight {
+    background: #FFCA00 !important;
+    border-color: #FFCA00 !important;
+}
+
+/* Tick mark color */
+.p-checkbox .p-checkbox-box.p-highlight .p-checkbox-icon {
+    color: #000 !important; /* or #fff based on your theme */
+}
+
+tr.selected-row {
+  background-color: #FFCA00 !important;
+}
+
+
+
+
+
+
+
+
+
+
+/* Checked */
+.p-checkbox .p-checkbox-box.p-highlight {
+  background-color: #FFCA00 !important;
+  border-color: #FFCA00 !important;
+}
+
+.p-checkbox:not(.p-disabled):has(.p-checkbox-input:hover) .p-checkbox-box {
+  border-color: #FFCA00;
+}
+
+/* Tick visible */
+.p-checkbox .p-checkbox-box.p-highlight .p-checkbox-icon {
+  color: #000 !important;
+}
+
+.p-checkbox.p-highlight .p-checkbox-box {
+  border-color: #FFCA00;
+  background: #FFCA00;
+}
+
+/* td text color change */
+.p-datatable .p-datatable-tbody > tr > td{
+  color: #000;
+}
+
+.p-datatable .p-datatable-tbody > tr.p-highlight {
+    background: #ffca0017;
+    color: #ffca00;
+}
+
+.p-datatable.p-datatable-selectable .p-datatable-tbody > tr.p-selectable-row:not(.p-highlight):not(.p-datatable-emptymessage):hover {
+    background: #ffca0017;
+    color: #ffca00;
+}
+
+.p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+    background: #ffca0017;
+    border-color: #eef2ff;
+    color: #000000;
+}
+
+.bg-brand-500{
+  background-color: #ffca00;
+}
+
+.border-brand-500{
+  border-color: #FFCA00;
+}
+
+/* calender css Add */
+.flatpickr-day.selected{
+  background-color: #FFCA00 !important;
+  border-color: #FFCA00 !important;
+}
+
+.checked\:bg-brand-500{
+  &:checked{
+    background-color: #FFCA00 ;
+  }
+}

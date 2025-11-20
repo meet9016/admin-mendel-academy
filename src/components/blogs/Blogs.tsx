@@ -32,6 +32,10 @@ const Blogs = () => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  const [mainImage, setMainImage] = useState<File | null>(null);
+
+  console.log(preview, 'pri');
+  console.log(mainImage, 'main')
 
   // Handle text input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,14 +64,40 @@ const Blogs = () => {
     setFormData((prev) => ({ ...prev, status: value }));
   };
 
+  // useEffect(() => {
+  //   const fetchById = async () => {
+  //     try {
+  //       if (!id) return;
+  //       const res = await api.get(`${endPointApi.getByIdBlogs}/${id}`);
+  //       const data = res.data || {};
+  //       const decodedDescription = decodeHtml(data.long_description ?? "");
+  //       // Ensure duration is a string for select matching
+  //       setFormData({
+  //         examName: data.exam_name ?? "",
+  //         title: data.title ?? "",
+  //         date: data.date ?? "",
+  //         status: data.status == "Active" ? "Active" : "Inactive",
+  //         shortDescription: data.sort_description ?? "",
+  //         description: decodedDescription,
+  //       });
+
+  //     } catch (err) {
+  //       console.error("Error fetching data by ID:", err);
+  //     }
+  //   };
+
+  //   fetchById();
+  // }, [id]);
+
   useEffect(() => {
     const fetchById = async () => {
       try {
         if (!id) return;
+
         const res = await api.get(`${endPointApi.getByIdBlogs}/${id}`);
         const data = res.data || {};
         const decodedDescription = decodeHtml(data.long_description ?? "");
-        // Ensure duration is a string for select matching
+
         setFormData({
           examName: data.exam_name ?? "",
           title: data.title ?? "",
@@ -76,6 +106,12 @@ const Blogs = () => {
           shortDescription: data.sort_description ?? "",
           description: decodedDescription,
         });
+
+        if (data.image) {
+          setPreview(data.image); 
+          setMainImage(null);     
+        }
+
       } catch (err) {
         console.error("Error fetching data by ID:", err);
       }
@@ -83,7 +119,8 @@ const Blogs = () => {
 
     fetchById();
   }, [id]);
-  // ✅ Form validation
+
+  // Form validation
   const validate = () => {
     const newErrors: { [key: string]: string } = {};
 
@@ -98,27 +135,32 @@ const Blogs = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+
+
   // Submit handler
   const handleSubmit = async () => {
-
     if (!validate()) return;
-
     setIsSubmitting(true);
-    const body = {
-      exam_name: formData.examName,
-      title: formData.title,
-      sort_description: formData.shortDescription,
-      long_description: formData.description,
-      date: formData.date,
-      image: preview,
-      status: formData?.status
+    const formDataToSend = new FormData();
+
+    formDataToSend.append("exam_name", formData.examName);
+    formDataToSend.append("title", formData.title);
+    formDataToSend.append("sort_description", formData.shortDescription);
+    formDataToSend.append("long_description", formData.description);
+    formDataToSend.append("date", formData.date);
+    formDataToSend.append("status", formData.status);
+
+    if (mainImage) {
+      formDataToSend.append("image", mainImage);
     }
+
+
     try {
       if (id) {
-        await api.put(`${endPointApi.updateBlog}/${id}`, body);
+        await api.put(`${endPointApi.updateBlog}/${id}`, formDataToSend);
         toast('Wow so easy !');
       } else {
-        await api.post(`${endPointApi.createBlog}`, body);
+        await api.post(`${endPointApi.createBlog}`, formDataToSend);
       }
       router.push("/blogs");
     } catch (error) {
@@ -233,6 +275,7 @@ const Blogs = () => {
           <DropzoneComponent
             preview={preview}
             setPreview={setPreview}
+            onFileSelect={(file: File) => setMainImage(file)}
           />
           <div className="flex items-center gap-5">
             <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting}>

@@ -156,6 +156,7 @@ import endPointApi from "@/utils/endPointApi";
 import { useRouter } from "next/navigation";
 import PrimeReactTable from "@/components/tables/PrimeReactTable";
 import CommonDialog from "@/components/tables/CommonDialog";
+import { PlusIcon } from "@/icons";
 
 type QuestionType = {
   id: number;
@@ -222,9 +223,9 @@ export default function Page() {
       <div className="space-y-6">
         <ComponentCard
           title="Question List"
-          // Plusicon={<PlusIcon />}
-          // name="Add Question"
-          // onAddProductClick="/question/add"
+          Plusicon={<PlusIcon />}
+          name="Add Question"
+          onAddProductClick="/question/add"
         >
           <div className="card">
             {/* <ReactTable
