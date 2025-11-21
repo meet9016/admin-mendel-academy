@@ -175,7 +175,6 @@ import { useRouter } from "next/navigation";
 import PrimeReactTable from "@/components/tables/PrimeReactTable";
 import CommonDialog from "@/components/tables/CommonDialog";
 import { Tag } from "primereact/tag";
-import Skeleton from 'react-loading-skeleton'
 
 type BlogType = {
   id: number;
@@ -250,7 +249,9 @@ export default function BlogListPage() {
             setRows(newRows);
           }}
           columns={[
-            { field: "exam_name", header: "Exam Name" },
+            {
+              field: "exam_name", header: "Exam Name"
+            },
             { field: "title", header: "Title" },
             {
               field: "createdAt",
@@ -299,21 +300,3 @@ export default function BlogListPage() {
 }
 
 
-
-const skeletonTable = (
-  <div className="space-y-3">
-    {[1, 2, 3, 4, 5].map((i) => (
-      <div
-        key={i}
-        className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"
-      >
-        <div className="flex items-center justify-between">
-          <Skeleton height={18} width="20%" borderRadius={6} />
-          <Skeleton height={18} width="25%" borderRadius={6} />
-          <Skeleton height={18} width="20%" borderRadius={6} />
-          <Skeleton height={18} width="15%" borderRadius={6} />
-        </div>
-      </div>
-    ))}
-  </div>
-);

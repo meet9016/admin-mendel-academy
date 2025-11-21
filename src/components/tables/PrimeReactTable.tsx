@@ -10,6 +10,7 @@ import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import { FaRegEye } from "react-icons/fa6";
 import { usePathname } from "next/navigation";
+import { Skeleton } from "primereact/skeleton";
 
 type ColumnType<T> = {
   field?: keyof T;
@@ -47,52 +48,75 @@ export default function PrimeReactTable<T extends { id: number; status?: string 
   const pathname = usePathname();
 
   // Action Buttons
-  const actionBodyTemplate = (rowData: T) => (
-    <div className="flex gap-3">
-      {pathname === "/payment" && (
-        <Button
-          icon={<FaRegEye size={16} />}
-          rounded
-          outlined
-          severity="info"
-          onClick={() => onView?.(rowData)}
-          className="p-0 flex items-center justify-center"
-          style={{ height: "2rem", width: "2rem", borderRadius: "50%" }}
-        />
-      )}
+  const actionBodyTemplate = (rowData: T) => {
+    if (loading) {
+      return (
+        <div className="flex gap-3">
+          {/* View button skeleton (Only on "payment") */}
+          {pathname === "/payment" && (
+            <Skeleton shape="circle" width="2.2rem" height="2.2rem" />
+          )}
 
-      {
-         pathname !== "/payment" && pathname !== "/contactus" &&(
+          {/* Edit skeleton (No payment + No contactus) */}
+          {(pathname !== "/payment" && pathname !== "/contactus") && (
+            <Skeleton shape="circle" width="2.2rem" height="2.2rem" />
+          )}
+
+          {/* Delete skeleton (Always) */}
+          <Skeleton shape="circle" width="2.2rem" height="2.2rem" />
+        </div>
+      );
+    }
+    return (
+      <>
+        <div className="flex gap-3">
+          {pathname === "/payment" && (
+            <Button
+              icon={<FaRegEye size={16} />}
+              rounded
+              outlined
+              severity="info"
+              onClick={() => onView?.(rowData)}
+              className="p-0 flex items-center justify-center"
+              style={{ height: "2rem", width: "2rem", borderRadius: "50%" }}
+            />
+          )}
+
+          {
+            pathname !== "/payment" && pathname !== "/contactus" && (
+              <Button
+                icon={<GoPencil size={16} />}
+                rounded
+                outlined
+                severity="success"
+                onClick={() => onEdit?.(rowData)}
+                className="p-0 flex items-center justify-center"
+                style={{ height: "2rem", width: "2rem", borderRadius: "50%" }}
+              />
+            )
+          }
           <Button
-            icon={<GoPencil size={16} />}
+            icon={<RiDeleteBin5Line size={16} />}
             rounded
             outlined
-            severity="success"
-            onClick={() => onEdit?.(rowData)}
+            severity="danger"
+            onClick={() => onDelete?.(rowData)}
             className="p-0 flex items-center justify-center"
             style={{ height: "2rem", width: "2rem", borderRadius: "50%" }}
           />
-        )
-      }
-      <Button
-        icon={<RiDeleteBin5Line size={16} />}
-        rounded
-        outlined
-        severity="danger"
-        onClick={() => onDelete?.(rowData)}
-        className="p-0 flex items-center justify-center"
-        style={{ height: "2rem", width: "2rem", borderRadius: "50%" }}
-      />
-    </div>
-  );
+        </div>
+      </>
+    )
+  };
 
   return (
     <div className="card">
       {/* @ts-expect-error PrimeReact type mismatch (safe to ignore) */}
       <DataTable<T>
         value={data}
-        loading={loading}
+        // loading={loading}
         paginator
+        emptyMessage="No data found"
         totalRecords={totalRecords}
         rows={rows}
         rowsPerPageOptions={[10, 15, 20]}
@@ -112,7 +136,14 @@ export default function PrimeReactTable<T extends { id: number; status?: string 
             field={col.field as string}
             header={col.header}
             sortable={col.sortable}
-            body={col.body}
+            // body={col.body}
+            body={(rowData) =>
+              loading
+                ? <Skeleton width="10rem" height="2rem" />
+                : col.body
+                  ? col.body(rowData)
+                  : rowData[col.field as keyof T]
+            }
           />
         ))}
 
