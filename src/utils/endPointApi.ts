@@ -49,8 +49,15 @@ export interface EndPointApi {
     getAllPayment?: string;
 
     //Contact-Us
-    getAllContact?:string;
+    getAllContact?: string;
     deleteContact?: string;
+
+    //Upcomeing-course
+    createUpcomeing?: string;
+    getAllUpcomeing?: string;
+    deleteUpcomeing?: string;
+    getByIdUpcomeing?: string;
+    updateUpcomeing?: string;
 }
 
 // Define and export the API endpoint object
@@ -104,9 +111,16 @@ const endPointApi: EndPointApi = {
     //Payment
     getAllPayment: 'payment/getall',
 
-     //Contact-Us
-     getAllContact: 'contactus/getall',
-     deleteContact: 'contactus/delete'
+    //Contact-Us
+    getAllContact: 'contactus/getall',
+    deleteContact: 'contactus/delete',
+
+    //Upcomeing-course
+    createUpcomeing: 'upcomming/create',
+    getAllUpcomeing: 'upcomming/getall',
+    deleteUpcomeing: 'upcomming/delete',
+    getByIdUpcomeing: 'upcomming/getById',
+    updateUpcomeing: 'upcomming/update',
 };
 
 export default endPointApi;

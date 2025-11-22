@@ -73,8 +73,12 @@ const PlanSection: React.FC<PlanSectionProps> = ({
             onChange={(val: string) => handleChange('planDay', val)}
             placeholder="Select plan duration"
             error={!!errors?.planDay}
-            hint={errors?.planDay}
+          // hint={errors?.planDay}
           />
+          {errors?.planDay && (
+            <p className="text-sm text-error-500 mt-1">{errors.planDay}</p>
+          )}
+
         </div>
         {data.planDay !== "Custom" && (
           <div>
@@ -87,8 +91,12 @@ const PlanSection: React.FC<PlanSectionProps> = ({
                 handleChange('planPrice', e.target.value)
               }
               error={!!errors?.planPrice}
-              hint={errors?.planPrice}
+            // hint={errors?.planPrice}
             />
+            {data.planDay !== "Custom" && errors?.planPrice && (
+              <p className="text-sm text-error-500 mt-1">{errors.planPrice}</p>
+            )}
+
           </div>
         )}
       </div>
@@ -107,8 +115,12 @@ const PlanSection: React.FC<PlanSectionProps> = ({
             onChange={(val: string) => handleChange('planType', val)}
             placeholder="Select category"
             error={!!errors?.planType}
-            hint={errors?.planType}
+          // hint={errors?.planType}
           />
+          {errors?.planType && (
+            <p className="text-sm text-error-500 mt-1">{errors.planType}</p>
+          )}
+
         </div>
         <div>
           <Label>Plan Popular</Label>
@@ -126,7 +138,7 @@ const PlanSection: React.FC<PlanSectionProps> = ({
             <Label>Plan Sub Title</Label>
             <button
               type="button"
-              className="bg-[#ffcb07] text-white w-8 h-8 flex items-center justify-center rounded-md hover:bg-[#e6b800] transition-colors duration-200"
+              className="bg-[#ffcb07] w-8 h-8 flex items-center justify-center rounded-md hover:bg-[#e6b800] transition-colors duration-200"
               onClick={addSubtitle}
             >
               <FaPlus className="w-4 h-4" />
@@ -143,13 +155,18 @@ const PlanSection: React.FC<PlanSectionProps> = ({
                   handleSubtitleChange(index, e.target.value)
                 }
                 error={!!errors?.[`planSubtitles[${index}]`]}
-                hint={errors?.[`planSubtitles[${index}]`]}
+              // hint={errors?.[`planSubtitles[${index}]`]}
               />
+              {errors?.[`planSubtitles[${index}]`] && (
+                <p className="text-sm text-error-500 mt-1">
+                  {errors[`planSubtitles[${index}]`]}
+                </p>
+              )}
               {data.planSubtitles.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeSubtitle(index)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 border border-[#ffcb07] text-[#ffcb07] w-8 h-8 rounded-md flex items-center justify-center hover:bg-[#ffcb07] hover:text-white transition-colors duration-200"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 border border-[#ffcb07] text-[#ffcb07] w-8 h-8 rounded-md flex items-center justify-center hover:bg-[#ffcb07] hover:text-black transition-colors duration-200"
                 >
                   <FaMinus className="w-4 h-4" />
                 </button>

@@ -9,17 +9,18 @@ import { Editor, EditorTextChangeEvent } from 'primereact/editor';
 import { api } from '@/utils/axiosInstance';
 import endPointApi from '@/utils/endPointApi';
 import { decodeHtml } from '@/utils/helper';
+import { faqSchema } from '@/ValidationSchema/validationSchema';
 
 const Faq = () => {
     const router = useRouter();
- const [id, setId] = useState<string | null>(null);
+    const [id, setId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      setId(params.get("id"));
-    }
-  }, []);
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search);
+            setId(params.get("id"));
+        }
+    }, []);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -65,7 +66,25 @@ const Faq = () => {
         fetchById();
     }, [id]);
 
+    const validate = async () => {
+        try {
+            await faqSchema.validate(formData, { abortEarly: false });
+            setErrors({});
+            return true;
+        } catch (err: any) {
+            const newErrors: any = {};
+            err.inner.forEach((e: any) => {
+                newErrors[e.path] = e.message;
+            });
+            setErrors(newErrors);
+            return false;
+        }
+    };
+
+
     const handleSubmit = async () => {
+        const isValid = await validate();
+        if (!isValid) return;
         setIsSubmitting(true);
         try {
             const body = {
@@ -100,6 +119,7 @@ const Faq = () => {
                             error={!!errors.title}
                             placeholder="Enter title"
                         />
+                        {errors.title && <p className="text-sm text-error-500 mt-1">{errors.title}</p>}
                     </div>
 
                     <div>
@@ -109,6 +129,7 @@ const Faq = () => {
                                 onTextChange={handleEditorChange}
                                 style={{ height: "320px" }}
                             />
+                            {errors.description && <p className="text-sm text-error-500 mt-1">{errors.description}</p>}
                         </div>
                     </div>
                 </div>

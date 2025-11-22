@@ -11,6 +11,7 @@ import ComponentCard from "../common/ComponentCard";
 import { Editor, EditorTextChangeEvent } from "primereact/editor";
 import MultiSelect from "../form/MultiSelect";
 import { decodeHtml } from "@/utils/helper";
+import { questionSchema } from "@/ValidationSchema/validationSchema";
 
 // const categoryOptions = [
 //   { value: "3", label: "3 Month" },
@@ -38,17 +39,7 @@ const Question = () => {
     description: "",
   });
 
-  const [errors, setErrors] = useState({
-    title: "",
-    tag: "",
-    rating: "",
-    total_reviews: "",
-    features: "",
-    price: "",
-    sort_description: "",
-    description: "",
-  });
-
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
@@ -81,7 +72,7 @@ const Question = () => {
   }, [id]);
 
 
-  const handleChange = (field: keyof typeof formData, value: string  | string[]) => {
+  const handleChange = (field: keyof typeof formData, value: string | string[]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
@@ -95,50 +86,64 @@ const Question = () => {
     }));
   };
 
-  const validate = () => {
-    const newErrors = {
-      title: "",
-      tag: "",
-      rating: "",
-      total_reviews: "",
-      features: "",
-      price: "",
-      sort_description: "",
-      description: "",
-      // duration: "",
-    };
+  // const validate = () => {
+  //   const newErrors = {
+  //     title: "",
+  //     tag: "",
+  //     rating: "",
+  //     total_reviews: "",
+  //     features: "",
+  //     price: "",
+  //     sort_description: "",
+  //     description: "",
+  //     // duration: "",
+  //   };
 
-    let isValid = true;
+  //   let isValid = true;
 
-    if (!formData.title) {
-      newErrors.title = "Title is required";
-      isValid = false;
+  //   if (!formData.title) {
+  //     newErrors.title = "Title is required";
+  //     isValid = false;
+  //   }
+
+  //   if (!formData.price) {
+  //     newErrors.price = "Price is required";
+  //     isValid = false;
+  //   }
+
+  //   // if (!formData.duration) {
+  //   //   newErrors.duration = "Please select a category";
+  //   //   isValid = false;
+  //   // }
+
+  //   if (!formData.description) {
+  //     newErrors.description = "Description is required";
+  //     isValid = false;
+  //   }
+
+  //   setErrors(newErrors);
+  //   return isValid;
+  // };
+
+  const validate = async () => {
+    try {
+      await questionSchema.validate(formData, { abortEarly: false });
+      setErrors({});
+      return true;
+    } catch (err: any) {
+      const newErrors: any = {};
+      err.inner.forEach((e: any) => {
+        newErrors[e.path] = e.message;
+      });
+      setErrors(newErrors);
+      return false;
     }
-
-    if (!formData.price) {
-      newErrors.price = "Price is required";
-      isValid = false;
-    }
-
-    // if (!formData.duration) {
-    //   newErrors.duration = "Please select a category";
-    //   isValid = false;
-    // }
-
-    if (!formData.description) {
-      newErrors.description = "Description is required";
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
   };
 
-  console.log("formData", formData);
 
   const handleSubmit = async () => {
-    if (!validate()) return;
-
+    const isValid = await validate();
+    if (!isValid) return;
     setIsSubmitting(true);
 
     const body = {
@@ -243,8 +248,8 @@ const Question = () => {
                   options={featuresOptions}
                   defaultSelected={formData.features || []}
                   onChange={(selected: string[]) => handleChange("features", selected)}
-                  
                 />
+                {errors.features && <p className="text-sm text-error-500 mt-1">{errors.features}</p>}
               </div>
             </div>
             <div>

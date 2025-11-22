@@ -10,14 +10,15 @@ import endPointApi from "@/utils/endPointApi";
 import ComponentCard from "../common/ComponentCard";
 import Radio from "../form/input/Radio";
 import DatePicker from "../form/date-picker";
+import { livecourseSchema } from "@/ValidationSchema/validationSchema";
 
 interface FormDataType {
   title: string;
   instructor_name: string;
   sub_scribe_student_count: string;
   zoom_link: string;
-  date?: string;        // 👈 added
-  status?: string;      // 👈 added
+  date?: string;        //  added
+  status?: string;      //  added
 }
 const LiveCourses = () => {
   const router = useRouter();
@@ -27,20 +28,12 @@ const LiveCourses = () => {
     instructor_name: "",
     sub_scribe_student_count: "",
     zoom_link: "",
-    date: "",     // 👈 optional default
+    date: "",     //  optional default
     status: "",
   });
 
 
-  const [errors, setErrors] = useState({
-    title: "",
-    instructor_name: "",
-    sub_scribe_student_count: "",
-    zoom_link: "",
-    date: "",     // 👈 optional default
-    status: "",
-  });
-
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
@@ -88,65 +81,81 @@ const LiveCourses = () => {
   const handleRadioChange = (value: string) => {
     setFormData((prev) => ({ ...prev, status: value }));
   };
-  const validate = () => {
-    const newErrors = {
-      title: "",
-      instructor_name: "",
-      sub_scribe_student_count: "",
-      zoom_link: "",
-      date: "",     //  optional default
-      status: "",
-    };
+  // const validate = () => {
+  //   const newErrors = {
+  //     title: "",
+  //     instructor_name: "",
+  //     sub_scribe_student_count: "",
+  //     zoom_link: "",
+  //     date: "",    
+  //     status: "",
+  //   };
 
-    let isValid = true;
+  //   let isValid = true;
 
-    if (!formData.title) {
-      newErrors.title = "Title is required";
-      isValid = false;
+  //   if (!formData.title) {
+  //     newErrors.title = "Title is required";
+  //     isValid = false;
+  //   }
+
+  //   if (!formData.instructor_name.trim()) {
+  //     newErrors.instructor_name = "Instructor name is required.";
+  //     isValid = false;
+  //   }
+
+  //   if (!formData.date) {
+  //     newErrors.date = "Please select a date.";
+  //     isValid = false;
+  //   }
+
+  //   if (!formData.sub_scribe_student_count.trim()) {
+  //     newErrors.sub_scribe_student_count = "Subscribed student count is required.";
+  //     isValid = false;
+  //   }
+
+  //   if (!formData.zoom_link.trim()) {
+  //     newErrors.zoom_link = "Zoom link is required.";
+  //     isValid = false;
+  //   }
+
+  //   // if (!formData.price) {
+  //   //   newErrors.price = "Price is required";
+  //   //   isValid = false;
+  //   // }
+
+  //   // if (!formData.duration) {
+  //   //   newErrors.duration = "Please select a category";
+  //   //   isValid = false;
+  //   // }
+
+  //   // if (!formData.description) {
+  //   //   newErrors.description = "Description is required";
+  //   //   isValid = false;
+  //   // }
+
+  //   setErrors(newErrors);
+  //   return isValid;
+  // };
+
+
+  const validate = async () => {
+    try {
+      await livecourseSchema.validate(formData, { abortEarly: false });
+      setErrors({});
+      return true;
+    } catch (err: any) {
+      const newErrors: any = {};
+      err.inner.forEach((e: any) => {
+        newErrors[e.path] = e.message;
+      });
+      setErrors(newErrors);
+      return false;
     }
-
-    if (!formData.instructor_name.trim()) {
-      newErrors.instructor_name = "Instructor name is required.";
-      isValid = false;
-    }
-
-    if (!formData.date) {
-      newErrors.date = "Please select a date.";
-      isValid = false;
-    }
-
-    if (!formData.sub_scribe_student_count.trim()) {
-      newErrors.sub_scribe_student_count = "Subscribed student count is required.";
-      isValid = false;
-    }
-
-    if (!formData.zoom_link.trim()) {
-      newErrors.zoom_link = "Zoom link is required.";
-      isValid = false;
-    }
-
-    // if (!formData.price) {
-    //   newErrors.price = "Price is required";
-    //   isValid = false;
-    // }
-
-    // if (!formData.duration) {
-    //   newErrors.duration = "Please select a category";
-    //   isValid = false;
-    // }
-
-    // if (!formData.description) {
-    //   newErrors.description = "Description is required";
-    //   isValid = false;
-    // }
-
-    setErrors(newErrors);
-    return isValid;
   };
 
   const handleSubmit = async () => {
-    if (!validate()) return;
-
+    const isValid = await validate();
+    if (!isValid) return;
     setIsSubmitting(true);
 
     const body = {
