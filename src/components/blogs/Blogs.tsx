@@ -14,6 +14,7 @@ import endPointApi from "@/utils/endPointApi";
 import { Editor, EditorTextChangeEvent } from "primereact/editor";
 import { toast } from 'react-toastify';
 import { decodeHtml } from "@/utils/helper";
+import { blogSchema } from "@/ValidationSchema/validationSchema";
 
 const Blogs = () => {
   const router = useRouter();
@@ -107,10 +108,11 @@ const Blogs = () => {
           description: decodedDescription,
         });
 
-        if (data.image) {
-          setPreview(data.image); 
-          setMainImage(null);     
+        if (data?.image) {
+          setPreview(data.image);
+          setMainImage(null);
         }
+
 
       } catch (err) {
         console.error("Error fetching data by ID:", err);
@@ -121,25 +123,41 @@ const Blogs = () => {
   }, [id]);
 
   // Form validation
-  const validate = () => {
-    const newErrors: { [key: string]: string } = {};
+  // const validate = () => {
+  //   const newErrors: { [key: string]: string } = {};
 
-    if (!formData.examName.trim()) newErrors.examName = "Exam Name is required.";
-    if (!formData.title.trim()) newErrors.title = "Title is required.";
-    if (!formData.date) newErrors.date = "Date is required.";
-    if (!formData.shortDescription.trim()) newErrors.shortDescription = "Short description is required.";
-    if (!formData.description.trim()) newErrors.description = "Description is required.";
+  //   if (!formData.examName.trim()) newErrors.examName = "Exam Name is required.";
+  //   if (!formData.title.trim()) newErrors.title = "Title is required.";
+  //   if (!formData.date) newErrors.date = "Date is required.";
+  //   if (!formData.shortDescription.trim()) newErrors.shortDescription = "Short description is required.";
+  //   if (!formData.description.trim()) newErrors.description = "Description is required.";
 
-    setErrors(newErrors);
+  //   setErrors(newErrors);
 
-    return Object.keys(newErrors).length === 0;
+  //   return Object.keys(newErrors).length === 0;
+  // };
+
+  const validate = async () => {
+    try {
+      await blogSchema.validate(formData, { abortEarly: false });
+      setErrors({});
+      return true;
+    } catch (err: any) {
+      const newErrors: any = {};
+      err.inner.forEach((e: any) => {
+        newErrors[e.path] = e.message;
+      });
+      setErrors(newErrors);
+      return false;
+    }
   };
 
 
 
   // Submit handler
   const handleSubmit = async () => {
-    if (!validate()) return;
+    const isValid = await validate();
+    if (!isValid) return;
     setIsSubmitting(true);
     const formDataToSend = new FormData();
 
