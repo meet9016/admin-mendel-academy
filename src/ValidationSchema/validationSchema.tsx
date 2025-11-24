@@ -105,3 +105,13 @@ export const faqSchema = Yup.object().shape({
     title: Yup.string().required("Title is required"),
     description: Yup.string().required("Description is required"),
 })
+
+export const upcomingcourseSchema = Yup.object().shape({
+    title: Yup.string().required("Title is required"),
+    category: Yup.string().required("Category is required"),
+    type: Yup.string().required("Type is required"),
+    date: Yup.string().required("Date is required"),
+    wishlistspot: Yup.string().required("Wishlist spot is required"),
+    status: Yup.string().required("Status is required"),
+    description: Yup.string().required("Description is required"),
+}) 

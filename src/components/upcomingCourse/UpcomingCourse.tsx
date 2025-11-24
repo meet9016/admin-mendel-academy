@@ -13,6 +13,7 @@ import endPointApi from '@/utils/endPointApi'
 import Select from '../form/Select'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { decodeHtml } from '@/utils/helper'
+import { upcomingcourseSchema } from '@/ValidationSchema/validationSchema'
 
 
 const UpcomingCourse = () => {
@@ -95,6 +96,8 @@ const UpcomingCourse = () => {
     }, [id]);
 
     const handleSubmit = async () => {
+        const isValid = await validate();
+        if (!isValid) return;
         try {
             setIsSubmitting(true)
             const formDataToSend = new FormData();
@@ -115,13 +118,29 @@ const UpcomingCourse = () => {
             else {
                 res = await api.post(`${endPointApi.createUpcomeing}`, formDataToSend);
             }
-            router.push("/upcomingCourse"); 
+            router.push("/upcomingCourse");
         } catch (error) {
             console.log("Submission Error:", error)
         } finally {
             setIsSubmitting(false)
         }
     }
+
+    const validate = async () => {
+        try {
+            await upcomingcourseSchema.validate(formData, { abortEarly: false });
+            setErrors({});
+            return true;
+        } catch (err: any) {
+            const newErrors: any = {};
+            err.inner.forEach((e: any) => {
+                newErrors[e.path] = e.message;
+            });
+            setErrors(newErrors);
+            return false;
+        }
+    };
+
 
     return (
         <div className="space-y-6">
@@ -136,7 +155,9 @@ const UpcomingCourse = () => {
                                 value={formData.title}
                                 placeholder='Enter title'
                                 onChange={handleChange}
+                                error={!!errors.title}
                             />
+                            {errors.title && <p className="text-sm text-error-500 mt-1">{errors.title}</p>}
                         </div>
                         <div>
                             <Label>Level</Label>
@@ -147,6 +168,7 @@ const UpcomingCourse = () => {
                                 onChange={(value: string) => handleSelectChange("category", value)}
                                 error={!!errors?.category}
                             />
+                            {errors.category && <p className="text-sm text-error-500 mt-1">{errors.category}</p>}
                         </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -158,7 +180,9 @@ const UpcomingCourse = () => {
                                 value={formData.type}
                                 placeholder='Enter type'
                                 onChange={handleChange}
+                                error={!!errors.type}
                             />
+                            {errors.type && <p className="text-sm text-error-500 mt-1">{errors.type}</p>}
                         </div>
                         <div>
                             <DatePicker
@@ -168,6 +192,7 @@ const UpcomingCourse = () => {
                                 defaultDate={formData.date}
                                 onChange={handleDateChange}
                             />
+                            {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
                         </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -179,7 +204,9 @@ const UpcomingCourse = () => {
                                 value={formData.wishlistspot}
                                 placeholder='Enter wishlistspot'
                                 onChange={handleChange}
+                                error={!!errors.wishlistspot}
                             />
+                            {errors.wishlistspot && <p className="text-red-500 text-sm mt-1">{errors.wishlistspot}</p>}
                         </div>
                         <div className="flex flex-wrap items-center gap-8">
                             <Radio
@@ -216,6 +243,7 @@ const UpcomingCourse = () => {
                                 onTextChange={handleEditorChange}
                                 style={{ height: "320px" }}
                             />
+                            {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
                         </div>
                         <div>
                             <Label>Select Image</Label>
