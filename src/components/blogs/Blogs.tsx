@@ -112,8 +112,6 @@ const Blogs = () => {
           setPreview(data.image);
           setMainImage(null);
         }
-
-
       } catch (err) {
         console.error("Error fetching data by ID:", err);
       }
@@ -175,13 +173,15 @@ const Blogs = () => {
 
     try {
       if (id) {
-        await api.put(`${endPointApi.updateBlog}/${id}`, formDataToSend);
-        toast('Wow so easy !');
+        const res = await api.put(`${endPointApi.updateBlog}/${id}`, formDataToSend);
+        toast.success(res.data?.message);
       } else {
-        await api.post(`${endPointApi.createBlog}`, formDataToSend);
+        const res = await api.post(`${endPointApi.createBlog}`, formDataToSend);
+        toast.success(res.data?.message);
       }
       router.push("/blogs");
     } catch (error) {
+      toast.error("Something went wrong! Please try again.");
       console.error("Submission error:", error);
     } finally {
       setIsSubmitting(false);
@@ -231,6 +231,7 @@ const Blogs = () => {
                   placeholder="Select a date"
                   defaultDate={formData.date}
                   onChange={handleDateChange}
+                  error={errors.date}
                 />
                 {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
               </div>
@@ -270,24 +271,21 @@ const Blogs = () => {
             </div>
 
 
-            <div className="space-y-6">
-              <div>
-                <Label>Description</Label>
-                {/* <TextArea
-                  rows={6}
-                  value={formData.description}
-                  onChange={handleDescriptionChange}
-                  error={!!errors.description}
-                  hint={errors.description || "Please enter a valid message."}
-                /> */}
-                <Editor
-                  value={formData.description}
-                  onTextChange={handleEditorChange}
-                  style={{ height: "320px" }}
-                />
-                {errors.description && <p className="text-sm text-error-500 mt-1">{errors.description}</p>}
-              </div>
+            <div>
+              <Editor
+                value={formData.description}
+                onTextChange={handleEditorChange}
+                style={{ height: "320px" }}
+                className={` ${errors.description
+                  ? "border border-error-500"
+                  : "border border-gray-100"
+                  }`}
+              />
+              {errors.description && (
+                <p className="text-sm text-error-500 mt-1">{errors.description}</p>
+              )}
             </div>
+
           </div>
 
           <DropzoneComponent

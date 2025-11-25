@@ -14,6 +14,7 @@ import Select from '../form/Select'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { decodeHtml } from '@/utils/helper'
 import { upcomingcourseSchema } from '@/ValidationSchema/validationSchema'
+import { toast } from 'react-toastify'
 
 
 const UpcomingCourse = () => {
@@ -114,13 +115,16 @@ const UpcomingCourse = () => {
             let res;
             if (id) {
                 res = await api.put(`${endPointApi.updateUpcomeing}/${id}`, formDataToSend);
+                toast.success(res.data?.message);
             }
             else {
                 res = await api.post(`${endPointApi.createUpcomeing}`, formDataToSend);
+                toast.success(res.data?.message);
             }
             router.push("/upcomingCourse");
         } catch (error) {
             console.log("Submission Error:", error)
+            toast.error("Something went wrong! Please try again.");
         } finally {
             setIsSubmitting(false)
         }
@@ -191,6 +195,7 @@ const UpcomingCourse = () => {
                                 placeholder="Select a date"
                                 defaultDate={formData.date}
                                 onChange={handleDateChange}
+                                error={errors.date}
                             />
                             {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
                         </div>
@@ -242,6 +247,10 @@ const UpcomingCourse = () => {
                                 value={formData.description}
                                 onTextChange={handleEditorChange}
                                 style={{ height: "320px" }}
+                                className={` ${errors.description
+                                    ? "border border-error-500"
+                                    : "border border-gray-100"
+                                    }`}
                             />
                             {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
                         </div>

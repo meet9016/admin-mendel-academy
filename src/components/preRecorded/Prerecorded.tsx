@@ -15,6 +15,7 @@ import DatePicker from "../form/date-picker";
 import { Editor, EditorTextChangeEvent } from "primereact/editor";
 import { decodeHtml } from "@/utils/helper";
 import { prerecordSchema } from "@/ValidationSchema/validationSchema";
+import { toast } from "react-toastify";
 
 const categoryOptions = [
   { value: "3", label: "3 Month" },
@@ -180,12 +181,15 @@ const Prerecorded = () => {
     };
     try {
       if (id) {
-        await api.put(`${endPointApi.updatePreRecorded}/${id}`, body);
+        const res = await api.put(`${endPointApi.updatePreRecorded}/${id}`, body);
+        toast.success(res.data?.message);
       } else {
-        await api.post(`${endPointApi.createPreRecorded}`, body);
+        const res = await api.post(`${endPointApi.createPreRecorded}`, body);
+        toast.success(res.data?.message);
       }
       router.push("/prerecord");
     } catch (error) {
+      toast.error("Something went wrong! Please try again.");
       console.error("Submission error:", error);
     } finally {
       setIsSubmitting(false);
@@ -296,7 +300,7 @@ const Prerecorded = () => {
                   onChange={(selectedOption) =>
                     handleChange("duration", selectedOption || "")
                   }
-                // error={errors.duration}
+                  error={errors.duration}
                 />
                 {errors.duration && <p className="text-sm text-error-500 mt-1">{errors.duration}</p>}
                 <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
@@ -311,6 +315,7 @@ const Prerecorded = () => {
                 placeholder="Select a date"
                 defaultDate={formData.date}
                 onChange={handleDateChange}
+                error={errors.date}
               />
               {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
             </div>
@@ -337,25 +342,14 @@ const Prerecorded = () => {
           {/* Description */}
           <div>
             <Label>Description</Label>
-            {/* <TextArea
-              rows={6}
-              value={formData.description}
-              onChange={(val) => handleChange("description", val)}
-              error={errors.description}
-            /> */}
-            {/* <Input
-              placeholder="Enter description"
-              type="text"
-              value={formData.description}
-              onChange={(e) => handleChange("description", e.target.value)}
-              error={errors.description}
-            />
-            {errors.description && <p className="text-sm text-error-500 mt-1">{errors.description}</p>} */}
-
             <Editor
               value={formData.description}
               style={{ height: "320px" }}
               onTextChange={handleEditorChange}
+              className={` ${errors.description
+                ? "border border-error-500"
+                : "border border-gray-100"
+                }`}
             />
             {errors.description && <p className="text-sm text-error-500 mt-1">{errors.description}</p>}
           </div>

@@ -12,6 +12,7 @@ import { Editor, EditorTextChangeEvent } from "primereact/editor";
 import MultiSelect from "../form/MultiSelect";
 import { decodeHtml } from "@/utils/helper";
 import { questionSchema } from "@/ValidationSchema/validationSchema";
+import { toast } from "react-toastify";
 
 // const categoryOptions = [
 //   { value: "3", label: "3 Month" },
@@ -160,12 +161,15 @@ const Question = () => {
 
     try {
       if (id) {
-        await api.put(`${endPointApi.updateQuestion}/${id}`, body);
+        const res = await api.put(`${endPointApi.updateQuestion}/${id}`, body);
+        toast.success(res.data?.message);
       } else {
-        await api.post(`${endPointApi.createQuestion}`, body);
+        const res = await api.post(`${endPointApi.createQuestion}`, body);
+        toast.success(res.data?.message);
       }
       router.push("/question");
     } catch (error) {
+      toast.error("Something went wrong! Please try again.");
       console.error("Submission error:", error);
     } finally {
       setIsSubmitting(false);
@@ -248,6 +252,7 @@ const Question = () => {
                   options={featuresOptions}
                   defaultSelected={formData.features || []}
                   onChange={(selected: string[]) => handleChange("features", selected)}
+                  error={errors.features}
                 />
                 {errors.features && <p className="text-sm text-error-500 mt-1">{errors.features}</p>}
               </div>
@@ -289,6 +294,10 @@ const Question = () => {
               value={formData.description}
               style={{ height: "320px" }}
               onTextChange={handleEditorChange}
+              className={` ${errors.description
+                ? "border border-error-500"
+                : "border border-gray-100"
+                }`}
             />
             {errors.description && <p className="text-sm text-error-500 mt-1">{errors.description}</p>}
           </div>

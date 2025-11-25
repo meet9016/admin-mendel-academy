@@ -101,6 +101,14 @@ export default function DemoPage() {
     getExamData();
   }, [getExamData]);
 
+  const headerNameMap = {
+    plan_day: "Plan Day",
+    plan_type: "Plan Type",
+    plan_pricing: "Pricing",
+    plan_popular: "Most Popular",
+  };
+
+
   return (
     <div className="space-y-6">
       <ComponentCard
@@ -136,6 +144,7 @@ export default function DemoPage() {
               },
             },
           ]}
+          headerNameMap={headerNameMap}
           // onEdit={(row) => console.log("Edit", row)}
           onEdit={(row) => router.push(`/medicalexamlist/add?id=${row.id}`)}
           onDelete={handleDeleteClick}

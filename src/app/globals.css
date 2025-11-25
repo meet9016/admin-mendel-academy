@@ -847,3 +847,9 @@ tr.selected-row {
     background-color: #FFCA00 ;
   }
 }
+
+.small-tooltip .p-tooltip-text {
+  font-size: 11px !important;
+  padding: 4px 8px !important;
+  line-height: 1.2 !important;
+}

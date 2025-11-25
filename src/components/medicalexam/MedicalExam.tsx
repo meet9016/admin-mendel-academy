@@ -16,6 +16,7 @@ import DropzoneComponent from "../blogs/DropZone";
 import EnrollSection from "./EnrollSection";
 import { decodeHtml } from "@/utils/helper";
 import { examListSchema } from "@/ValidationSchema/validationSchema";
+import { toast } from "react-toastify";
 
 interface PlanData {
     id: number | string;
@@ -133,8 +134,12 @@ const MedicalExam = () => {
 
     const validate = async () => {
         try {
+            console.log("aaa")
             await examListSchema.validate(formData, { abortEarly: false });
+            console.log("aaa11111")
+
             setErrors({});
+
             return true;
         } catch (err: any) {
             const newErrors: any = {};
@@ -218,6 +223,7 @@ const MedicalExam = () => {
         fetchById();
     }, [id]);
 
+
     const handleSave = async () => {
         const isValid = await validate();
         if (!isValid) return;
@@ -272,8 +278,10 @@ const MedicalExam = () => {
 
             if (id) {
                 res = await api.put(`${endPointApi.updateExamList}/${id}`, formDataToSend);
+                toast.success(res.data?.message);
             } else {
                 res = await api.post(`${endPointApi.createExamList}`, formDataToSend);
+                toast.success(res.data?.message);
             }
 
             if (res.data) {
@@ -282,6 +290,7 @@ const MedicalExam = () => {
                 console.log("API Failed");
             }
         } catch (err) {
+            toast.error("Something went wrong! Please try again.");
             console.log("ERROR:", err);
         }
     };
@@ -448,10 +457,10 @@ const MedicalExam = () => {
                     onChange={(data) => setEnrollData(data)}
                     previewWho={previewWho}
                     setPreviewWho={setPreviewWho}
-                    errors={{
-                        title: errors["enrollData.title"],
-                        description: errors["enrollData.description"]
-                    }}
+                errors={{
+                    title: errors["enrollData.title"],
+                    description: errors["enrollData.description"]
+                }}
                 />
             </div>
 

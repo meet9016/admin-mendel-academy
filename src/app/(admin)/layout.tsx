@@ -6,6 +6,8 @@ import AppSidebar from "@/layout/AppSidebar";
 import Backdrop from "@/layout/Backdrop";
 import React from "react";
 import { ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+
 
 export default function AdminLayout({
   children,
@@ -18,27 +20,85 @@ export default function AdminLayout({
   const mainContentMargin = isMobileOpen
     ? "ml-0"
     : isExpanded || isHovered
-    ? "lg:ml-[290px]"
-    : "lg:ml-[90px]";
+      ? "lg:ml-[290px]"
+      : "lg:ml-[90px]";
 
   return (
     <>
-    <div className="min-h-screen xl:flex">
-      {/* Sidebar and Backdrop */}
-      <AppSidebar />
-      <Backdrop />
-      {/* Main Content Area */}
-      <div
-        className={`flex-1 transition-all  duration-300 ease-in-out ${mainContentMargin}`}
-      >
-       <ToastContainer className="!z-[9999]"/>
-
-        {/* Header */}
-        <AppHeader />
-        {/* Page Content */}
-        <div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">{children}</div>
+      <div className="min-h-screen xl:flex">
+        {/* Sidebar and Backdrop */}
+        <AppSidebar />
+        <Backdrop />
+        {/* Main Content Area */}
+        <div
+          className={`flex-1 transition-all  duration-300 ease-in-out ${mainContentMargin}`}
+        >
+          <ToastContainer position="top-right" autoClose={3000} newestOnTop style={{ zIndex: 999999, position: "fixed" }} />
+          {/* Header */}
+          <AppHeader />
+          {/* Page Content */}
+          <div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">{children}</div>
+        </div>
       </div>
-    </div>
     </>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// "use client";
+
+// import { useSidebar } from "@/context/SidebarContext";
+// import AppHeader from "@/layout/AppHeader";
+// import AppSidebar from "@/layout/AppSidebar";
+// import Backdrop from "@/layout/Backdrop";
+// import React from "react";
+// import { ToastContainer } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
+
+// export default function AdminLayout({ children }: { children: React.ReactNode }) {
+//   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
+
+//   const mainContentMargin = isMobileOpen
+//     ? "ml-0"
+//     : isExpanded || isHovered
+//       ? "lg:ml-[290px]"
+//       : "lg:ml-[90px]";
+
+//   return (
+//     <>
+//       {/*  Toast ALWAYS TOP — ABOVE HEADER */}
+//       <ToastContainer
+//         position="top-right"
+//         autoClose={9000}
+//         newestOnTop
+//         style={{ zIndex: 999999, position: "fixed" }}
+//       />
+
+//       <div className="min-h-screen xl:flex">
+//         <AppSidebar />
+//         <Backdrop />
+//         <div
+//           className={`flex-1 transition-all duration-300 ease-in-out ${mainContentMargin}`}
+//         >
+//           <AppHeader />
+//           <div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
+//             {children}
+//           </div>
+//         </div>
+//       </div>
+//     </>
+//   );
+// }

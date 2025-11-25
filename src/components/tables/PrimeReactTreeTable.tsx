@@ -1,5 +1,10 @@
+"use client";
 import React, { useState } from "react";
-import { DataTable, DataTableExpandedRows, DataTableRowEvent } from "primereact/datatable";
+import {
+    DataTable,
+    DataTableExpandedRows,
+    DataTableRowEvent,
+} from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { GoPencil } from "react-icons/go";
@@ -21,10 +26,11 @@ interface PrimeReactTreeTableProps<T> {
     onPageChange?: (page: number, rows: number) => void;
     onEdit?: (row: T) => void;
     onDelete?: (row: T) => void;
+    headerNameMap?: Record<string, string>;
 }
 
 export default function PrimeReactTreeTable<
-    T extends { id: number | string; children?: Record<string, unknown>[] }
+    T extends { id: number | string; children?: Record<string, any>[] }
 >({
     data,
     loading,
@@ -33,27 +39,37 @@ export default function PrimeReactTreeTable<
     rows = 10,
     onEdit,
     onDelete,
+    headerNameMap = {},
 }: PrimeReactTreeTableProps<T>) {
-    // ✅ Fixed: proper type instead of `any`
-    const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | null>(null);
+    const [expandedRows, setExpandedRows] =
+        useState<DataTableExpandedRows | null>(null);
 
-    /** ✅ Allow expansion only if there are children */
+    // ALLOW MULTIPLE EXPANSIONS
+    const onRowExpand = (event: DataTableRowEvent) => {
+        const id = event.data.id;
+        setExpandedRows((prev) => ({
+            ...(prev || {}),
+            [id]: true,
+        }));
+    };
+
+    // REMOVE ONLY THAT ROW WHEN COLLAPSED
+    const onRowCollapse = (event: DataTableRowEvent) => {
+        const id = event.data.id;
+        setExpandedRows((prev) => {
+            const updated = { ...(prev || {}) };
+            delete updated[id];
+            return updated;
+        });
+    };
+
+    // Allow expansion only if children exist
     const allowExpansion = (rowData: T) =>
         Array.isArray(rowData.children) && rowData.children.length > 0;
 
-    /** ✅ Allow only ONE row to expand at a time */
-    // const onRowExpand = (event: { data: T }) => {
-    const onRowExpand = (event: DataTableRowEvent) => {
-        setExpandedRows({ [event.data.id]: true });
-    };
-
-    const onRowCollapse = () => {
-        setExpandedRows(null);
-    };
-
-    /** Template for expanded content */
+    // CHILD ROW TABLE
     const rowExpansionTemplate = (data: T) => {
-        if (!Array.isArray(data.children) || data.children.length === 0) {
+        if (!data.children?.length) {
             return (
                 <div className="p-3 text-gray-500">
                     No additional details available.
@@ -63,35 +79,16 @@ export default function PrimeReactTreeTable<
 
         const firstChild = data.children[0];
 
-        const headerNameMap: Record<string, string> = {
-            plan_day: "Plan Day",
-            plan_type: "Plan Type",
-            plan_pricing: "Plan Pricing",
-            plan_popular: "Most Popular",
-        };
-
         return (
             <div className="p-3">
-                <h5 className="font-semibold mb-3">
-                    Details for{" "}
-                    {String(
-                        (data as Record<string, unknown>)["category_name"] ??
-                        (data as Record<string, unknown>)["exam_name"] ??
-                        "-"
-                    )}
-                </h5>
+                <h5 className="font-semibold mb-3">Additional Information</h5>
 
-                <DataTable value={data.children} dataKey="id" responsiveLayout="scroll">
-                    {Object.keys(firstChild).map((key, index) => (
-                        // <Column
-                        //     key={index}
-                        //     field={key}
-                        //     header={key.charAt(0).toUpperCase() + key.slice(1)}
-                        // />
+                <DataTable value={data.children} dataKey="session_title">
+                    {Object.keys(firstChild).map((key, idx) => (
                         <Column
-                            key={index}
+                            key={idx}
                             field={key}
-                            header={headerNameMap[key] || key.charAt(0).toUpperCase() + key.slice(1)}
+                            header={headerNameMap[key] || key.toUpperCase()}
                         />
                     ))}
                 </DataTable>
@@ -99,7 +96,6 @@ export default function PrimeReactTreeTable<
         );
     };
 
-    /**  Action buttons */
     const actionBodyTemplate = (rowData: T) => (
         <div className="flex gap-3">
             <Button
@@ -108,8 +104,8 @@ export default function PrimeReactTreeTable<
                 outlined
                 severity="success"
                 onClick={() => onEdit?.(rowData)}
-                className="p-0 flex items-center justify-center"
-                style={{ height: "2rem", width: "2rem", borderRadius: "50%" }}
+                className="p-0"
+                style={{ width: "2rem", height: "2rem" }}
             />
             <Button
                 icon={<RiDeleteBin5Line size={16} />}
@@ -117,8 +113,8 @@ export default function PrimeReactTreeTable<
                 outlined
                 severity="danger"
                 onClick={() => onDelete?.(rowData)}
-                className="p-0 flex items-center justify-center"
-                style={{ height: "2rem", width: "2rem", borderRadius: "50%" }}
+                className="p-0"
+                style={{ width: "2rem", height: "2rem" }}
             />
         </div>
     );
@@ -133,16 +129,13 @@ export default function PrimeReactTreeTable<
                 rows={rows}
                 rowsPerPageOptions={[10, 15, 20]}
                 dataKey="id"
-                expandedRows={expandedRows as DataTableExpandedRows}
+                expandedRows={expandedRows || {}}
                 onRowExpand={onRowExpand}
                 onRowCollapse={onRowCollapse}
                 rowExpansionTemplate={rowExpansionTemplate}
-                tableStyle={{ minWidth: "60rem" }}
             >
-                {/* Expander column */}
                 <Column expander={allowExpansion} style={{ width: "3rem" }} />
 
-                {/* Dynamic columns */}
                 {columns.map((col, idx) => (
                     <Column
                         key={idx}
@@ -153,8 +146,7 @@ export default function PrimeReactTreeTable<
                     />
                 ))}
 
-                {/* Action column */}
-                <Column header="Action" body={actionBodyTemplate}></Column>
+                <Column header="Action" body={actionBodyTemplate} />
             </DataTable>
         </div>
     );

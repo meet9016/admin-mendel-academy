@@ -1,62 +1,54 @@
 "use client";
+
 import { useState, useEffect, useCallback } from "react";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import ComponentCard from "@/components/common/ComponentCard";
-// import { PlusIcon } from "@/icons";
 import { useRouter } from "next/navigation";
-import PrimeReactTable from "@/components/tables/PrimeReactTable";
-import { Tag } from "primereact/tag";
+import PrimeReactTreeTable from "@/components/tables/PrimeReactTreeTable";
 import CommonDialog from "@/components/tables/CommonDialog";
+import { PlusIcon } from "@/icons";
 
-type LiveCoursesType = {
-  id: number;
-  course_title: string;
-  instructor_name: string;
-  sub_scribe_student_count?: string;
-  zoom_link?: string;
-  status?: string;
-  date?: string;
-  createdAt?: string;
+// ---------------------- TYPES ----------------------
+type LiveCourseChild = {
+  session_title: string;
+  session_date: string;
 };
 
+export type FormattedTreeData = {
+  id: string;
+  course_title: string;
+  instructor_name: string;
+  date?: string;
+  createdAt?: string;
+  qualification?: string;
+  children?: LiveCourseChild[];
+};
+
+// ---------------------- MAIN COMPONENT ----------------------
 export default function Page() {
   const router = useRouter();
 
-  const [data, setData] = useState<LiveCoursesType[]>([]);
+  const [data, setData] = useState<FormattedTreeData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<LiveCoursesType | null>(null);
+  const [selectedRow, setSelectedRow] = useState<FormattedTreeData | null>(null);
   const [page, setPage] = useState<number>(1);
   const [rows, setRows] = useState<number>(10);
   const [totalRecords, setTotalRecords] = useState<number>(0);
 
-  const handleDeleteClick = (row: LiveCoursesType) => {
+  // ---------------------- DELETE HANDLER ----------------------
+  const handleDeleteClick = (row: FormattedTreeData) => {
     setSelectedRow(row);
     setIsDeleteModalOpen(true);
   };
 
-  const getLiveCoursesData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await api.get(`${endPointApi.getAllLiveCourses}?page=${page}&limit=${rows}`);
-      setData(res.data.data || []);
-      setTotalRecords(res.data.total);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, rows]);
-
   const confirmDelete = async () => {
     if (!selectedRow) return;
-
     try {
       const res = await api.delete(`${endPointApi.deleteLiveCourses}/${selectedRow.id}`);
-
       if (res?.data?.message) {
-        getLiveCoursesData(); // Refresh the table/list after deletion
+        getLiveCoursesData();
       }
     } catch (error) {
       console.error("Delete error:", error);
@@ -66,70 +58,66 @@ export default function Page() {
     }
   };
 
+  // ---------------------- API CALL + DATA FORMAT ----------------------
+  const getLiveCoursesData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await api.get(`${endPointApi.getAllLiveCourses}?page=${page}&limit=${rows}`);
+
+      const apiData = Array.isArray(res.data.data) ? res.data.data : [];
+
+      // Convert API data → TreeTable Format
+      const formattedData: FormattedTreeData[] = apiData.map((item: any) => {
+        const children =
+          Array.isArray(item?.choose_plan_list) &&
+          item.choose_plan_list.map((p: any) => ({
+            module_title: p?.title || "-",
+            module_number: p?.moduleNumber || "-",
+            price: p?.price || "-",
+          }));
+
+        return {
+          id: String(item.id),
+          course_title: item.course_title ?? "-",
+          instructor_name: item.instructor_name ?? "-",
+          qualification: item.instructor?.qualification ?? "-",
+          date: item.date,
+          createdAt: item.createdAt,
+          children: children || [],
+        };
+      });
+
+
+      setData(formattedData);
+      setTotalRecords(res.data.total);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, rows]);
+
   useEffect(() => {
     getLiveCoursesData();
   }, [getLiveCoursesData]);
+
+  const headerNameMap = {
+    plan_day: "Module Number",
+    plan_type: "Module Name",
+    plan_pricing: "Module Price",
+    plan_popular: "Most Popular",
+  };
 
   return (
     <div className="space-y-6">
       <ComponentCard
         title="Live Courses List"
-      // Plusicon={<PlusIcon />}
-      // name="Add Live Courses"
-      // onAddProductClick="/liveCourses/add"
+        Plusicon={<PlusIcon />}
+        name="Add Live Courses"
+        onAddProductClick="/liveCourses/add"
       >
         <div className="card">
-          {/* <ReactTable
-            selectable={true}
-            data={data}
-            loading={loading}
-            columns={[
-              { field: "course_title", header: "Course Title" },
-              { field: "instructor_name", header: "Instructor Name" },
-              { field: "sub_scribe_student_count", header: "Sub Scribe Count" },
-              { field: "zoom_link", header: "Zoom Link" },
-              {
-                field: "date", header: "Date", body: (row: LiveCoursesType) =>
-                  row.date ? new Date(row.date).toLocaleDateString() : "-",
-              },
-              { field: "status", header: "Status" },
-              {
-                field: "createdAt",
-                header: "Created At",
-                body: (row: LiveCoursesType) =>
-                  row.createdAt ? new Date(row.createdAt).toLocaleDateString() : "-",
-              },
-              {
-                header: "Action",
-                sortable: false,
-                body: (row: LiveCoursesType) => (
-                  <div className="flex gap-5">
-                    <button className="text-green-500 hover:text-green-700"
-                        onClick={() => router.push(`/liveCourses/add?id=${row.id}`)}
-                    >
-                      <FaEdit size={18} />
-                    </button>
-                    <button
-                      className="text-red-500 hover:text-red-700"
-                      onClick={() => handleDeleteClick(row)}
-                    >
-                      <MdDeleteForever size={18} />
-                    </button>
-                  </div>
-                ),
-              }
-            ]}
-             lazy
-            page={page}
-            rows={rows}
-            totalRecords={totalRecords}
-             onPageChange={(newPage: number, newRows: number) => {
-              setPage(newPage);
-              setRows(newRows);
-            }}
-          /> */}
-
-          <PrimeReactTable
+          <PrimeReactTreeTable
             data={data}
             loading={loading}
             totalRecords={totalRecords}
@@ -139,45 +127,21 @@ export default function Page() {
               setRows(newRows);
             }}
             columns={[
-              { field: "course_title", header: "Course Title"},
-              { field: "instructor_name", header: "Instruction Name" },
-              { field: "sub_scribe_student_count", header: " Sub Scribe Count" },
-              { field: "zoom_link", header: "Zoom Link" },
+              { field: "course_title", header: "Course Title" },
+              { field: "instructor_name", header: "Instructor Name" },
               {
-                field: "date", header: "Date", body: (row: LiveCoursesType) =>
-                  row.date ? new Date(row.date).toLocaleDateString() : "-",
-              },
+                field: "qualification",
+                header: "Instructor Qualification",
 
-              {
-                field: "createdAt",
-                header: "Created At",
-                body: (row) => (row.createdAt ? new Date(row.createdAt).toLocaleDateString() : "-"),
-              },
-              {
-                field: "status",
-                header: "Status",
-                body: (row) => {
-                  const status = row.status || "Inactive";
-                  const severity =
-                    status === "Active"
-                      ? "success"
-                      : status === "Pending"
-                        ? "warning"
-                        : "danger";
-                  return <Tag value={status} severity={severity} />;
-                },
               },
             ]}
+            headerNameMap={headerNameMap}
             onEdit={(row) => router.push(`/liveCourses/add?id=${row.id}`)}
             onDelete={handleDeleteClick}
           />
         </div>
-        {/* <ConfirmationModal
-          isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-          onConfirm={confirmDelete}
-        /> */}
       </ComponentCard>
+
       <CommonDialog
         visible={isDeleteModalOpen}
         header="Confirm Delete"

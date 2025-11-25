@@ -12,8 +12,6 @@ const apiAdminInstance = axios.create({
 })
 console.log("baseURL", baseURL);
 
-
-
 export const api = apiAdminInstance;
 
 apiAdminInstance.interceptors.request.use(

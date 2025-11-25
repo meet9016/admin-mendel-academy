@@ -175,6 +175,7 @@ import { useRouter } from "next/navigation";
 import PrimeReactTable from "@/components/tables/PrimeReactTable";
 import CommonDialog from "@/components/tables/CommonDialog";
 import { Tag } from "primereact/tag";
+import { Tooltip } from "primereact/tooltip";
 
 type BlogType = {
   id: number;
@@ -193,7 +194,7 @@ export default function BlogListPage() {
   const [totalRecords, setTotalRecords] = useState<number>(0);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const [selectedRow, setSelectedRow] = useState<BlogType | null>(null);
-
+  
   const getBlogData = useCallback(async () => {
     setLoading(true);
     try {
@@ -250,9 +251,47 @@ export default function BlogListPage() {
           }}
           columns={[
             {
-              field: "exam_name", header: "Exam Name"
+              field: "exam_name",
+              header: "Exam Name",
+              body: (row) => (
+                <>
+                  <Tooltip
+                    target={`.examName-${row.id}`}
+                    content={row.exam_name}
+                    className="small-tooltip "
+                    position="bottom"
+                  />
+                  <div
+                    className={`examName-${row.id} w-[150px] truncate whitespace-nowrap overflow-hidden text-ellipsis cursor-pointer`}
+                  >
+                    {row.exam_name}
+                  </div>
+                </>
+              ),
             },
-            { field: "title", header: "Title" },
+
+            {
+              field: "title",
+              header: "Title",
+              body: (row) => (
+                <>
+                  <Tooltip
+                    target={`.title-${row.id}`}
+                    content={row.title}
+                    className="small-tooltip"
+                    position="bottom"
+                  />
+
+                  {/* Tooltip exactly yahi element par trigger hoga */}
+                  <div
+                    className={`title-${row.id} w-[350px] truncate whitespace-nowrap overflow-hidden text-ellipsis cursor-pointer`}
+                  >
+                    {row.title}
+                  </div>
+                </>
+              ),
+            },
+
             {
               field: "createdAt",
               header: "Created At",
