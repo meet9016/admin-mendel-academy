@@ -1,183 +1,21 @@
-// "use client";
-// import { useState, useEffect, useCallback } from "react";
-// import { api } from "@/utils/axiosInstance";
-// import endPointApi from "@/utils/endPointApi";
-// import ComponentCard from "@/components/common/ComponentCard";
-// import { PlusIcon } from "@/icons";
-// import { FaEdit } from "react-icons/fa";
-// import { MdDeleteForever } from "react-icons/md";
-// import ConfirmationModal from "@/components/common/ConfirmationModal";
-// import { useRouter } from "next/navigation";
-// import PrimeReactTable from "@/components/tables/PrimeReactTable";
-
-// type BlogType = {
-//   id: number;
-//   title: string;
-//   exam_name: string;
-//   author?: string;
-//   createdAt?: string;
-// };
-
-// export default function Page() {
-//   const router = useRouter();
-
-//   const [data, setData] = useState<BlogType[]>([]);
-//   const [loading, setLoading] = useState<boolean>(false);
-//   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-//   const [selectedRow, setSelectedRow] = useState<BlogType | null>(null);
-//   const [page, setPage] = useState(1);
-//   const [rows, setRows] = useState(5);
-//   const [totalRecords, setTotalRecords] = useState(0);
-
-//   const handleDeleteClick = (row: BlogType) => {
-//     setSelectedRow(row);
-//     setIsDeleteModalOpen(true);
-//   };
-
-//   const getBlogData = useCallback(async () => {
-//     setLoading(true);
-//     try {
-//       const res = await api.get(`${endPointApi.getAllBlogs}?page=${page}&limit=${rows}`);
-//       setData(res.data.data || []);
-//       setTotalRecords(res.data.total);
-//     } catch (err) {
-//       console.error(err);
-//     } finally {
-//       setLoading(false);
-//     }
-//   }, [page, rows]);
-
-//   const confirmDelete = async () => {
-//     if (!selectedRow) return;
-
-//     try {
-//       const res = await api.delete(`${endPointApi.deleteBlog}/${selectedRow.id}`);
-
-//       if (res?.data?.message) {
-//         getBlogData(); // Refresh the table/list after deletion
-//       }
-//     } catch (error) {
-//       console.error("Delete error:", error);
-//     } finally {
-//       setIsDeleteModalOpen(false);
-//       setSelectedRow(null);
-//     }
-//   };
-
-
-//   useEffect(() => {
-//     getBlogData();
-//   }, [getBlogData]);
-
-//   return (
-//     <div className="space-y-6">
-//       <ComponentCard
-//         title="Blog List"
-//         Plusicon={<PlusIcon />}
-//         name="Add Blog"
-//         onAddProductClick="/blogs/add"
-//       >
-//         <div className="card">
-//           {/* <ReactTable
-//             selectable={true}
-//             data={data}
-//             loading={loading}
-//             columns={[
-//               { field: "exam_name", header: "Exam Name" },
-//               { field: "title", header: "Title" },
-//               // {
-//               //   field: "sort_description",
-//               //   header: "sort_description",
-//               //   body: (row) => row?.sort_description ?? "-",
-//               // },
-//               // {
-//               //   field: "date", header: "Date", body: (row) =>
-//               //     row.date ? new Date(row.date).toLocaleDateString() : "-",
-//               // },
-//               { field: "status", header: "Status" },
-//               {
-//                 field: "createdAt",
-//                 header: "Created At",
-//                 // body: (row) =>
-//                 //   row.createdAt ? new Date(row.createdAt).toLocaleDateString() : "-",
-//               },
-//               {
-//                 header: "Action",
-//                 sortable: false,
-//                 body: (row: BlogType) => (
-//                   <div className="flex gap-5">
-//                     <button className="text-green-500 hover:text-green-700"
-//                       onClick={() => router.push(`/blogs/add?id=${row.id}`)}
-//                     >
-//                       <FaEdit size={18} />
-//                     </button>
-//                     <button
-//                       className="text-red-500 hover:text-red-700"
-//                       onClick={() => handleDeleteClick(row)}
-//                     >
-//                       <MdDeleteForever size={18} />
-//                     </button>
-//                   </div>
-//                 ),
-//               }
-//             ]}
-//             //  paginator
-//             lazy
-//             page={page}
-//             rows={rows}
-//             totalRecords={totalRecords}
-//             onPageChange={(newPage: number, newRows: number) => {
-//               setPage(newPage);
-//               setRows(newRows);
-//             }}
-//           /> */}
-
-//           <PrimeReactTable />
-//         </div>
-//         <ConfirmationModal
-//           isOpen={isDeleteModalOpen}
-//           onClose={() => setIsDeleteModalOpen(false)}
-//           onConfirm={confirmDelete}
-//         />
-//       </ComponentCard>
-//     </div>
-
-//   );
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import ComponentCard from "@/components/common/ComponentCard";
 import { PlusIcon } from "@/icons";
-import { useRouter } from "next/navigation";
 import PrimeReactTable from "@/components/tables/PrimeReactTable";
 import CommonDialog from "@/components/tables/CommonDialog";
 import { Tag } from "primereact/tag";
 import { Tooltip } from "primereact/tooltip";
+import { Skeleton } from "primereact/skeleton";
 
-type BlogType = {
+/* ------------------------------------------------------------------ */
+/* Types                                                              */
+/* ------------------------------------------------------------------ */
+type Blog = {
   id: number;
   title: string;
   exam_name: string;
@@ -185,52 +23,105 @@ type BlogType = {
   status?: string;
 };
 
+type Col = "exam_name" | "title" | "createdAt" | "status";
+
+/* ------------------------------------------------------------------ */
+/* Helpers                                                            */
+/* ------------------------------------------------------------------ */
+const statusSeverity = (s?: string): "success" | "warning" | "danger" =>
+  s === "Active" ? "success" : s === "Pending" ? "warning" : "danger";
+
+const truncate = (str: string, len: number) =>
+  str.length > len ? `${str.slice(0, len)}…` : str;
+
+/* ------------------------------------------------------------------ */
+/* Component                                                          */
+/* ------------------------------------------------------------------ */
 export default function BlogListPage() {
   const router = useRouter();
-  const [data, setData] = useState<BlogType[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [page, setPage] = useState<number>(1);
-  const [rows, setRows] = useState<number>(10);
-  const [totalRecords, setTotalRecords] = useState<number>(0);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
-  const [selectedRow, setSelectedRow] = useState<BlogType | null>(null);
-  
-  const getBlogData = useCallback(async () => {
-    setLoading(true);
+
+  /* -------------------- State ------------------------------------ */
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  const [rows] = useState(10);
+
+  const [toDelete, setToDelete] = useState<Blog | null>(null);
+
+  /* -------------------- Data fetch -------------------------------- */
+  const fetchBlogs = useCallback(async () => {
     try {
-      const res = await api.get(`${endPointApi.getAllBlogs}?page=${page}&rows=${rows}`);
-      setData(res.data.data || []);
-      setTotalRecords(res.data.total || 0);
-    } catch (err) {
-      console.error(err);
+      const { data } = await api.get<{
+        data: Blog[];
+        total: number;
+      }>(`${endPointApi.getAllBlogs}`);
+      setBlogs(data.data);
+      setTotal(data.total);
     } finally {
       setLoading(false);
     }
-  }, [page, rows]);
+  }, []);
 
   useEffect(() => {
-    getBlogData();
-  }, [getBlogData]);
+    fetchBlogs();
+  }, [fetchBlogs]);
 
+  /* -------------------- Actions ----------------------------------- */
+  const onDelete = useCallback((b: Blog) => setToDelete(b), []);
 
-  const handleDeleteClick = (row: BlogType) => {
-    setSelectedRow(row);
-    setIsDeleteModalOpen(true);
-  };
+  const confirmDelete = useCallback(async () => {
+    if (!toDelete) return;
+    await api.delete(`${endPointApi.deleteBlog}/${toDelete.id}`);
+    setBlogs((prev) => prev.filter((b) => b.id !== toDelete.id));
+    setTotal((t) => t - 1);
+    setToDelete(null);
+  }, [toDelete]);
 
-  const confirmDelete = async () => {
-    if (!selectedRow) return;
-    try {
-      await api.delete(`${endPointApi.deleteBlog}/${selectedRow.id}`);
-      getBlogData();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsDeleteModalOpen(false);
-      setSelectedRow(null);
-    }
-  };
+  /* -------------------- Columns (memoised) ------------------------ */
+  const columns = useMemo(
+    () => [
+      {
+        field: "exam_name" as Col,
+        header: "Exam Name",
+        body: ({ id, exam_name }: Blog) => (
+          <>
+            <Tooltip target={`.exam-${id}`} content={exam_name} position="bottom" />
+            <div className={`exam-${id} w-[150px] truncate cursor-pointer`}>
+              {truncate(exam_name, 22)}
+            </div>
+          </>
+        ),
+      },
+      {
+        field: "title" as Col,
+        header: "Title",
+        body: ({ id, title }: Blog) => (
+          <>
+            <Tooltip target={`.title-${id}`} content={title} position="bottom" />
+            <div className={`title-${id} w-[350px] truncate cursor-pointer`}>
+              {truncate(title, 50)}
+            </div>
+          </>
+        ),
+      },
+      {
+        field: "createdAt" as Col,
+        header: "Created At",
+        body: ({ createdAt }: Blog) =>
+          createdAt ? new Date(createdAt).toLocaleDateString() : "-",
+      },
+      {
+        field: "status" as Col,
+        header: "Status",
+        body: ({ status }: Blog) => (
+          <Tag value={status || "Inactive"} severity={statusSeverity(status)} />
+        ),
+      },
+    ],
+    []
+  );
 
+  /* -------------------- Render ------------------------------------ */
   return (
     <div className="space-y-6">
       <ComponentCard
@@ -239,97 +130,35 @@ export default function BlogListPage() {
         name="Add Blog"
         onAddProductClick="/blogs/add"
       >
-
-        <PrimeReactTable
-          data={data}
-          loading={loading}
-          totalRecords={totalRecords}
-          rows={rows}
-          onPageChange={(newPage, newRows) => {
-            setPage(newPage);
-            setRows(newRows);
-          }}
-          columns={[
-            {
-              field: "exam_name",
-              header: "Exam Name",
-              body: (row) => (
-                <>
-                  <Tooltip
-                    target={`.examName-${row.id}`}
-                    content={row.exam_name}
-                    className="small-tooltip "
-                    position="bottom"
-                  />
-                  <div
-                    className={`examName-${row.id} w-[150px] truncate whitespace-nowrap overflow-hidden text-ellipsis cursor-pointer`}
-                  >
-                    {row.exam_name}
-                  </div>
-                </>
-              ),
-            },
-
-            {
-              field: "title",
-              header: "Title",
-              body: (row) => (
-                <>
-                  <Tooltip
-                    target={`.title-${row.id}`}
-                    content={row.title}
-                    className="small-tooltip"
-                    position="bottom"
-                  />
-
-                  {/* Tooltip exactly yahi element par trigger hoga */}
-                  <div
-                    className={`title-${row.id} w-[350px] truncate whitespace-nowrap overflow-hidden text-ellipsis cursor-pointer`}
-                  >
-                    {row.title}
-                  </div>
-                </>
-              ),
-            },
-
-            {
-              field: "createdAt",
-              header: "Created At",
-              body: (row) => (row.createdAt ? new Date(row.createdAt).toLocaleDateString() : "-"),
-            },
-            {
-              field: "status",
-              header: "Status",
-              body: (row) => {
-                const status = row.status || "Inactive";
-                const severity =
-                  status === "Active"
-                    ? "success"
-                    : status === "Pending"
-                      ? "warning"
-                      : "danger";
-                return <Tag value={status} severity={severity} />;
-              },
-            },
-          ]}
-          onEdit={(row) => router.push(`/blogs/add?id=${row.id}`)}
-          onDelete={handleDeleteClick}
-        />
+        {
+          loading ? (
+            renderSkeletonRows()
+          ) : (
+            <PrimeReactTable
+              data={blogs}
+              loading={loading}
+              totalRecords={total}
+              rows={rows}
+              columns={columns}
+              onEdit={(b) => router.push(`/blogs/add?id=${b.id}`)}
+              onDelete={onDelete}
+            />
+          )
+        }
       </ComponentCard>
 
-      {/*  Delete Confirmation (same as PrimeReact style) */}
       <CommonDialog
-        visible={isDeleteModalOpen}
+        visible={!!toDelete}
         header="Confirm Delete"
         footerType="confirm-delete"
-        onHide={() => setIsDeleteModalOpen(false)}
+        onHide={() => setToDelete(null)}
         onSave={confirmDelete}
       >
         <div className="confirmation-content flex items-center gap-3">
           <i className="pi pi-exclamation-triangle text-3xl text-red-500" />
-          {selectedRow && (
+          {toDelete && (
             <span>
-              Are you sure you want to delete <b>{selectedRow.title}</b>?
+              Are you sure you want to delete <b>{toDelete.title}</b>?
             </span>
           )}
         </div>
@@ -338,4 +167,19 @@ export default function BlogListPage() {
   );
 }
 
-
+const renderSkeletonRows = () => (
+  <div className="card p-4">
+    {Array.from({ length: 10 }).map((_, i) => (
+      <div key={i} className="flex items-center py-2 border-b">
+        <Skeleton size="1.5rem" className="mr-3" />
+        <Skeleton width="15rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="25rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="20rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="10rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="10rem" height="2.2rem" className="mr-4" />
+        <Skeleton shape="circle" size="2rem" className="mr-2" />
+        <Skeleton shape="circle" size="2rem" />
+      </div>
+    ))}
+  </div>
+);

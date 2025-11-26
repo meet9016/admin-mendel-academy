@@ -25,7 +25,6 @@ interface PrimeReactTableProps<T> {
   columns: ColumnType<T>[];
   totalRecords?: number;
   rows?: number;
-  onPageChange?: (page: number, rows: number) => void;
   selection?: T[];
   onSelectionChange?: (selected: T[]) => void;
   onEdit?: (row: T) => void;
@@ -38,13 +37,11 @@ export default function PrimeReactTable<T extends { id: number; status?: string 
   data,
   loading,
   columns,
-  totalRecords = 0,
   rows = 10,
   onEdit,
   onDelete,
   onView,
 }: PrimeReactTableProps<T>) {
-  const [selectedRows, setSelectedRows] = useState<T[]>([]);
   const pathname = usePathname();
 
   // Action Buttons
@@ -108,48 +105,43 @@ export default function PrimeReactTable<T extends { id: number; status?: string 
       </>
     )
   };
+   const [selectedCustomers, setSelectedCustomers] = useState([]);
 
-  return (
-    <div className="card">
-      {/* @ts-expect-error PrimeReact type mismatch (safe to ignore) */}
-      <DataTable<T>
-        value={data}
-        // loading={loading}
+ return (
+  <div className="card">
+    {/* @ts-expect-error PrimeReact type mismatch (safe to ignore) */}
+    <DataTable<T>
+     value={data}
         paginator
-        emptyMessage="No data found"
-        totalRecords={totalRecords}
         rows={rows}
-        rowsPerPageOptions={[10, 15, 20]}
-        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+         className="p-datatable-sm p-fluid" 
+        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+        rowsPerPageOptions={[10, 25, 50]}
         dataKey="id"
-        lazy
-        selection={selectedRows}
-        onSelectionChange={(e) => setSelectedRows((e.value as T[]) ?? [])}
-      >
-        {/* Checkbox Selection Column */}
-        <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} exportable={false} />
+        selectionMode="checkbox"
+        selection={selectedCustomers}
+        onSelectionChange={(e) => setSelectedCustomers(e.value)}
+        emptyMessage={loading ? null : "No customers found."}  
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+    >
+      <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} exportable={false} />
 
-        {/* Dynamic Columns */}
-        {columns.map((col, idx) => (
-          <Column
-            key={idx}
-            field={col.field as string}
-            header={col.header}
-            sortable={col.sortable}
-            // body={col.body}
-            body={(rowData) =>
-              loading
-                ? <Skeleton width="10rem" height="2rem" />
-                : col.body
-                  ? col.body(rowData)
-                  : rowData[col.field as keyof T]
-            }
-          />
-        ))}
+      {columns.map((col, idx) => (
+        <Column
+          key={idx}
+          field={col.field as string}
+          header={col.header}
+          sortable={col.sortable}
+          body={(rowData) =>
+             col.body
+                ? col.body(rowData)
+                : rowData[col.field as keyof T]
+          }
+        />
+      ))}
 
-        {/* Action Column */}
-        <Column header="Action" body={actionBodyTemplate}></Column>
-      </DataTable>
-    </div>
-  );
+      <Column header="Action" body={actionBodyTemplate} />
+    </DataTable>
+  </div>
+);
 }
