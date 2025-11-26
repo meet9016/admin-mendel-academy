@@ -131,7 +131,7 @@ export default function BlogListPage() {
         onAddProductClick="/blogs/add"
       >
         {
-          loading ? (
+          !loading ? (
             renderSkeletonRows()
           ) : (
             <PrimeReactTable
@@ -176,7 +176,7 @@ const renderSkeletonRows = () => (
         <Skeleton width="25rem" height="2.2rem" className="mr-4" />
         <Skeleton width="20rem" height="2.2rem" className="mr-4" />
         <Skeleton width="10rem" height="2.2rem" className="mr-4" />
-        <Skeleton width="10rem" height="2.2rem" className="mr-4" />
+        {/* <Skeleton width="10rem" height="2.2rem" className="mr-4" /> */}
         <Skeleton shape="circle" size="2rem" className="mr-2" />
         <Skeleton shape="circle" size="2rem" />
       </div>
