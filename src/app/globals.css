@@ -200,7 +200,7 @@
 }
 
 @utility menu-item-active {
-  @apply bg-[#ffcc09] text-white dark:bg-brand-500/[0.12] dark:text-brand-400;
+  @apply bg-[#ffcc09] text-black dark:bg-brand-500/[0.12] dark:text-brand-400;
 }
 
 @utility menu-item-inactive {
@@ -212,7 +212,7 @@
 }
 
 @utility menu-item-icon-active {
-  @apply text-white dark:text-brand-400;
+  @apply text-black dark:text-brand-400;
 }
 
 @utility menu-item-icon-inactive {
@@ -846,4 +846,10 @@ tr.selected-row {
   &:checked{
     background-color: #FFCA00 ;
   }
+}
+
+.small-tooltip .p-tooltip-text {
+  font-size: 11px !important;
+  padding: 4px 8px !important;
+  line-height: 1.2 !important;
 }

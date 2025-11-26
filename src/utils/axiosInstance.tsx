@@ -10,9 +10,7 @@ const apiAdminInstance = axios.create({
   //   'Content-Type': 'multipart/form-data'
   // }
 })
-console.log("baseURL",baseURL);
-
-
+console.log("baseURL", baseURL);
 
 export const api = apiAdminInstance;
 
@@ -35,7 +33,7 @@ apiAdminInstance.interceptors.response.use(
   },
   error => {
     const { response } = error;
-  
+
     if (response.status === 401) {
       localStorage.removeItem('auth_token');
       window.location.href = '/login';

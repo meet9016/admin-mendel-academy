@@ -1,42 +1,37 @@
-"use client";
-import React, { useCallback, useEffect, useState } from "react";
-// import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-// import { PlusIcon } from "@/icons";
-import ComponentCard from "@/components/common/ComponentCard";
-import { api } from "@/utils/axiosInstance";
-import endPointApi from "@/utils/endPointApi";
-import { useRouter } from "next/navigation";
-import PrimeReactTable from "@/components/tables/PrimeReactTable";
-import CommonDialog from "@/components/tables/CommonDialog";
-import { PlusIcon } from "@/icons";
+'use client';
+import ComponentCard from '@/components/common/ComponentCard'
+import CommonDialog from '@/components/tables/CommonDialog';
+import PrimeReactTable from '@/components/tables/PrimeReactTable'
+import { PlusIcon } from '@/icons'
+import { api } from '@/utils/axiosInstance'
+import endPointApi from '@/utils/endPointApi'
+import { useRouter } from 'next/navigation';
+import React, { useCallback, useEffect, useState } from 'react'
 
-type QuestionType = {
-  id: number;
+type upcomeingcourse = {
+  id: number
   title: string;
-  price?: string;
-  features?: string;
-  rating?: string;
-  tag?: string;
-  total_reviews?: string;
-  // duration?: string;
-  createdAt?: string;
-  description?: string;
-};
+  level: string;
+  type: string;
+  startDate: number;
+  waitlistSpots: number;
+  createdAt: string;
+}
 
-export default function Page() {
+const page = () => {
   const router = useRouter();
-
-  const [data, setData] = useState<QuestionType[]>([]);
+  const [data, setData] = useState<upcomeingcourse[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [selectedRow, setSelectedRow] = useState<QuestionType | null>(null);
-  const [rows, setRows] = useState<number>(10);
   const [totalRecords, setTotalRecords] = useState<number>(0);
+  const [page, setPage] = useState<number>(1);
+  const [rows, setRows] = useState<number>(10);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const [selectedRow, setSelectedRow] = useState<upcomeingcourse | null>(null);
 
-  const geQuestionData = useCallback(async () => {
+  const getupComeingcourse = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.get(`${endPointApi.getAllQuestion}`);
+      const res = await api.get(`${endPointApi.getAllUpcomeing}?page=${page}&limit=${rows}`);
       setData(res.data.data || []);
       setTotalRecords(res.data.total);
     } catch (err) {
@@ -44,14 +39,13 @@ export default function Page() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page, rows]);
 
   useEffect(() => {
-    geQuestionData();
-  }, [geQuestionData]);
+    getupComeingcourse();
+  }, [getupComeingcourse]);
 
-
-  const handleDeleteClick = (row: QuestionType) => {
+  const handleDeleteClick = (row: upcomeingcourse) => {
     setSelectedRow(row);
     setIsDeleteModalOpen(true);
   };
@@ -59,8 +53,8 @@ export default function Page() {
   const confirmDelete = async () => {
     if (!selectedRow) return;
     try {
-      await api.delete(`${endPointApi.deleteQuestion}/${selectedRow.id}`);
-      geQuestionData();
+      await api.delete(`${endPointApi.deleteUpcomeing}/${selectedRow.id}`);
+      getupComeingcourse();
     } catch (err) {
       console.error(err);
     } finally {
@@ -70,13 +64,12 @@ export default function Page() {
   };
   return (
     <div>
-      {/* <PageBreadcrumb pageTitle="Question" /> */}
       <div className="space-y-6">
         <ComponentCard
-          title="Question List"
+          title="Upcomeing course List"
           Plusicon={<PlusIcon />}
-          name="Add Question"
-          onAddProductClick="/question/add"
+          name="Add Upcomeing course"
+          onAddProductClick="/upcomingCourse/add"
         >
           <div className="card">
             <PrimeReactTable
@@ -84,25 +77,27 @@ export default function Page() {
               loading={loading}
               totalRecords={totalRecords}
               rows={rows}
+              onPageChange={(newPage, newRows) => {
+                setPage(newPage);
+                setRows(newRows);
+              }}
               columns={[
                 { field: "title", header: "Title" },
-                { field: "tag", header: "Tag" },
-                { field: "rating", header: "Rating" },
-                { field: "features", header: "Features" },
-                { field: "price", header: "Price"},
-                // { field: "description", header: "Description", sortable: true },
+                { field: "level", header: "Level" },
+                { field: "type", header: "Type" },
+                { field: "startDate", header: "Date" },
+                { field: "waitlistSpots", header: "Whishlist Spot" },
                 {
                   field: "createdAt",
                   header: "Created At",
                   body: (row) => (row.createdAt ? new Date(row.createdAt).toLocaleDateString() : "-"),
                 },
               ]}
-              onEdit={(row) => router.push(`/question/add?id=${row.id}`)}
+              onEdit={(row) => router.push(`/upcomingCourse/add?id=${row.id}`)}
               onDelete={handleDeleteClick}
             />
           </div>
         </ComponentCard>
-
         <CommonDialog
           visible={isDeleteModalOpen}
           header="Confirm Delete"
@@ -119,8 +114,9 @@ export default function Page() {
             )}
           </div>
         </CommonDialog>
-        {/* <Question /> */}
       </div>
     </div>
-  );
+  )
 }
+
+export default page

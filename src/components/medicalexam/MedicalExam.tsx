@@ -15,6 +15,8 @@ import endPointApi from "@/utils/endPointApi";
 import DropzoneComponent from "../blogs/DropZone";
 import EnrollSection from "./EnrollSection";
 import { decodeHtml } from "@/utils/helper";
+import { examListSchema } from "@/ValidationSchema/validationSchema";
+import { toast } from "react-toastify";
 
 interface PlanData {
     id: number | string;
@@ -53,7 +55,7 @@ const MedicalExam = () => {
         { value: "International Exams", label: "International Exams" },
     ];
 
-    const [formErrors, setFormErrors] = useState<Record<string, string> | null>(null);
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [preview, setPreview] = useState<string | null>(null);
     const [previewWho, setPreviewWho] = useState<string | null>(null);
 
@@ -79,13 +81,14 @@ const MedicalExam = () => {
         title: "",
         description: "",
         image: null as File | null,
+
     });
     const [mainImage, setMainImage] = useState<File | null>(null);
 
     //  Handle updates to any field in formData
     const handleChange = <K extends keyof FormData>(field: K, value: FormData[K]) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
-        setFormErrors((prev) => ({ ...prev, [field]: "" }));
+        setErrors((prev) => ({ ...prev, [field]: "" }));
     };
 
     //  Steps (array)
@@ -102,7 +105,7 @@ const MedicalExam = () => {
         const updated = [...formData.examSteps];
         updated[index] = value;
         handleChange("examSteps", updated);
-        setFormErrors((prev) => ({
+        setErrors((prev) => ({
             ...prev,
             [`examSteps[${index}]`]: "",
         }));
@@ -129,25 +132,24 @@ const MedicalExam = () => {
     };
 
 
-    //  Validate and Submit
-    // const handleSave = async () => {
-    //     try {
-    //         const valid = await FormSchema.validate(formData, { abortEarly: false });
-    //         setFormErrors(null);
-    //         console.log(" Validated Data:", valid);
-    //     } catch (err: any) {
-    //         const formatted: Record<string, string> = {};
-    //         if (err.inner && err.inner.length) {
-    //             err.inner.forEach((e: any) => {
-    //                 if (e.path) formatted[e.path] = e.message;
-    //             });
-    //         } else if (err.path) {
-    //             formatted[err.path] = err.message;
-    //         }
-    //         setFormErrors(formatted);
-    //         console.log(" Validation Errors:", formatted);
-    //     }
-    // };
+    const validate = async () => {
+        try {
+            console.log("aaa")
+            await examListSchema.validate(formData, { abortEarly: false });
+            console.log("aaa11111")
+
+            setErrors({});
+
+            return true;
+        } catch (err: any) {
+            const newErrors: any = {};
+            err.inner.forEach((e: any) => {
+                newErrors[e.path] = e.message;
+            });
+            setErrors(newErrors);
+            return false;
+        }
+    }
 
     useEffect(() => {
         const fetchById = async () => {
@@ -221,7 +223,10 @@ const MedicalExam = () => {
         fetchById();
     }, [id]);
 
+
     const handleSave = async () => {
+        const isValid = await validate();
+        if (!isValid) return;
         try {
             const formDataToSend = new FormData();
             // Category
@@ -273,8 +278,10 @@ const MedicalExam = () => {
 
             if (id) {
                 res = await api.put(`${endPointApi.updateExamList}/${id}`, formDataToSend);
+                toast.success(res.data?.message);
             } else {
                 res = await api.post(`${endPointApi.createExamList}`, formDataToSend);
+                toast.success(res.data?.message);
             }
 
             if (res.data) {
@@ -283,6 +290,7 @@ const MedicalExam = () => {
                 console.log("API Failed");
             }
         } catch (err) {
+            toast.error("Something went wrong! Please try again.");
             console.log("ERROR:", err);
         }
     };
@@ -299,9 +307,10 @@ const MedicalExam = () => {
                             placeholder="Select category"
                             value={formData.category}
                             onChange={(value: string) => handleChange("category", value)}
-                            error={!!formErrors?.category}
-                            hint={formErrors?.category}
+                            error={!!errors?.category}
+                        // hint={formErrors?.category}
                         />
+                        {errors.category && <p className="text-sm text-error-500 mt-1">{errors.category}</p>}
                     </div>
 
                     <div>
@@ -313,9 +322,10 @@ const MedicalExam = () => {
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                 handleChange("examName", e.target.value)
                             }
-                            error={!!formErrors?.examName}
-                            hint={formErrors?.examName}
+                            error={!!errors?.examName}
+                        // hint={formErrors?.examName}
                         />
+                        {errors.examName && <p className="text-sm text-error-500 mt-1">{errors.examName}</p>}
                     </div>
 
                     <div className="flex flex-wrap items-center gap-8">
@@ -349,9 +359,10 @@ const MedicalExam = () => {
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                 handleChange("country", e.target.value)
                             }
-                        // error={!!formErrors?.examName}
+                            error={!!errors?.country}
                         // hint={formErrors?.examName}
                         />
+                        {errors.country && <p className="text-sm text-error-500 mt-1">{errors.country}</p>}
                     </div>
                     <div>
                         <Label>Title</Label>
@@ -362,7 +373,9 @@ const MedicalExam = () => {
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                 handleChange("title", e.target.value)
                             }
+                            error={!!errors?.title}
                         />
+                        {errors.title && <p className="text-sm text-error-500 mt-1">{errors.title}</p>}
                     </div>
                 </div>
 
@@ -390,10 +403,14 @@ const MedicalExam = () => {
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                         handleStepChange(index, e.target.value)
                                     }
-                                    error={!!formErrors?.[`examSteps[${index}]`]}
-                                    hint={formErrors?.[`examSteps[${index}]`]}
-
+                                    error={!!errors?.[`examSteps[${index}]`]}
+                                // hint={formErrors?.[`examSteps[${index}]`]
                                 />
+                                {errors[`examSteps[${index}]`] && (
+                                    <p className="text-sm text-error-500 mt-1">
+                                        {errors[`examSteps[${index}]`]}
+                                    </p>
+                                )}
                                 {formData.examSteps.length > 1 && (
                                     <button
                                         type="button"
@@ -418,12 +435,9 @@ const MedicalExam = () => {
                             value={formData.description}
                             onTextChange={(e) => {
                                 handleChange("description", e.htmlValue ?? "");
-                                setFormErrors((prev) => ({ ...prev, description: "" }));
                             }}
                         />
-                        {formErrors?.description && (
-                            <p className="text-red-500 text-sm">{formErrors.description}</p>
-                        )}
+                        {errors.description && <p className="text-sm text-error-500 mt-1">{errors.description}</p>}
                     </div>
                     <div>
                         <Label>Select Image</Label>
@@ -443,6 +457,10 @@ const MedicalExam = () => {
                     onChange={(data) => setEnrollData(data)}
                     previewWho={previewWho}
                     setPreviewWho={setPreviewWho}
+                errors={{
+                    title: errors["enrollData.title"],
+                    description: errors["enrollData.description"]
+                }}
                 />
             </div>
 
@@ -455,7 +473,17 @@ const MedicalExam = () => {
                         data={plan}
                         onChange={(updated: PlanData) => handlePlanChange(index, updated)}
                         onPopularChange={() => handlePopularChange(index)}
-                    // errors={formErrors?.[`plans[${index}]`] || {}}
+                        // errors={formErrors?.[`plans[${index}]`] || {}}
+                        errors={{
+                            planDay: errors[`plans[${index}].planDay`],
+                            planPrice: errors[`plans[${index}].planPrice`],
+                            planType: errors[`plans[${index}].planType`],
+                            ...Object.fromEntries(
+                                Object.entries(errors).filter(([key]) =>
+                                    key.startsWith(`plans[${index}].planSubtitles`)
+                                )
+                            )
+                        }}
                     />
                 ))}
             </div>
@@ -468,7 +496,6 @@ const MedicalExam = () => {
                     Cancel
                 </Button>
             </div>
-
         </div>
     );
 };

@@ -14,11 +14,12 @@ interface EnrollData {
 interface EnrollSectionProps {
   data: EnrollData;
   onChange: (data: EnrollData) => void;
-  previewWho: string | null; // ✅ matches useState<string | null>
+  previewWho: string | null; //  matches useState<string | null>
   setPreviewWho: React.Dispatch<React.SetStateAction<string | null>>;
+  errors?: { title?: string; description?: string };
 }
 
-const EnrollSection: React.FC<EnrollSectionProps> = ({ data, onChange, previewWho, setPreviewWho }) => {
+const EnrollSection: React.FC<EnrollSectionProps> = ({ data, onChange, previewWho, setPreviewWho, errors }) => {
 
   const handleChange = (field: keyof EnrollData, value: any) => {
     onChange({ ...data, [field]: value });
@@ -27,7 +28,7 @@ const EnrollSection: React.FC<EnrollSectionProps> = ({ data, onChange, previewWh
   return (
     <div className="space-y-6">
       <ComponentCard title="Add Enroll" name="">
-        {/* ✅ Title Input */}
+        {/* Title Input */}
         <div className="grid grid-cols-1 gap-6">
           <div>
             <Label>Title</Label>
@@ -37,10 +38,13 @@ const EnrollSection: React.FC<EnrollSectionProps> = ({ data, onChange, previewWh
               value={data.title}
               onChange={(e) => handleChange("title", e.target.value)}
             />
+            {errors?.title && (
+              <p className="text-sm text-error-500 mt-1">{errors.title}</p>
+            )}
           </div>
         </div>
 
-        {/* ✅ Description Editor */}
+        {/*  Description Editor */}
         <div className="grid grid-cols-2 gap-6">
           <div>
             <Label>Description</Label>
@@ -51,15 +55,18 @@ const EnrollSection: React.FC<EnrollSectionProps> = ({ data, onChange, previewWh
                 handleChange("description", e.htmlValue ?? "")
               }
             />
+            {errors?.description && (
+              <p className="text-sm text-error-500 mt-1">{errors.description}</p>
+            )}
           </div>
           <div>
-              <Label>Select Image</Label>
-        {/* ✅ Image Dropzone */}
-        <DropzoneComponent
-          preview={previewWho}
-          setPreview={setPreviewWho}
-          onFileSelect={(file: File) => handleChange("image", file)}
-        />
+            <Label>Select Image</Label>
+            {/*  Image Dropzone */}
+            <DropzoneComponent
+              preview={previewWho}
+              setPreview={setPreviewWho}
+              onFileSelect={(file: File) => handleChange("image", file)}
+            />
           </div>
         </div>
 

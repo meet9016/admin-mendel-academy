@@ -14,6 +14,8 @@ import Radio from "../form/input/Radio";
 import DatePicker from "../form/date-picker";
 import { Editor, EditorTextChangeEvent } from "primereact/editor";
 import { decodeHtml } from "@/utils/helper";
+import { prerecordSchema } from "@/ValidationSchema/validationSchema";
+import { toast } from "react-toastify";
 
 const categoryOptions = [
   { value: "3", label: "3 Month" },
@@ -32,7 +34,7 @@ interface FormDataType {
   duration: string;
   description: string;
   date: string;
-  status: string; // ✅ Add this field
+  status: string; //  Add this field
 }
 const Prerecorded = () => {
   const router = useRouter();
@@ -51,16 +53,7 @@ const Prerecorded = () => {
     status: "Active",
   });
 
-  // const [errors, setErrors] = useState({
-  //   title: "",
-  //   vimeo_video_id: "",
-  //   price: "",
-  //   duration: "",
-  //   description: "",
-  //   date: "",
-  // });
   const [errors, setErrors] = useState<Partial<Record<keyof FormDataType, string>>>({});
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
@@ -73,7 +66,6 @@ const Prerecorded = () => {
         const data = res.data || {};
         const decodedDescription = decodeHtml(data.description ?? "");
 
-        // Ensure duration is a string for select matching
         setFormData({
           title: data.title ?? "",
           category: data.category ?? "",
@@ -110,55 +102,70 @@ const Prerecorded = () => {
     }));
   };
 
-  // 📅 Handle date selection
+  //  Handle date selection
   const handleDateChange = (_dates: unknown, currentDateString: string) => {
     setFormData((prev) => ({ ...prev, date: currentDateString }));
   };
 
-  // 🔘 Handle radio button selection
+  //  Handle radio button selection
   const handleRadioChange = (value: string) => {
     setFormData((prev) => ({ ...prev, status: value }));
   };
 
-  const validate = () => {
-    const newErrors = {
-      title: "",
-      price: "",
-      duration: "",
-      description: "",
-    };
+  // const validate = () => {
+  //   const newErrors = {
+  //     title: "",
+  //     price: "",
+  //     duration: "",
+  //     description: "",
+  //   };
 
-    let isValid = true;
+  //   let isValid = true;
 
-    if (!formData.title) {
-      newErrors.title = "Title is required";
-      isValid = false;
+  //   if (!formData.title) {
+  //     newErrors.title = "Title is required";
+  //     isValid = false;
+  //   }
+
+  //   if (!formData.price) {
+  //     newErrors.price = "Price is required";
+  //     isValid = false;
+  //   }
+
+  //   if (!formData.duration) {
+  //     newErrors.duration = "Please select a category";
+  //     isValid = false;
+  //   }
+
+  //   if (!formData.description) {
+  //     newErrors.description = "Description is required";
+  //     isValid = false;
+  //   }
+
+  //   setErrors(newErrors);
+  //   return isValid;
+  // };
+
+  const validate = async () => {
+    try {
+      await prerecordSchema.validate(formData, { abortEarly: false });
+      setErrors({});
+      return true;
+    } catch (err: any) {
+      const newErrors: any = {};
+      err.inner.forEach((e: any) => {
+        newErrors[e.path] = e.message;
+      });
+      setErrors(newErrors);
+      return false;
     }
-
-    if (!formData.price) {
-      newErrors.price = "Price is required";
-      isValid = false;
-    }
-
-    if (!formData.duration) {
-      newErrors.duration = "Please select a category";
-      isValid = false;
-    }
-
-    if (!formData.description) {
-      newErrors.description = "Description is required";
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
   };
 
   const handleSubmit = async () => {
-    if (!validate()) return;
+    const isValid = await validate();
+    if (!isValid) return;
 
     setIsSubmitting(true);
-
     const body = {
       title: formData.title,
       category: formData.category,
@@ -172,15 +179,17 @@ const Prerecorded = () => {
       date: formData.date,
       status: formData.status,
     };
-
     try {
       if (id) {
-        await api.put(`${endPointApi.updatePreRecorded}/${id}`, body);
+        const res = await api.put(`${endPointApi.updatePreRecorded}/${id}`, body);
+        toast.success(res.data?.message);
       } else {
-        await api.post(`${endPointApi.createPreRecorded}`, body);
+        const res = await api.post(`${endPointApi.createPreRecorded}`, body);
+        toast.success(res.data?.message);
       }
       router.push("/prerecord");
     } catch (error) {
+      toast.error("Something went wrong! Please try again.");
       console.error("Submission error:", error);
     } finally {
       setIsSubmitting(false);
@@ -291,8 +300,9 @@ const Prerecorded = () => {
                   onChange={(selectedOption) =>
                     handleChange("duration", selectedOption || "")
                   }
-                // error={errors.duration}
+                  error={errors.duration}
                 />
+                {errors.duration && <p className="text-sm text-error-500 mt-1">{errors.duration}</p>}
                 <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
                   <ChevronDownIcon />
                 </span>
@@ -305,6 +315,7 @@ const Prerecorded = () => {
                 placeholder="Select a date"
                 defaultDate={formData.date}
                 onChange={handleDateChange}
+                error={errors.date}
               />
               {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
             </div>
@@ -331,25 +342,14 @@ const Prerecorded = () => {
           {/* Description */}
           <div>
             <Label>Description</Label>
-            {/* <TextArea
-              rows={6}
-              value={formData.description}
-              onChange={(val) => handleChange("description", val)}
-              error={errors.description}
-            /> */}
-            {/* <Input
-              placeholder="Enter description"
-              type="text"
-              value={formData.description}
-              onChange={(e) => handleChange("description", e.target.value)}
-              error={errors.description}
-            />
-            {errors.description && <p className="text-sm text-error-500 mt-1">{errors.description}</p>} */}
-
             <Editor
               value={formData.description}
               style={{ height: "320px" }}
               onTextChange={handleEditorChange}
+              className={` ${errors.description
+                ? "border border-error-500"
+                : "border border-gray-100"
+                }`}
             />
             {errors.description && <p className="text-sm text-error-500 mt-1">{errors.description}</p>}
           </div>
