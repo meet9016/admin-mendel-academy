@@ -43,6 +43,7 @@ export const MAIN_NAV: NavItem[] = [
   { icon: <CalenderIcon />, name: "Blogs", path: "/blogs" },
   { icon: <CalenderIcon />, name: "Question", path: "/question" },
   { icon: <CalenderIcon />, name: "Add To Cart", path: "/addtocart" },
+  { icon: <CalenderIcon />, name: "Payment", path: "/payment" },
   {
     icon: <ListIcon />,
     name: "Content Management",
@@ -52,8 +53,7 @@ export const MAIN_NAV: NavItem[] = [
       { name: "Contact Us", path: "/contactus" },
     ],
   },
-  { icon: <CalenderIcon />, name: "Payment", path: "/payment" },
-  { icon: <UserCircleIcon />, name: "User Profile", path: "/profile" },
+  // { icon: <UserCircleIcon />, name: "User Profile", path: "/profile" },
 ];
 
 export const OTHER_NAV: NavItem[] = [
