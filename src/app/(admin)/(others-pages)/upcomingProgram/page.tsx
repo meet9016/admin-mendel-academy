@@ -13,11 +13,7 @@ import { PlusIcon } from "@/icons";
 type PreRecordType = {
   id: number;
   title: string;
-  vimeo_video_id: string;
-  total_reviews: number;
-  rating: number;
-  price: number;
-  date?: string;
+  waitlistCount: string;
   createdAt?: string;
   duration?: string;
   status?: string
@@ -42,7 +38,7 @@ export default function Page() {
   const getPreRecordData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.get(`${endPointApi.getAllPreRecorded}?page=${page}&limit=${rows}`);
+      const res = await api.get(`${endPointApi.getAllUpcomeingProgram}?page=${page}&limit=${rows}`);
       setData(res.data.data || []);
       setTotalRecords(res.data.total);
     } catch (err) {
@@ -56,7 +52,7 @@ export default function Page() {
     if (!selectedRow) return;
 
     try {
-      const res = await api.delete(`${endPointApi.deletePreRecorded}/${selectedRow.id}`);
+      const res = await api.delete(`${endPointApi.deleteUpcomeingProgram}/${selectedRow.id}`);
 
       if (res?.data?.message) {
         getPreRecordData(); // Refresh the table/list after deletion
@@ -79,7 +75,7 @@ export default function Page() {
         title="Prerecord List"
         Plusicon={<PlusIcon />}
         name="Add Prerecord"
-        onAddProductClick="/prerecord/add"
+        onAddProductClick="/upcomingProgram/add"
       >
         <div className="card">
           <PrimeReactTable
@@ -92,12 +88,11 @@ export default function Page() {
               setRows(newRows);
             }}
             columns={[
-              { field: "title", header: "Title"},
-              { field: "total_reviews", header: "Total reviews"},
-              { field: "rating", header: "Rating"},
-              { field: "vimeo_video_id", header: "Vimeo video id"},
-              { field: "price", header: "Price" },
-              { field: "duration", header: "Duration"},
+              { field: "title", header: "Title" },
+              { field: "waitlistCount", header: "WaitlistCount" },
+
+
+              { field: "duration", header: "Duration" },
               {
                 field: "status",
                 header: "Status",
@@ -113,7 +108,7 @@ export default function Page() {
                 },
               },
             ]}
-            onEdit={(row) => router.push(`/prerecord/add?id=${row.id}`)}
+            onEdit={(row) => router.push(`/upcomingProgram/add?id=${row.id}`)}
             onDelete={handleDeleteClick}
           />
         </div>

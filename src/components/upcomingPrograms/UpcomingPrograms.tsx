@@ -4,193 +4,134 @@ import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
-import Select from "../form/Select";
 import Button from "../ui/button/Button";
-import { ChevronDownIcon } from "@/icons";
-import { api } from "@/utils/axiosInstance";
-import endPointApi from "@/utils/endPointApi";
 import ComponentCard from "../common/ComponentCard";
 import Radio from "../form/input/Radio";
-import DatePicker from "../form/date-picker";
-import { Editor, EditorTextChangeEvent } from "primereact/editor";
-import { decodeHtml } from "@/utils/helper";
-import { prerecordSchema } from "@/ValidationSchema/validationSchema";
+import { FaPlus, FaMinus } from "react-icons/fa6";
 import { toast } from "react-toastify";
-
-const categoryOptions = [
-  { value: "3", label: "3 Month" },
-  { value: "5", label: "5 Month" },
-  { value: "6", label: "6 Month" },
-];
+import { api } from "@/utils/axiosInstance";
+import endPointApi from "@/utils/endPointApi";
 
 interface FormDataType {
   title: string;
-  category: string;
-  total_reviews: string;
-  subtitle: string;
-  vimeo_video_id: string;
-  rating: string;
-  price: string;
+  waitlistCount: string;
   duration: string;
-  description: string;
-  date: string;
-  status: string; //  Add this field
+  status: string;
+  features: string[];
 }
+
 const UpcomingPrograms = () => {
   const router = useRouter();
-
-  const [formData, setFormData] = useState<FormDataType>({
-    title: "",
-    category: "",
-    total_reviews: "",
-    subtitle: "",
-    vimeo_video_id: "",
-    price: "",
-    rating: "",
-    duration: "",
-    description: "",
-    date: "",
-    status: "Active",
-  });
-
-  const [errors, setErrors] = useState<Partial<Record<keyof FormDataType, string>>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
-  useEffect(() => {
-    const fetchById = async () => {
-      try {
-        if (!id) return;
-        const res = await api.get(`${endPointApi.getByIdPreRecorded}/${id}`);
-        const data = res.data || {};
-        const decodedDescription = decodeHtml(data.description ?? "");
+  const [formData, setFormData] = useState<FormDataType>({
+    title: "",
+    waitlistCount: "",
+    duration: "",
+    status: "Launching Soon",
+    features: [""],
+  });
 
-        setFormData({
-          title: data.title ?? "",
-          category: data.category ?? "",
-          total_reviews: data.total_reviews ?? "",
-          subtitle: data.subtitle ?? "",
-          vimeo_video_id: data.vimeo_video_id ?? "",
-          price: data.price?.toString() ?? "",
-          rating: data.rating ?? "",
-          duration: data.duration ? String(data.duration) : '',
-          description: decodedDescription,
-          date: data.date ?? "",
-          status: data.status == "Active" ? "Active" : "Inactive",
-        });
-      } catch (err) {
-        console.error("Error fetching data by ID:", err);
-      }
-    };
-
-    fetchById();
-  }, [id]);
+  const [errors, setErrors] = useState<any>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
 
-  const handleChange = (field: keyof FormDataType, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }));
-    }
-  };
-
-  const handleEditorChange = (e: EditorTextChangeEvent) => {
+  //  SINGLE onChange function for all inputs
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      description: e.htmlValue || "",
+      [name]: value,
+    }));
+    setErrors((prev: any) => ({
+      ...prev,
+      [name]: "",
     }));
   };
 
-  //  Handle date selection
-  const handleDateChange = (_dates: unknown, currentDateString: string) => {
-    setFormData((prev) => ({ ...prev, date: currentDateString }));
-  };
 
-  //  Handle radio button selection
+  // Radio Change
   const handleRadioChange = (value: string) => {
     setFormData((prev) => ({ ...prev, status: value }));
   };
 
-  // const validate = () => {
-  //   const newErrors = {
-  //     title: "",
-  //     price: "",
-  //     duration: "",
-  //     description: "",
-  //   };
 
-  //   let isValid = true;
-
-  //   if (!formData.title) {
-  //     newErrors.title = "Title is required";
-  //     isValid = false;
-  //   }
-
-  //   if (!formData.price) {
-  //     newErrors.price = "Price is required";
-  //     isValid = false;
-  //   }
-
-  //   if (!formData.duration) {
-  //     newErrors.duration = "Please select a category";
-  //     isValid = false;
-  //   }
-
-  //   if (!formData.description) {
-  //     newErrors.description = "Description is required";
-  //     isValid = false;
-  //   }
-
-  //   setErrors(newErrors);
-  //   return isValid;
-  // };
-
-  const validate = async () => {
-    try {
-      await prerecordSchema.validate(formData, { abortEarly: false });
-      setErrors({});
-      return true;
-    } catch (err: any) {
-      const newErrors: any = {};
-      err.inner.forEach((e: any) => {
-        newErrors[e.path] = e.message;
-      });
-      setErrors(newErrors);
-      return false;
-    }
+  // Feature Add / Remove / Change
+  const addFeature = () => {
+    setFormData((prev) => ({
+      ...prev,
+      features: [...prev.features, ""],
+    }));
   };
 
-  const handleSubmit = async () => {
-    const isValid = await validate();
-    if (!isValid) return;
+  const removeFeature = (index: number) => {
+    const updated = formData.features.filter((_, i) => i !== index);
+    setFormData((prev) => ({ ...prev, features: updated }));
+  };
 
+  const handleFeatureChange = (index: number, value: string) => {
+    const updated = [...formData.features];
+    updated[index] = value;
+
+    setFormData((prev) => ({
+      ...prev,
+      features: updated,
+    }));
+
+    setErrors((prev: any) => ({
+      ...prev,
+      [`features[${index}]`]: "",
+    }));
+  };
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!id) return;
+      try {
+        const res = await api.get(`${endPointApi.getByIdUpcomeingProgram}/${id}`);
+        const data = res.data || {};
+
+        setFormData({
+          title: data.title ?? "",
+          waitlistCount: data.waitlistCount?.toString() ?? "",
+          duration: data.duration ?? "",
+          status: data.status ?? "Launching Soon",
+          features: Array.isArray(data.features) ? data.features : [""],
+        });
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        toast.error("Failed to load data");
+      }
+    };
+
+    fetchData();
+  }, [id]);
+
+  // Submit Handler
+  const handleSubmit = async () => {
     setIsSubmitting(true);
+
     const body = {
       title: formData.title,
-      category: formData.category,
-      total_reviews: formData.total_reviews,
-      subtitle: formData.subtitle,
-      rating: formData.rating,
-      vimeo_video_id: formData.vimeo_video_id,
-      price: formData.price,
+      waitlistCount: formData.waitlistCount,
       duration: formData.duration,
-      description: formData.description,
-      date: formData.date,
       status: formData.status,
+      features: formData.features,
     };
     try {
       if (id) {
-        const res = await api.put(`${endPointApi.updatePreRecorded}/${id}`, body);
+        const res = await api.put(`${endPointApi.updateUpcomeingProgram}/${id}`, body)
         toast.success(res.data?.message);
       } else {
-        const res = await api.post(`${endPointApi.createPreRecorded}`, body);
+        const res = await api.post(`${endPointApi.createUpcomeingProgram}`, body)
         toast.success(res.data?.message);
       }
-      router.push("/prerecord");
+      router.push("/upcomingProgram");
     } catch (error) {
+      console.error("Error creating program:", error);
       toast.error("Something went wrong! Please try again.");
-      console.error("Submission error:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -199,171 +140,123 @@ const UpcomingPrograms = () => {
 
   return (
     <div className="space-y-6">
-      <ComponentCard title="Add PreRecorded" name="">
+      <ComponentCard title="Add Upcoming Program" name="">
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Title */}
+
+          {/* ---------- Row 1 ---------- */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Label>Title</Label>
               <Input
+                type="text"
+                name="title"
                 placeholder="Enter title"
-                type="text"
                 value={formData.title}
-                onChange={(e) => handleChange("title", e.target.value)}
-                error={errors.title}
+                onChange={handleChange}
               />
-              {errors.title && <p className="text-sm text-error-500 mt-1">{errors.title}</p>}
-            </div>
-            <div>
-              <Label>Sub title</Label>
-              <Input
-                placeholder="Enter sub title"
-                type="text"
-                value={formData.subtitle}
-                onChange={(e) => handleChange("subtitle", e.target.value)}
-                error={errors.subtitle}
-              />
-              {errors.subtitle && <p className="text-sm text-error-500 mt-1">{errors.subtitle}</p>}
-            </div>
-            <div>
-              <Label>Category</Label>
-              <Input
-                placeholder="Enter category"
-                type="text"
-                value={formData.category}
-                onChange={(e) => handleChange("category", e.target.value)}
-                error={errors.category}
-              />
-              {errors.category && <p className="text-sm text-error-500 mt-1">{errors.category}</p>}
-            </div>
-            <div>
-              <Label>Total Reviews</Label>
-              <Input
-                placeholder="Enter total reviews"
-                type="text"
-                value={formData.total_reviews}
-                onChange={(e) => handleChange("total_reviews", e.target.value)}
-                error={errors.total_reviews}
-              />
-              {errors.total_reviews && <p className="text-sm text-error-500 mt-1">{errors.total_reviews}</p>}
-            </div>
-            <div>
-              <Label>vimeo video id</Label>
-              <Input
-                placeholder="Enter vimeo video id"
-                type="text"
-                value={formData.vimeo_video_id}
-                onChange={(e) => handleChange("vimeo_video_id", e.target.value)}
-                error={errors.vimeo_video_id}
-              />
-              {errors.vimeo_video_id && <p className="text-sm text-error-500 mt-1">{errors.vimeo_video_id}</p>}
-            </div>
-            <div className="flex-1">
-              <Label>Price</Label>
-              <Input
-                placeholder="Enter price"
-                type="text"
-                value={formData.price}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (/^\d*$/.test(value)) {
-                    handleChange("price", value);
-                  }
-                }}
-                error={errors.price}
-              />
-              {errors.price && <p className="text-sm text-error-500 mt-1">{errors.price}</p>}
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <Label>Rating</Label>
-              <Input
-                placeholder="Enter rating"
-                type="text"
-                value={formData.rating}
-                onChange={(e) => handleChange("rating", e.target.value)}
-                error={errors.rating}
-              />
-              {errors.rating && <p className="text-sm text-error-500 mt-1">{errors.rating}</p>}
             </div>
 
-            {/* Duration  */}
+            <div>
+              <Label>Waitlist Count</Label>
+              <Input
+                type="text"
+                name="waitlistCount"
+                placeholder="Enter waitlistCount"
+                value={formData.waitlistCount}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+
+          {/* ---------- Row 2 ---------- */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Label>Duration</Label>
-              <div className="relative">
-
-                <Select
-                  options={categoryOptions}
-                  placeholder="Select month"
-                  defaultValue={formData.duration || ''}
-                  onChange={(selectedOption) =>
-                    handleChange("duration", selectedOption || "")
-                  }
-                  error={errors.duration}
-                />
-                {errors.duration && <p className="text-sm text-error-500 mt-1">{errors.duration}</p>}
-                <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
-                  <ChevronDownIcon />
-                </span>
-              </div>
-            </div>
-            <div>
-              <DatePicker
-                id="date-picker"
-                label="Date Picker"
-                placeholder="Select a date"
-                defaultDate={formData.date}
-                onChange={handleDateChange}
-                error={errors.date}
+              <Input
+                type="text"
+                name="duration"
+                placeholder="Enter duration"
+                value={formData.duration}
+                onChange={handleChange}
               />
-              {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
+            </div>
+
+            <div>
+              <Label>Status</Label>
+              <Radio
+                id="radio1"
+                name="status"
+                value="Launching Soon"
+                checked={formData.status === "Launching Soon"}
+                onChange={handleRadioChange}
+                label="Launching Soon"
+              />
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-8">
-            <Radio
-              id="radio1"
-              name="status"
-              value="Active"
-              checked={formData.status === "Active"}
-              onChange={handleRadioChange}
-              label="Active"
-            />
-            <Radio
-              id="radio2"
-              name="status"
-              value="Inactive"
-              checked={formData.status === "Inactive"}
-              onChange={handleRadioChange}
-              label="Inactive"
-            />
+          {/* ---------- Features ---------- */}
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-2">
+              <Label>Features</Label>
+
+              <button
+                type="button"
+                onClick={addFeature}
+                className="bg-[#ffcb07] text-white w-8 h-8 rounded-md flex items-center justify-center hover:bg-[#ffcb07]"
+              >
+                <FaPlus />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {formData.features.map((feature, index) => (
+                <div key={index} className="relative">
+
+                  <Input
+                    type="text"
+                    placeholder={`Feature ${index + 1}`}
+                    value={feature}
+                    onChange={(e) =>
+                      handleFeatureChange(index, e.target.value)
+                    }
+                    error={!!errors?.[`features[${index}]`]}
+                  />
+
+                  {errors[`features[${index}]`] && (
+                    <p className="text-sm text-error-500 mt-1">
+                      {errors[`features[${index}]`]}
+                    </p>
+                  )}
+
+                  {formData.features.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeFeature(index)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#ffcb07] border border-[#ffcb07] w-8 h-8 rounded-md flex items-center justify-center hover:bg-[#ffcb07] hover:text-white"
+                    >
+                      <FaMinus />
+                    </button>
+
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-          {/* Description */}
-          <div>
-            <Label>Description</Label>
-            <Editor
-              value={formData.description}
-              style={{ height: "320px" }}
-              onTextChange={handleEditorChange}
-              className={` ${errors.description
-                ? "border border-error-500"
-                : "border border-gray-100"
-                }`}
-            />
-            {errors.description && <p className="text-sm text-error-500 mt-1">{errors.description}</p>}
-          </div>
+
         </div>
-        <div className="flex items-center gap-5">
+
+        {/* ---------- Buttons ---------- */}
+        <div className="flex items-center gap-5 mt-6">
           <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
             {isSubmitting ? "Saving..." : "Save"}
           </Button>
+
           <Button size="sm" variant="outline" onClick={() => router.push("/prerecord")}>
             Cancel
           </Button>
         </div>
-      </ComponentCard >
-    </div >
+      </ComponentCard>
+    </div>
   );
 };
 
