@@ -98,7 +98,7 @@ export default function SignInForm() {
 
       if (res.status === 200) {
         saveToken(res.data.token.access);
-       localStorage.setItem("userData", JSON.stringify(res.data.user));
+      //  localStorage.setItem("userData", JSON.stringify(res.data.user));
         router.push("/");
       } else {
         // Handle application-specific error messages from the API
