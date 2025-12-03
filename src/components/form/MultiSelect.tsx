@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface Option {
   value: string;
@@ -12,6 +12,7 @@ interface MultiSelectProps {
   defaultSelected?: string[];
   onChange?: (selected: string[]) => void;
   disabled?: boolean;
+  error?: string;
 }
 
 const MultiSelect: React.FC<MultiSelectProps> = ({
@@ -20,10 +21,15 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
   defaultSelected = [],
   onChange,
   disabled = false,
+  error,
 }) => {
   const [selectedOptions, setSelectedOptions] =
     useState<string[]>(defaultSelected);
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    setSelectedOptions(defaultSelected);
+  }, [defaultSelected]);
 
   const toggleDropdown = () => {
     if (disabled) return;
@@ -58,7 +64,11 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
       <div className="relative z-20 inline-block w-full">
         <div className="relative flex flex-col items-center">
           <div onClick={toggleDropdown} className="w-full">
-            <div className="mb-2 flex h-11 rounded-lg border border-gray-300 py-1.5 pl-3 pr-3 shadow-theme-xs outline-hidden transition focus:border-brand-300 focus:shadow-focus-ring dark:border-gray-700 dark:bg-gray-900 dark:focus:border-brand-300">
+            <div
+              className={`mb-2 flex h-11 rounded-lg py-1.5 pl-3 pr-3 shadow-theme-xs outline-hidden transition
+    ${error ? "border border-red-500" : "border border-gray-300 dark:border-gray-700"}
+    dark:bg-gray-900 dark:focus:border-brand-300`}
+            >
               <div className="flex flex-wrap flex-auto gap-2">
                 {selectedValuesText.length > 0 ? (
                   selectedValuesText.map((text, index) => (

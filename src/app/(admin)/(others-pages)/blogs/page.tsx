@@ -131,7 +131,7 @@ export default function BlogListPage() {
         onAddProductClick="/blogs/add"
       >
         {
-          !loading ? (
+          loading ? (
             renderSkeletonRows()
           ) : (
             <PrimeReactTable

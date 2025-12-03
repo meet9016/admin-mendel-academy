@@ -100,11 +100,13 @@ const Prerecorded = () => {
       ...prev,
       description: e.htmlValue || "",
     }));
+    setErrors((prev) => ({ ...prev, description: "" }));
   };
 
   //  Handle date selection
   const handleDateChange = (_dates: unknown, currentDateString: string) => {
     setFormData((prev) => ({ ...prev, date: currentDateString }));
+    setErrors((prev) => ({ ...prev, date: "" }));
   };
 
   //  Handle radio button selection
@@ -282,7 +284,13 @@ const Prerecorded = () => {
                 placeholder="Enter rating"
                 type="text"
                 value={formData.rating}
-                onChange={(e) => handleChange("rating", e.target.value)}
+                // onChange={(e) => handleChange("rating", e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (/^\d*$/.test(value)) {
+                    handleChange("rating", e.target.value);
+                  }
+                }}
                 error={errors.rating}
               />
               {errors.rating && <p className="text-sm text-error-500 mt-1">{errors.rating}</p>}
@@ -314,6 +322,7 @@ const Prerecorded = () => {
                 label="Date Picker"
                 placeholder="Select a date"
                 defaultDate={formData.date}
+                value={formData.date}
                 onChange={handleDateChange}
                 error={errors.date}
               />
