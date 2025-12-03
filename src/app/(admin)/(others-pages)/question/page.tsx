@@ -321,7 +321,7 @@ export default function Page() {
         name="Add Question"
         onAddProductClick="/question/add"
       >
-        {!loading ? (
+        {loading ? (
           <TableSkeleton
             count={10}
             columns={[

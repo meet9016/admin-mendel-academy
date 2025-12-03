@@ -38,8 +38,6 @@ export const prerecordSchema = Yup.object().shape({
         .required("Price is required"),
     rating: Yup.number()
         .typeError("Rating must be a number")
-        .min(1, "Rating must be at least 1")
-        .max(5, "Rating cannot be more than 5")
         .required("Rating is required"),
     duration: Yup.string().required("Duration is required"),
     description: Yup.string().required("Description is required"),

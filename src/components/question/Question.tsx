@@ -28,7 +28,6 @@ const featuresOptions = [
 
 const Question = () => {
   const router = useRouter();
-
   const [formData, setFormData] = useState({
     title: "",
     tag: "",
@@ -59,11 +58,13 @@ const Question = () => {
           tag: data.tag ?? "",
           rating: data.rating?.toString() ?? "",
           total_reviews: data.total_reviews?.toString() ?? "",
-          features: Array.isArray(data.features) ? data.features.join(", ") : data.features ?? "",
+          // features: Array.isArray(data.features) ? data.features.join(", ") : data.features ?? "",
+          features: Array.isArray(data.features) ? data.features : [],
           price: data.price ?? '',
           sort_description: data.sort_description ?? "",
           description: decodedDescription,
         });
+        console.log(formData, 'formDataaa')
       } catch (err) {
         console.error("Error fetching data by ID:", err);
       }
@@ -85,46 +86,8 @@ const Question = () => {
       ...prev,
       description: e.htmlValue || "",
     }));
+    setErrors((prev) => ({ ...prev, description: "" }));
   };
-
-  // const validate = () => {
-  //   const newErrors = {
-  //     title: "",
-  //     tag: "",
-  //     rating: "",
-  //     total_reviews: "",
-  //     features: "",
-  //     price: "",
-  //     sort_description: "",
-  //     description: "",
-  //     // duration: "",
-  //   };
-
-  //   let isValid = true;
-
-  //   if (!formData.title) {
-  //     newErrors.title = "Title is required";
-  //     isValid = false;
-  //   }
-
-  //   if (!formData.price) {
-  //     newErrors.price = "Price is required";
-  //     isValid = false;
-  //   }
-
-  //   // if (!formData.duration) {
-  //   //   newErrors.duration = "Please select a category";
-  //   //   isValid = false;
-  //   // }
-
-  //   if (!formData.description) {
-  //     newErrors.description = "Description is required";
-  //     isValid = false;
-  //   }
-
-  //   setErrors(newErrors);
-  //   return isValid;
-  // };
 
   const validate = async () => {
     try {
@@ -140,7 +103,6 @@ const Question = () => {
       return false;
     }
   };
-
 
   const handleSubmit = async () => {
     const isValid = await validate();
@@ -268,23 +230,6 @@ const Question = () => {
               />
               {errors.sort_description && <p className="text-sm text-error-500 mt-1">{errors.sort_description}</p>}
             </div>
-            {/* <div>
-              <Label>Duration</Label>
-              <div className="relative">
-                <Select
-                  options={categoryOptions}
-                  placeholder="Select month"
-                  defaultValue={formData.duration || ''}
-                  onChange={(selectedOption) =>
-                    handleChange("duration", selectedOption || "")
-                  }
-                // error={errors.duration}
-                />
-                <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
-                  <ChevronDownIcon />
-                </span>
-              </div>
-            </div> */}
           </div>
 
           {/* Description */}
@@ -299,7 +244,7 @@ const Question = () => {
                 : "border border-gray-100"
                 }`}
             />
-            {errors.description && <p className="text-sm text-error-500 mt-1">{errors.description}</p>}
+            {errors.descripton && <p className="text-sm text-error-500 mt-1">{errors.description}</p>}
           </div>
         </div>
         <div className="flex items-center gap-5">
