@@ -121,20 +121,6 @@ const Blogs = () => {
   }, [id]);
 
   // Form validation
-  // const validate = () => {
-  //   const newErrors: { [key: string]: string } = {};
-
-  //   if (!formData.examName.trim()) newErrors.examName = "Exam Name is required.";
-  //   if (!formData.title.trim()) newErrors.title = "Title is required.";
-  //   if (!formData.date) newErrors.date = "Date is required.";
-  //   if (!formData.shortDescription.trim()) newErrors.shortDescription = "Short description is required.";
-  //   if (!formData.description.trim()) newErrors.description = "Description is required.";
-
-  //   setErrors(newErrors);
-
-  //   return Object.keys(newErrors).length === 0;
-  // };
-
   const validate = async () => {
     try {
       await blogSchema.validate(formData, { abortEarly: false });

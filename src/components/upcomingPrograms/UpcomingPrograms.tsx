@@ -11,13 +11,17 @@ import { FaPlus, FaMinus } from "react-icons/fa6";
 import { toast } from "react-toastify";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
+import DatePicker from "../form/date-picker";
+import { Editor, EditorTextChangeEvent } from "primereact/editor";
+import DropzoneComponent from "../blogs/DropZone";
+import { upcomingProgramSchema } from "@/ValidationSchema/validationSchema";
 
 interface FormDataType {
   title: string;
   waitlistCount: string;
-  duration: string;
-  status: string;
-  features: string[];
+  date: string;
+  course_types: string;
+  description: string;
 }
 
 const UpcomingPrograms = () => {
@@ -28,13 +32,15 @@ const UpcomingPrograms = () => {
   const [formData, setFormData] = useState<FormDataType>({
     title: "",
     waitlistCount: "",
-    duration: "",
-    status: "Launching Soon",
-    features: [""],
+    date: "",
+    course_types: "",
+    description: "",
   });
 
   const [errors, setErrors] = useState<any>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [mainImage, setMainImage] = useState<File | null>(null);
 
 
   //  SINGLE onChange function for all inputs
@@ -50,39 +56,34 @@ const UpcomingPrograms = () => {
     }));
   };
 
-
-  // Radio Change
-  const handleRadioChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, status: value }));
+  // Handle date selection
+  const handleDateChange = (_dates: unknown, currentDateString: string) => {
+    setFormData((prev) => ({ ...prev, date: currentDateString }));
+    setErrors((prev) => ({ ...prev, date: "" }));
   };
 
-
-  // Feature Add / Remove / Change
-  const addFeature = () => {
+  // Handle Editor text change
+  const handleEditorChange = (e: EditorTextChangeEvent) => {
     setFormData((prev) => ({
       ...prev,
-      features: [...prev.features, ""],
+      description: e.htmlValue || "",
     }));
+    setErrors((prev) => ({ ...prev, description: "" }));
   };
-
-  const removeFeature = (index: number) => {
-    const updated = formData.features.filter((_, i) => i !== index);
-    setFormData((prev) => ({ ...prev, features: updated }));
-  };
-
-  const handleFeatureChange = (index: number, value: string) => {
-    const updated = [...formData.features];
-    updated[index] = value;
-
-    setFormData((prev) => ({
-      ...prev,
-      features: updated,
-    }));
-
-    setErrors((prev: any) => ({
-      ...prev,
-      [`features[${index}]`]: "",
-    }));
+  // Form validation
+  const validate = async () => {
+    try {
+      await upcomingProgramSchema.validate(formData, { abortEarly: false });
+      setErrors({});
+      return true;
+    } catch (err: any) {
+      const newErrors: any = {};
+      err.inner.forEach((e: any) => {
+        newErrors[e.path] = e.message;
+      });
+      setErrors(newErrors);
+      return false;
+    }
   };
 
 
@@ -92,42 +93,46 @@ const UpcomingPrograms = () => {
       try {
         const res = await api.get(`${endPointApi.getByIdUpcomeingProgram}/${id}`);
         const data = res.data || {};
-
         setFormData({
           title: data.title ?? "",
           waitlistCount: data.waitlistCount?.toString() ?? "",
-          duration: data.duration ?? "",
-          status: data.status ?? "Launching Soon",
-          features: Array.isArray(data.features) ? data.features : [""],
+          date: data.date ?? "",
+          course_types: data.course_types ?? "",
+          description: data.description ?? "",
         });
+        if (data.image) {
+          setPreview(data.image);
+        }
       } catch (err) {
         console.error("Error fetching data:", err);
-        toast.error("Failed to load data");
       }
     };
-
     fetchData();
   }, [id]);
 
+
   // Submit Handler
   const handleSubmit = async () => {
+    const isValid = await validate();
+    if (!isValid) return;
     setIsSubmitting(true);
-
-    const body = {
-      title: formData.title,
-      waitlistCount: formData.waitlistCount,
-      duration: formData.duration,
-      status: formData.status,
-      features: formData.features,
-    };
     try {
-      if (id) {
-        const res = await api.put(`${endPointApi.updateUpcomeingProgram}/${id}`, body)
-        toast.success(res.data?.message);
-      } else {
-        const res = await api.post(`${endPointApi.createUpcomeingProgram}`, body)
-        toast.success(res.data?.message);
+      const form = new FormData();
+      form.append("title", formData.title);
+      form.append("waitlistCount", formData.waitlistCount);
+      form.append("date", formData.date);
+      form.append("course_types", formData.course_types);
+      form.append("description", formData.description);
+      if (mainImage) {
+        form.append("image", mainImage);
       }
+      let res;
+      if (id) {
+        res = await api.put(`${endPointApi.updateUpcomeingProgram}/${id}`, form);
+      } else {
+        res = await api.post(`${endPointApi.createUpcomeingProgram}`, form)
+      }
+      toast.success(res.data?.message);
       router.push("/upcomingProgram");
     } catch (error) {
       console.error("Error creating program:", error);
@@ -143,7 +148,6 @@ const UpcomingPrograms = () => {
       <ComponentCard title="Add Upcoming Program" name="">
         <div className="space-y-6">
 
-          {/* ---------- Row 1 ---------- */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Label>Title</Label>
@@ -153,7 +157,9 @@ const UpcomingPrograms = () => {
                 placeholder="Enter title"
                 value={formData.title}
                 onChange={handleChange}
+                error={!!errors.title}
               />
+              {errors.title && <p className="text-sm text-error-500 mt-1">{errors.title}</p>}
             </div>
 
             <div>
@@ -163,83 +169,77 @@ const UpcomingPrograms = () => {
                 name="waitlistCount"
                 placeholder="Enter waitlistCount"
                 value={formData.waitlistCount}
-                onChange={handleChange}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (/^\d*$/.test(value)) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      waitlistCount: value,
+                    }));
+
+                    setErrors((prev: any) => ({
+                      ...prev,
+                      waitlistCount: "",
+                    }));
+                  }
+                }}
+                error={!!errors.waitlistCount}
               />
+              {errors.waitlistCount && <p className="text-sm text-error-500 mt-1">{errors.waitlistCount}</p>}
             </div>
           </div>
 
-          {/* ---------- Row 2 ---------- */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <Label>Duration</Label>
-              <Input
-                type="text"
-                name="duration"
-                placeholder="Enter duration"
-                value={formData.duration}
-                onChange={handleChange}
+              <DatePicker
+                id="date-picker"
+                label="Date Picker Input"
+                placeholder="Select a date"
+                defaultDate={formData.date}
+                onChange={handleDateChange}
+                error={errors.date}
               />
+              {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
             </div>
 
             <div>
-              <Label>Status</Label>
-              <Radio
-                id="radio1"
-                name="status"
-                value="Launching Soon"
-                checked={formData.status === "Launching Soon"}
-                onChange={handleRadioChange}
-                label="Launching Soon"
+              <Label>Course Types</Label>
+              <Input
+                type="text"
+                name="course_types"
+                placeholder="Enter course_types"
+                value={formData.course_types}
+                onChange={handleChange}
+                error={!!errors.course_types}
               />
+              {errors.course_types && <p className="text-sm text-error-500 mt-1">{errors.course_types}</p>}
             </div>
           </div>
 
-          {/* ---------- Features ---------- */}
-          <div className="mt-6">
-            <div className="flex items-center justify-between mb-2">
-              <Label>Features</Label>
-
-              <button
-                type="button"
-                onClick={addFeature}
-                className="bg-[#ffcb07] text-white w-8 h-8 rounded-md flex items-center justify-center hover:bg-[#ffcb07]"
-              >
-                <FaPlus />
-              </button>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Description</Label>
+              <Editor
+                value={formData.description}
+                onTextChange={handleEditorChange}
+                style={{ height: "320px" }}
+                className={` ${errors.description
+                  ? "border border-error-500"
+                  : "border border-gray-100"
+                  }`}
+              />
+              {errors.description && (
+                <p className="text-sm text-error-500 mt-1">{errors.description}</p>
+              )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {formData.features.map((feature, index) => (
-                <div key={index} className="relative">
-
-                  <Input
-                    type="text"
-                    placeholder={`Feature ${index + 1}`}
-                    value={feature}
-                    onChange={(e) =>
-                      handleFeatureChange(index, e.target.value)
-                    }
-                    error={!!errors?.[`features[${index}]`]}
-                  />
-
-                  {errors[`features[${index}]`] && (
-                    <p className="text-sm text-error-500 mt-1">
-                      {errors[`features[${index}]`]}
-                    </p>
-                  )}
-
-                  {formData.features.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeFeature(index)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#ffcb07] border border-[#ffcb07] w-8 h-8 rounded-md flex items-center justify-center hover:bg-[#ffcb07] hover:text-white"
-                    >
-                      <FaMinus />
-                    </button>
-
-                  )}
-                </div>
-              ))}
+            <div>
+              <Label>Select Image</Label>
+              <DropzoneComponent
+                preview={preview}
+                setPreview={setPreview}
+                onFileSelect={(file: File) => setMainImage(file)}
+              />
             </div>
           </div>
 

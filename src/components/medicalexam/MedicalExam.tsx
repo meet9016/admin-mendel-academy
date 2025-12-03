@@ -386,7 +386,7 @@ const MedicalExam = () => {
                         <button
                             type="button"
                             onClick={addStep}
-                            className="bg-[#ffcb07] text-white w-8 h-8 flex items-center justify-center rounded-md hover:bg-[#ffcb07] transition-colors duration-200"
+                            className="bg-[#ffcb07] text-black w-8 h-8 flex items-center justify-center rounded-md hover:bg-[#ffcb07]  transition-colors duration-200"
                         >
                             <FaPlus />
                         </button>
@@ -415,7 +415,7 @@ const MedicalExam = () => {
                                     <button
                                         type="button"
                                         onClick={() => removeStep(index)}
-                                        className="absolute right-3 top-[22px] transform -translate-y-1/2 border border-[#ffcb07] text-[#ffcb07] w-8 h-8 rounded-md flex items-center justify-center hover:bg-[#ffcb07] hover:text-white transition-colors duration-200"
+                                        className="absolute right-3 top-[22px] transform -translate-y-1/2 border border-[#ffcb07] text-[#ffcb07] w-8 h-8 rounded-md flex items-center justify-center hover:bg-[#ffcb07] hover:text-black transition-colors duration-200"
                                     >
                                         <FaMinus />
                                     </button>

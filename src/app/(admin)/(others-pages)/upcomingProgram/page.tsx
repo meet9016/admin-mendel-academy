@@ -14,9 +14,8 @@ type PreRecordType = {
   id: number;
   title: string;
   waitlistCount: string;
-  createdAt?: string;
-  duration?: string;
-  status?: string
+  createdAt: string;
+  course_types: string
 };
 
 export default function Page() {
@@ -72,7 +71,7 @@ export default function Page() {
 
     <div className="space-y-6">
       <ComponentCard
-        title="Prerecord List"
+        title="Upcomeing Program"
         Plusicon={<PlusIcon />}
         name="Add Prerecord"
         onAddProductClick="/upcomingProgram/add"
@@ -90,23 +89,7 @@ export default function Page() {
             columns={[
               { field: "title", header: "Title" },
               { field: "waitlistCount", header: "WaitlistCount" },
-
-
-              { field: "duration", header: "Duration" },
-              {
-                field: "status",
-                header: "Status",
-                body: (row) => {
-                  const status = row.status || "Inactive";
-                  const severity =
-                    status === "Active"
-                      ? "success"
-                      : status === "Pending"
-                        ? "warning"
-                        : "danger";
-                  return <Tag value={status} severity={severity} />;
-                },
-              },
+              { field: "course_types", header: "Course Type" }
             ]}
             onEdit={(row) => router.push(`/upcomingProgram/add?id=${row.id}`)}
             onDelete={handleDeleteClick}
