@@ -35,9 +35,6 @@ const Blogs = () => {
   const [preview, setPreview] = useState<string | null>(null);
   const [mainImage, setMainImage] = useState<File | null>(null);
 
-  console.log(preview, 'pri');
-  console.log(mainImage, 'main')
-
   // Handle text input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -166,9 +163,8 @@ const Blogs = () => {
         toast.success(res.data?.message);
       }
       router.push("/blogs");
-    } catch (error) {
-      toast.error("Something went wrong! Please try again.");
-      console.error("Submission error:", error);
+    } catch (error: any) {
+      toast.error( error.response.data.message);
     } finally {
       setIsSubmitting(false);
     }

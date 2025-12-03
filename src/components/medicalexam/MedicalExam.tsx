@@ -134,12 +134,12 @@ const MedicalExam = () => {
 
     const validate = async () => {
         try {
-            console.log("aaa")
-            await examListSchema.validate(formData, { abortEarly: false });
-            console.log("aaa11111")
-
+             const finalData = {
+            ...formData,
+            enrollData: enrollData,
+        };
+            await examListSchema.validate(finalData, { abortEarly: false });
             setErrors({});
-
             return true;
         } catch (err: any) {
             const newErrors: any = {};
@@ -278,17 +278,14 @@ const MedicalExam = () => {
 
             if (id) {
                 res = await api.put(`${endPointApi.updateExamList}/${id}`, formDataToSend);
+                router.push("/medicalexamlist");
                 toast.success(res.data?.message);
             } else {
                 res = await api.post(`${endPointApi.createExamList}`, formDataToSend);
                 toast.success(res.data?.message);
+                router.push("/medicalexamlist");
             }
 
-            if (res.data) {
-                router.push('/medicalexamlist')
-            } else {
-                console.log("API Failed");
-            }
         } catch (err) {
             toast.error("Something went wrong! Please try again.");
             console.log("ERROR:", err);
