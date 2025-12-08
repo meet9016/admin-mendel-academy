@@ -147,7 +147,10 @@ const LiveCourses = () => {
     setFormData((prev) => ({ ...prev, modules }));
   };
 
-
+  // Handle date selection
+  const handleDateChange = (_dates: unknown, currentDateString: string) => {
+    setFormData((prev) => ({ ...prev, date: currentDateString }));
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -338,7 +341,7 @@ const LiveCourses = () => {
                 />
               </div>
               <div>
-                <DatePicker
+                {/* <DatePicker
                   id="date-picker"
                   label="Date Picker Input"
                   placeholder="Select a date"
@@ -349,7 +352,14 @@ const LiveCourses = () => {
                       date: selected?.toString() || ""
                     }));
                   }}
-
+                /> */}
+                <DatePicker
+                  id="date-picker"
+                  label="Date Picker Input"
+                  placeholder="Select a date"
+                  defaultDate={formData.date}
+                  onChange={handleDateChange}
+                // error={errors.date}
                 />
               </div>
             </div>

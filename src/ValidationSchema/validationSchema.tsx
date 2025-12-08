@@ -38,8 +38,6 @@ export const prerecordSchema = Yup.object().shape({
         .required("Price is required"),
     rating: Yup.number()
         .typeError("Rating must be a number")
-        .min(1, "Rating must be at least 1")
-        .max(5, "Rating cannot be more than 5")
         .required("Rating is required"),
     duration: Yup.string().required("Duration is required"),
     description: Yup.string().required("Description is required"),
@@ -106,12 +104,12 @@ export const faqSchema = Yup.object().shape({
     description: Yup.string().required("Description is required"),
 })
 
-export const upcomingcourseSchema = Yup.object().shape({
+export const upcomingProgramSchema = Yup.object().shape({
     title: Yup.string().required("Title is required"),
-    category: Yup.string().required("Category is required"),
-    type: Yup.string().required("Type is required"),
+    waitlistCount: Yup.number()
+        .typeError("Waitlist count must be a number")
+        .required("Waitlist count is required"),
     date: Yup.string().required("Date is required"),
-    wishlistspot: Yup.string().required("Wishlist spot is required"),
-    status: Yup.string().required("Status is required"),
+    course_types: Yup.string().required("Course types is required"),
     description: Yup.string().required("Description is required"),
-}) 
+});

@@ -25,6 +25,7 @@ type PaymentType = {
     email?: string
     gateway?: string
     status: string
+    payment_status: string
 }
 
 export default function page() {
@@ -93,7 +94,7 @@ export default function page() {
                         { field: 'createdAt', header: 'Date & Time' },
                         { field: 'payment_method', header: 'Method' },
                         { field: 'amount', header: 'Amount' },
-                        { field: 'status', header: 'Status' }
+                        { field: 'payment_status', header: 'Status' }
                     ]}
                     onDelete={handleDeleteClick}
                     onView={handleView}

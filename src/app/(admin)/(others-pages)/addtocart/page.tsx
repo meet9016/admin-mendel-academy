@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ComponentCard from "@/components/common/ComponentCard";
 // import { PlusIcon } from "@/icons";
 import PrimeReactTable from "@/components/tables/PrimeReactTable";
@@ -20,6 +20,8 @@ type PreRecordType = {
     status?: string
 };
 
+type Col = "category_name" | "duration" | "price" | "quantity" | "product_id" | "createdAt";
+
 export default function Page() {
 
     const [data, setData] = useState<PreRecordType[]>([]);
@@ -35,7 +37,9 @@ export default function Page() {
     const getBlogData = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await api.get(`${endPointApi.getAllBlogs}?page=${page}&rows=${rows}`);
+            const res = await api.get(`${endPointApi.getAllCart}?page=${page}&rows=${rows}`);
+            console.log("res*******",res.data.data);
+            
             setData(res.data.data || []);
             setTotalRecords(res.data.total || 0);
         } catch (err) {
@@ -66,6 +70,47 @@ export default function Page() {
         }
     };
 
+     /* -------------------- Columns (memoised) ------------------------ */
+      const columns = useMemo(
+        () => [
+          {
+            field: "category_name" as Col,
+            header: "Category Name",
+            // body: ({ id, exam_name }: Blog) => (
+            //   <>
+            //     <Tooltip target={`.exam-${id}`} content={exam_name} position="bottom" />
+            //     <div className={`exam-${id} w-[150px] truncate cursor-pointer`}>
+            //       {truncate(exam_name, 22)}
+            //     </div>
+            //   </>
+            // ),
+          },
+          {
+            field: "duration" as Col,
+            header: "Duration",
+          },
+          {
+            field: "price" as Col,
+            header: "Price",
+          },
+          {
+            field: "quantity" as Col,
+            header: "Quantity",
+          },
+          {
+            field: "product_id" as Col,
+            header: "Product id",
+          },
+          {
+            field: "createdAt" as Col,
+            header: "Created At",
+            body: ({ createdAt }: Blog) =>
+              createdAt ? new Date(createdAt).toLocaleDateString() : "-",
+          },
+        ],
+        []
+      );
+
     return (
 
         <div className="space-y-6">
@@ -81,18 +126,7 @@ export default function Page() {
                         loading={loading}
                         totalRecords={totalRecords}
                         rows={rows}
-                        onPageChange={(newPage, newRows) => {
-                            setPage(newPage);
-                            setRows(newRows);
-                        }}
-                        columns={[
-                            { header: "Title", sortable: true },
-                            { header: "Price" },
-                            { header: "Description" },
-                            { header: "Status" },
-
-                        ]}
-
+                        columns={columns}
                     />
                 </div>
                 <ConfirmationModal

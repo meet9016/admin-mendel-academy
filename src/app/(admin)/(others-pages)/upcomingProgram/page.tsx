@@ -13,14 +13,9 @@ import { PlusIcon } from "@/icons";
 type PreRecordType = {
   id: number;
   title: string;
-  vimeo_video_id: string;
-  total_reviews: number;
-  rating: number;
-  price: number;
-  date?: string;
-  createdAt?: string;
-  duration?: string;
-  status?: string
+  waitlistCount: string;
+  createdAt: string;
+  course_types: string
 };
 
 export default function Page() {
@@ -42,7 +37,7 @@ export default function Page() {
   const getPreRecordData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.get(`${endPointApi.getAllPreRecorded}?page=${page}&limit=${rows}`);
+      const res = await api.get(`${endPointApi.getAllUpcomeingProgram}?page=${page}&limit=${rows}`);
       setData(res.data.data || []);
       setTotalRecords(res.data.total);
     } catch (err) {
@@ -56,7 +51,7 @@ export default function Page() {
     if (!selectedRow) return;
 
     try {
-      const res = await api.delete(`${endPointApi.deletePreRecorded}/${selectedRow.id}`);
+      const res = await api.delete(`${endPointApi.deleteUpcomeingProgram}/${selectedRow.id}`);
 
       if (res?.data?.message) {
         getPreRecordData(); // Refresh the table/list after deletion
@@ -76,10 +71,10 @@ export default function Page() {
 
     <div className="space-y-6">
       <ComponentCard
-        title="Prerecord List"
+        title="Upcomeing Program"
         Plusicon={<PlusIcon />}
         name="Add Prerecord"
-        onAddProductClick="/prerecord/add"
+        onAddProductClick="/upcomingProgram/add"
       >
         <div className="card">
           <PrimeReactTable
@@ -92,28 +87,11 @@ export default function Page() {
               setRows(newRows);
             }}
             columns={[
-              { field: "title", header: "Title"},
-              { field: "total_reviews", header: "Total reviews"},
-              { field: "rating", header: "Rating"},
-              { field: "vimeo_video_id", header: "Vimeo video id"},
-              { field: "price", header: "Price" },
-              { field: "duration", header: "Duration"},
-              {
-                field: "status",
-                header: "Status",
-                body: (row) => {
-                  const status = row.status || "Inactive";
-                  const severity =
-                    status === "Active"
-                      ? "success"
-                      : status === "Pending"
-                        ? "warning"
-                        : "danger";
-                  return <Tag value={status} severity={severity} />;
-                },
-              },
+              { field: "title", header: "Title" },
+              { field: "waitlistCount", header: "WaitlistCount" },
+              { field: "course_types", header: "Course Type" }
             ]}
-            onEdit={(row) => router.push(`/prerecord/add?id=${row.id}`)}
+            onEdit={(row) => router.push(`/upcomingProgram/add?id=${row.id}`)}
             onDelete={handleDeleteClick}
           />
         </div>

@@ -35,9 +35,6 @@ const Blogs = () => {
   const [preview, setPreview] = useState<string | null>(null);
   const [mainImage, setMainImage] = useState<File | null>(null);
 
-  console.log(preview, 'pri');
-  console.log(mainImage, 'main')
-
   // Handle text input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -121,20 +118,6 @@ const Blogs = () => {
   }, [id]);
 
   // Form validation
-  // const validate = () => {
-  //   const newErrors: { [key: string]: string } = {};
-
-  //   if (!formData.examName.trim()) newErrors.examName = "Exam Name is required.";
-  //   if (!formData.title.trim()) newErrors.title = "Title is required.";
-  //   if (!formData.date) newErrors.date = "Date is required.";
-  //   if (!formData.shortDescription.trim()) newErrors.shortDescription = "Short description is required.";
-  //   if (!formData.description.trim()) newErrors.description = "Description is required.";
-
-  //   setErrors(newErrors);
-
-  //   return Object.keys(newErrors).length === 0;
-  // };
-
   const validate = async () => {
     try {
       await blogSchema.validate(formData, { abortEarly: false });
@@ -180,9 +163,8 @@ const Blogs = () => {
         toast.success(res.data?.message);
       }
       router.push("/blogs");
-    } catch (error) {
-      toast.error("Something went wrong! Please try again.");
-      console.error("Submission error:", error);
+    } catch (error: any) {
+      toast.error( error.response.data.message);
     } finally {
       setIsSubmitting(false);
     }

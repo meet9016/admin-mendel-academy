@@ -39,7 +39,6 @@ export const MAIN_NAV: NavItem[] = [
     ],
   },
   { icon: <CalenderIcon />, name: "Medical Exam List", path: "/medicalexamlist" },
-  { icon: <CalenderIcon />, name: "Upcoming Courses", path: "/upcomingCourse" },
   { icon: <CalenderIcon />, name: "Blogs", path: "/blogs" },
   { icon: <CalenderIcon />, name: "Question", path: "/question" },
   { icon: <CalenderIcon />, name: "Add To Cart", path: "/addtocart" },
