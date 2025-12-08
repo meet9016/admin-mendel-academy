@@ -1,0 +1,8 @@
+{
+  "build": {
+    "env": {
+      "NEXT_DISABLE_SSR_MEMORY_WATCH": "1",
+      "NEXT_PRIVATE_SKIP_NEXTJS_CHECK": "true"
+    }
+  }
+}
