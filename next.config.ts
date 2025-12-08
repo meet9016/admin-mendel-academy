@@ -1,7 +1,8 @@
-import type { NextConfig } from "next";
+const nextConfig = {
+  // Important: Silence turbopack warning
+  turbopack: {},
 
-const nextConfig: NextConfig = {
-  /* config options here */
+  // Your webpack SVG loader
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
@@ -10,16 +11,15 @@ const nextConfig: NextConfig = {
     return config;
   },
 
-  // ✅ Add these sections below
+  // Allow builds to pass even with type errors
   typescript: {
-    // ❗ Allow production builds to complete even if there are type errors
     ignoreBuildErrors: true,
   },
+
+  // Skip ESLint during build
   eslint: {
-    // ❗ Skip ESLint checks during `next build`
     ignoreDuringBuilds: true,
   },
-  
 };
 
 export default nextConfig;
