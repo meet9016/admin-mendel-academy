@@ -86,7 +86,6 @@ const UpcomingPrograms = () => {
     }
   };
 
-
   useEffect(() => {
     const fetchData = async () => {
       if (!id) return;
@@ -207,7 +206,7 @@ const UpcomingPrograms = () => {
               <Input
                 type="text"
                 name="course_types"
-                placeholder="Enter course_types"
+                placeholder="Enter course types"
                 value={formData.course_types}
                 onChange={handleChange}
                 error={!!errors.course_types}

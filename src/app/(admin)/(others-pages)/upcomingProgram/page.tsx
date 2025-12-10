@@ -6,7 +6,6 @@ import ComponentCard from "@/components/common/ComponentCard";
 // import { PlusIcon } from "@/icons";
 import { useRouter } from "next/navigation";
 import PrimeReactTable from "@/components/tables/PrimeReactTable";
-import { Tag } from "primereact/tag";
 import CommonDialog from "@/components/tables/CommonDialog";
 import { PlusIcon } from "@/icons";
 
@@ -20,7 +19,6 @@ type PreRecordType = {
 
 export default function Page() {
   const router = useRouter();
-
   const [data, setData] = useState<PreRecordType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

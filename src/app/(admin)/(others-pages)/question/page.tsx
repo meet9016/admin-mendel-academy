@@ -202,7 +202,7 @@ export default function Page() {
   /* -------------------- State ------------------------------------ */
   const [data, setData] = useState<QuestionType[]>([]);
   const [loading, setLoading] = useState(true);
-  const [rows] = useState(10);
+    const [rows] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
   const [selectedRow, setSelectedRow] = useState<QuestionType | null>(null);
 

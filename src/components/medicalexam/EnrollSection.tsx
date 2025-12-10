@@ -69,7 +69,6 @@ const EnrollSection: React.FC<EnrollSectionProps> = ({ data, onChange, previewWh
             />
           </div>
         </div>
-
       </ComponentCard>
     </div>
   );

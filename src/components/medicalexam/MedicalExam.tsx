@@ -77,6 +77,8 @@ const MedicalExam = () => {
         ],
     });
 
+    console.log(formData, 'formData')
+
     const [enrollData, setEnrollData] = useState({
         title: "",
         description: "",
@@ -134,10 +136,10 @@ const MedicalExam = () => {
 
     const validate = async () => {
         try {
-             const finalData = {
-            ...formData,
-            enrollData: enrollData,
-        };
+            const finalData = {
+                ...formData,
+                enrollData: enrollData,
+            };
             await examListSchema.validate(finalData, { abortEarly: false });
             setErrors({});
             return true;
@@ -150,6 +152,7 @@ const MedicalExam = () => {
             return false;
         }
     }
+
 
     useEffect(() => {
         const fetchById = async () => {
@@ -454,10 +457,10 @@ const MedicalExam = () => {
                     onChange={(data) => setEnrollData(data)}
                     previewWho={previewWho}
                     setPreviewWho={setPreviewWho}
-                errors={{
-                    title: errors["enrollData.title"],
-                    description: errors["enrollData.description"]
-                }}
+                    errors={{
+                        title: errors["enrollData.title"],
+                        description: errors["enrollData.description"]
+                    }}
                 />
             </div>
 

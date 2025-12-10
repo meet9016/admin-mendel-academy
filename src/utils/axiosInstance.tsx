@@ -1,7 +1,8 @@
 import axios from 'axios'
 
 // const baseURL = 'http://localhost:3699/api/v1/';
-const baseURL = 'https://christeen-unmaidenlike-bloomingly.ngrok-free.dev/api/v1/';
+// const baseURL = 'https://christeen-unmaidenlike-bloomingly.ngrok-free.dev/api/v1/';
+const baseURL = 'http://192.168.29.254:3699';
 // const baseURL = process.env.NEXT_PUBLIC_APP_URL;
 
 const apiAdminInstance = axios.create({
