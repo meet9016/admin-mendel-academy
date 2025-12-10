@@ -65,6 +65,9 @@ export interface EndPointApi {
     deleteUpcomeingProgram?: string;
     getByIdUpcomeingProgram?: string;
     updateUpcomeingProgram?: string;
+
+    //Cart
+    getAllCart?: string;
 }
 
 // Define and export the API endpoint object
@@ -135,6 +138,9 @@ const endPointApi: EndPointApi = {
     deleteUpcomeingProgram: 'upcomming-program/delete',
     getByIdUpcomeingProgram: 'upcomming-program/getById',
     updateUpcomeingProgram: 'upcomming-program/update',
+
+    //Cart
+    getAllCart: 'cart/get-all-cart',
 };
 
 export default endPointApi;
