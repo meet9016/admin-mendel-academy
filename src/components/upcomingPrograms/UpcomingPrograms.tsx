@@ -41,8 +41,7 @@ const UpcomingPrograms = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [mainImage, setMainImage] = useState<File | null>(null);
-  console.log("sdsd");
-  
+
 
   //  SINGLE onChange function for all inputs
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

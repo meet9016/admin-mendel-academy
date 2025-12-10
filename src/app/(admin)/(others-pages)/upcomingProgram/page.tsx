@@ -28,6 +28,7 @@ export default function Page() {
   const [page, setPage] = useState<number>(1);
   const [rows, setRows] = useState<number>(10);
   const [totalRecords, setTotalRecords] = useState<number>(0);
+console.log("sdsds");
 
   const handleDeleteClick = (row: PreRecordType) => {
     setSelectedRow(row);
