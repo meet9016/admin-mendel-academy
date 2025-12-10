@@ -13,6 +13,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import { toast } from "react-toastify";
+import { liveCourseSchema } from "@/ValidationSchema/validationSchema";
 
 interface ModuleType {
   module_number: number | string;
@@ -39,6 +40,7 @@ const LiveCourses = () => {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
   const router = useRouter();
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<FormDataType>({
     title: "",
@@ -85,11 +87,19 @@ const LiveCourses = () => {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+    setErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
   };
 
 
   const handleRadioChange = (value: string) => {
     setFormData((prev) => ({ ...prev, status: value }));
+    setErrors((prev) => ({
+      ...prev,
+      status: "",
+    }));
   };
 
 
@@ -101,6 +111,14 @@ const LiveCourses = () => {
     const tags = [...formData.tags];
     tags[i] = value;
     setFormData((prev) => ({ ...prev, tags }));
+
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      if (newErrors.tags) {
+        newErrors.tags[i] = "";
+      }
+      return newErrors;
+    });
   };
 
   const removeTag = (i: number) => {
@@ -150,6 +168,10 @@ const LiveCourses = () => {
   // Handle date selection
   const handleDateChange = (_dates: unknown, currentDateString: string) => {
     setFormData((prev) => ({ ...prev, date: currentDateString }));
+    setErrors((prev) => ({
+      ...prev,
+      date: "",
+    }));
   };
 
   useEffect(() => {
@@ -194,29 +216,53 @@ const LiveCourses = () => {
                 plan_sub_title: [""],
               });
             }
-
             return apiModules;
           })(),
-
         }));
-
       } catch (error) {
         console.log("Error fetching live course:", error);
       }
     };
-
     fetchData();
   }, [id]);
 
 
+  const validate = async () => {
+    try {
+      await liveCourseSchema.validate(formData, { abortEarly: false });
+      setErrors({});
+      return true;
+    } catch (err: any) {
+      const newErrors: any = {};
+
+      err.inner.forEach((e: any) => {
+        // Handle array paths like tags[0], modules[1].plan_sub_title[0] etc
+        if (e.path?.startsWith("tags")) {
+          const match = e.path.match(/tags\[(\d+)\]/);
+          console.log(match, 'match')
+          if (match) {
+            const index = parseInt(match[1]);
+            if (!newErrors.tags) newErrors.tags = [];
+            newErrors.tags[index] = e.message;
+          } else {
+            newErrors.tags = e.message;
+          }
+        } else {
+          newErrors[e.path] = e.message;
+        }
+      });
+      setErrors(newErrors);
+      return false;
+    }
+  };
 
 
 
   const handleSubmit = async () => {
+    const isValid = await validate();
+    if (!isValid) return;
     try {
       setIsSubmitting(true);
-
-
       const instructorObj = {
         name: formData.instructor_name,
         qualification: formData.instructor_qualification,
@@ -294,7 +340,9 @@ const LiveCourses = () => {
                   name="title"
                   value={formData.title}
                   onChange={handleChange}
+                  error={errors.title}
                 />
+                {errors.title && <p className="text-sm text-error-500 mt-1">{errors.title}</p>}
               </div>
               <div>
                 <Label>Instructor Name</Label>
@@ -304,7 +352,9 @@ const LiveCourses = () => {
                   name="instructor_name"
                   value={formData.instructor_name}
                   onChange={handleChange}
+                  error={errors.instructor_name}
                 />
+                {errors.instructor_name && <p className="text-sm text-error-500 mt-1">{errors.instructor_name}</p>}
               </div>
               {/* Qualification */}
               <div>
@@ -315,7 +365,9 @@ const LiveCourses = () => {
                   name="instructor_qualification"
                   value={formData.instructor_qualification}
                   onChange={handleChange}
+                  error={errors.instructor_qualification}
                 />
+                {errors.instructor_qualification && <p className="text-sm text-error-500 mt-1">{errors.instructor_qualification}</p>}
               </div>
             </div>
 
@@ -328,7 +380,9 @@ const LiveCourses = () => {
                   name="duration"
                   value={formData.duration}
                   onChange={handleChange}
+                  error={errors.duration}
                 />
+                {errors.duration && <p className="text-sm text-error-500 mt-1">{errors.duration}</p>}
               </div>
               <div>
                 <Label>Zoom Link</Label>
@@ -341,26 +395,15 @@ const LiveCourses = () => {
                 />
               </div>
               <div>
-                {/* <DatePicker
-                  id="date-picker"
-                  label="Date Picker Input"
-                  placeholder="Select a date"
-                  onChange={(date: any) => {
-                    const selected = Array.isArray(date) ? date[0] : date;
-                    setFormData(prev => ({
-                      ...prev,
-                      date: selected?.toString() || ""
-                    }));
-                  }}
-                /> */}
                 <DatePicker
                   id="date-picker"
                   label="Date Picker Input"
                   placeholder="Select a date"
                   defaultDate={formData.date}
                   onChange={handleDateChange}
-                // error={errors.date}
+                  error={errors.date}
                 />
+                {errors.date && <p className="text-sm text-error-500 mt-1">{errors.date}</p>}
               </div>
             </div>
 
@@ -385,8 +428,11 @@ const LiveCourses = () => {
                       placeholder={`Tag ${i + 1}`}
                       value={tag}
                       onChange={(e) => handleTagChange(i, e.target.value)}
+                      error={errors.tags?.[i]}
                     />
-
+                    {errors.tags?.[i] && (
+                      <p className="text-sm text-error-500 mt-1">{errors.tags[i]}</p>
+                    )}
                     {/* Remove Button */}
                     {formData.tags.length > 1 && (
                       <button
@@ -435,6 +481,9 @@ const LiveCourses = () => {
                     onChange={() => handleRadioChange("upcoming")}
                   />
                 </div>
+                {errors.status && (
+                  <p className="text-sm text-error-500 mt-1">{errors.status}</p>
+                )}
               </div>
 
               <div>
@@ -445,7 +494,6 @@ const LiveCourses = () => {
                   onChange={(checked: boolean) =>
                     setFormData(prev => ({ ...prev, soldOut: checked }))
                   }
-
                 />
               </div>
             </div>
@@ -465,6 +513,7 @@ const LiveCourses = () => {
                 <div>
                   <Label>Module Number</Label>
                   <Input
+                    name="module_number"
                     value={module.module_number}
                     onChange={(e) =>
                       handleModuleChange(mIndex, "module_number", e.target.value)
@@ -474,6 +523,7 @@ const LiveCourses = () => {
                 <div>
                   <Label>Module Name</Label>
                   <Input
+                    name="module_name"
                     value={module.module_name}
                     onChange={(e) =>
                       handleModuleChange(mIndex, "module_name", e.target.value)
@@ -483,6 +533,7 @@ const LiveCourses = () => {
                 <div>
                   <Label>Module Title</Label>
                   <Input
+                    name="module_title"
                     value={module.module_title}
                     onChange={(e) =>
                       handleModuleChange(mIndex, "module_title", e.target.value)
@@ -496,6 +547,7 @@ const LiveCourses = () => {
                 <div>
                   <Label>Module Price</Label>
                   <Input
+                    name="module_price"
                     value={module.module_price}
                     onChange={(e) =>
                       handleModuleChange(mIndex, "module_price", e.target.value)

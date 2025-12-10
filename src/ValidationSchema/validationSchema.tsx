@@ -44,15 +44,15 @@ export const prerecordSchema = Yup.object().shape({
     date: Yup.string().required("Date is required"),
 })
 
-export const livecourseSchema = Yup.object().shape({
-    title: Yup.string().required("Title is required"),
-    instructor_name: Yup.string().required("Instructor name is required"),
-    date: Yup.string().required("Date is required"),
-    sub_scribe_student_count: Yup.string().required("Subscribed student count is required"),
-    zoom_link: Yup.string()
-        .url("Enter a valid Zoom link")
-        .required("Zoom link is required"),
-})
+// export const livecourseSchema = Yup.object().shape({
+//     title: Yup.string().required("Title is required"),
+//     instructor_name: Yup.string().required("Instructor name is required"),
+//     date: Yup.string().required("Date is required"),
+//     sub_scribe_student_count: Yup.string().required("Subscribed student count is required"),
+//     zoom_link: Yup.string()
+//         .url("Enter a valid Zoom link")
+//         .required("Zoom link is required"),
+// })
 
 export const examListSchema = Yup.object().shape({
     category: Yup.string().required("Course category is required"),
@@ -112,4 +112,40 @@ export const upcomingProgramSchema = Yup.object().shape({
     date: Yup.string().required("Date is required"),
     course_types: Yup.string().required("Course types is required"),
     description: Yup.string().required("Description is required"),
+});
+
+export const liveCourseSchema = Yup.object().shape({
+    title: Yup.string().required("Course title is required"),
+    instructor_name: Yup.string().required("Instructor name is required"),
+    instructor_qualification: Yup.string().required("Instructor qualification is required"),
+
+    duration: Yup.string().required("Duration is required"),
+
+    date: Yup.string().required("Date is required"),
+
+    status: Yup.string().required("Status is required"),
+
+    tags: Yup.array()
+        .of(Yup.string().required("Tag cannot be empty"))
+        .min(1, "At least one tag is required"),
+
+    soldOut: Yup.boolean(),
+
+    modules: Yup.array().of(
+        Yup.object().shape({
+            module_number: Yup.string().required("Module number is required"),
+            module_name: Yup.string().required("Module name is required"),
+            module_title: Yup.string().required("Module title is required"),
+
+            module_price: Yup.number()
+                .typeError("Module price must be a number")
+                .required("Module price is required"),
+
+            plan_sub_title: Yup.array()
+                .of(Yup.string().required("Subtitle cannot be empty"))
+                .min(1, "At least one subtitle is required"),
+
+            most_popular: Yup.boolean(),
+        })
+    )
 });
