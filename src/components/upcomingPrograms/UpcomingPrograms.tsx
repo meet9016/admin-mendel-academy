@@ -59,7 +59,7 @@ const UpcomingPrograms = () => {
   // Handle date selection
   const handleDateChange = (_dates: unknown, currentDateString: string) => {
     setFormData((prev) => ({ ...prev, date: currentDateString }));
-    setErrors((prev) => ({ ...prev, date: "" }));
+    setErrors((prev: any) => ({ ...prev, date: "" }));
   };
 
   // Handle Editor text change
@@ -68,7 +68,7 @@ const UpcomingPrograms = () => {
       ...prev,
       description: e.htmlValue || "",
     }));
-    setErrors((prev) => ({ ...prev, description: "" }));
+    setErrors((prev: any) => ({ ...prev, description: "" }));
   };
   // Form validation
   const validate = async () => {

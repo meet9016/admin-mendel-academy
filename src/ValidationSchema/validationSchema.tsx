@@ -73,9 +73,14 @@ export const examListSchema = Yup.object().shape({
         Yup.object().shape({
             planDay: Yup.string(),
 
-            planPrice: Yup.string().when("planDay", {
+            planPriceUSD: Yup.string().when("planDay", {
                 is: (val: string) => val && val !== "" && val !== null,
-                then: (schema) => schema.required("Plan price is required"),
+                then: (schema) => schema.required("USD price is required"),
+                otherwise: (schema) => schema.notRequired(),
+            }),
+            planPriceINR: Yup.string().when("planDay", {
+                is: (val: string) => val && val !== "" && val !== null,
+                then: (schema) => schema.required("INR price is required"),
                 otherwise: (schema) => schema.notRequired(),
             }),
 
@@ -86,11 +91,12 @@ export const examListSchema = Yup.object().shape({
             }),
 
             planSubtitles: Yup.array()
-                .of(Yup.string().required("Subtitle cannot be empty"))
                 .when("planDay", {
-                    is: (val: string) => val && val !== "" && val !== null,
+                    is: (val) => val && val !== "",
                     then: (schema) =>
-                        schema.min(1, "At least one subtitle is required"),
+                        schema
+                            .of(Yup.string().required("Subtitle cannot be empty"))
+                            .min(1, "At least one subtitle is required"),
                     otherwise: (schema) => schema.notRequired(),
                 }),
 
