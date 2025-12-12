@@ -15,6 +15,8 @@ export interface PlanData {
   planType: string;
   planSubtitles: string[];
   isPopular: boolean;
+  planPriceUSD: number,
+  planPriceINR: number,
 }
 
 //  Props with proper types (no `any`)
@@ -37,6 +39,9 @@ const PlanSection: React.FC<PlanSectionProps> = ({
     value: PlanData[K]
   ) => {
     onChange({ ...data, [field]: value });
+    if (errors && errors[field]) {
+      errors[field] = "";
+    }
   };
 
   //  Add subtitle
@@ -64,9 +69,9 @@ const PlanSection: React.FC<PlanSectionProps> = ({
           <Label>Plan Day</Label>
           <Select
             options={[
-              { value: '30', label: '30 Days' },
-              { value: '60', label: '60 Days' },
-              { value: '90', label: '90 Days' },
+              { value: '3', label: '3 Month' },
+              { value: '6', label: '6 Month' },
+              { value: '12', label: '12 Month' },
               { value: 'Custom', label: 'Custom' },
             ]}
             value={String(data.planDay)}
@@ -81,21 +86,57 @@ const PlanSection: React.FC<PlanSectionProps> = ({
 
         </div>
         {data.planDay !== "Custom" && (
-          <div>
-            <Label>Plan Price</Label>
-            <Input
-              type="text"
-              placeholder="Enter price"
-              value={data.planPrice}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                handleChange('planPrice', e.target.value)
-              }
-              error={!!errors?.planPrice}
-            // hint={errors?.planPrice}
-            />
-            {data.planDay !== "Custom" && errors?.planPrice && (
-              <p className="text-sm text-error-500 mt-1">{errors.planPrice}</p>
-            )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            {/* USD PRICE */}
+            <div>
+              <Label>Plan Price (USD)</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">
+                  $
+                </span>
+
+                <Input
+                  type="number"
+                  placeholder="Enter USD"
+                  className="pl-8"
+                  value={String(data.planPriceUSD)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleChange("planPriceUSD", Number(e.target.value))
+                  }
+
+                  error={!!errors?.planPriceUSD}
+                />
+              </div>
+
+              {data.planDay !== "Custom" && errors?.planPriceUSD && (
+                <p className="text-sm text-error-500 mt-1">{errors.planPriceUSD}</p>
+              )}
+            </div>
+
+            {/* INR PRICE */}
+            <div>
+              <Label>Plan Price (INR)</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">
+                  ₹
+                </span>
+
+                <Input
+                  type="number"
+                  placeholder="Enter INR"
+                  className="pl-8"
+                  value={String(data.planPriceINR)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleChange("planPriceINR", Number(e.target.value))
+                  }
+                  error={!!errors?.planPriceINR}
+                />
+              </div>
+              {data.planDay !== "Custom" && errors?.planPriceINR && (
+                <p className="text-sm text-error-500 mt-1">{errors.planPriceINR}</p>
+              )}
+            </div>
 
           </div>
         )}

@@ -59,7 +59,7 @@ const UpcomingPrograms = () => {
   // Handle date selection
   const handleDateChange = (_dates: unknown, currentDateString: string) => {
     setFormData((prev) => ({ ...prev, date: currentDateString }));
-    setErrors((prev) => ({ ...prev, date: "" }));
+    setErrors((prev: any) => ({ ...prev, date: "" }));
   };
 
   // Handle Editor text change
@@ -68,7 +68,7 @@ const UpcomingPrograms = () => {
       ...prev,
       description: e.htmlValue || "",
     }));
-    setErrors((prev) => ({ ...prev, description: "" }));
+    setErrors((prev: any) => ({ ...prev, description: "" }));
   };
   // Form validation
   const validate = async () => {
@@ -85,7 +85,6 @@ const UpcomingPrograms = () => {
       return false;
     }
   };
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -207,7 +206,7 @@ const UpcomingPrograms = () => {
               <Input
                 type="text"
                 name="course_types"
-                placeholder="Enter course_types"
+                placeholder="Enter course types"
                 value={formData.course_types}
                 onChange={handleChange}
                 error={!!errors.course_types}
