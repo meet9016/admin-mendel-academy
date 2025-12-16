@@ -35,6 +35,7 @@ export const MAIN_NAV: NavItem[] = [
     subItems: [
       { name: "live Courses", path: "/liveCourses" },
       { name: "Pre Recorded", path: "/prerecord" },
+      { name: "question", path: "/question" },
       { name: "Upcoming Programs", path: "/upcomingProgram" },
     ],
   },
