@@ -14,7 +14,6 @@ import Radio from "../form/input/Radio";
 import DatePicker from "../form/date-picker";
 import { Editor, EditorTextChangeEvent } from "primereact/editor";
 import { decodeHtml } from "@/utils/helper";
-import { prerecordSchema } from "@/ValidationSchema/validationSchema";
 import { toast } from "react-toastify";
 import { FiPlus, FiTrash2, FiCheck, FiX, FiAlertCircle } from "react-icons/fi";
 
@@ -27,7 +26,8 @@ const categoryOptions = [
 interface OptionType {
   type: "record-book" | "video" | "writing-book";
   description: string;
-  price: number;
+  price_usd: number;
+  price_inr: number;
   features: string[];
   is_available: boolean;
 }
@@ -39,7 +39,6 @@ interface FormDataType {
   subtitle: string;
   vimeo_video_id: string;
   rating: string;
-  price: string;
   duration: string;
   description: string;
   date: string;
@@ -56,7 +55,6 @@ const Prerecorded = () => {
     total_reviews: "",
     subtitle: "",
     vimeo_video_id: "",
-    price: "",
     rating: "",
     duration: "",
     description: "",
@@ -72,7 +70,8 @@ const Prerecorded = () => {
   const [currentOption, setCurrentOption] = useState<OptionType>({
     type: "record-book",
     description: "",
-    price: 0,
+    price_usd: 0,
+    price_inr: 0,
     features: [""],
     is_available: true,
   });
@@ -96,7 +95,6 @@ const Prerecorded = () => {
           total_reviews: data.total_reviews ?? "",
           subtitle: data.subtitle ?? "",
           vimeo_video_id: data.vimeo_video_id ?? "",
-          price: data.price?.toString() ?? "",
           rating: data.rating ?? "",
           duration: data.duration ? String(data.duration) : "",
           description: decodedDescription,
@@ -136,30 +134,6 @@ const Prerecorded = () => {
     setFormData((prev) => ({ ...prev, status: value }));
   };
 
-  // ✅ HELPER: Check if main price equals minimum option price
-  const validatePriceWithOptions = (): { isValid: boolean; message: string } => {
-    if (formData.options.length === 0) {
-      return { isValid: true, message: "" };
-    }
-
-    const mainPrice = parseFloat(formData.price);
-    if (isNaN(mainPrice)) {
-      return { isValid: false, message: "Please enter a valid main price" };
-    }
-
-    const optionPrices = formData.options.map(opt => opt.price);
-    const minOptionPrice = Math.min(...optionPrices);
-
-    if (mainPrice !== minOptionPrice) {
-      return {
-        isValid: false,
-        message: `Main price ($${mainPrice}) must equal the minimum option price ($${minOptionPrice}). This ensures the "starting from" price is accurate.`
-      };
-    }
-
-    return { isValid: true, message: "" };
-  };
-
   // ========== OPTION MANAGEMENT ==========
 
   const handleAddOption = () => {
@@ -168,7 +142,8 @@ const Prerecorded = () => {
     setCurrentOption({
       type: "record-book",
       description: "",
-      price: 0,
+      price_usd: 0,
+      price_inr: 0,
       features: [""],
       is_available: true,
     });
@@ -187,8 +162,8 @@ const Prerecorded = () => {
   };
 
   const handleSaveOption = () => {
-    if (!currentOption.description || currentOption.price <= 0) {
-      toast.error("Please fill all option fields");
+    if (!currentOption.description || currentOption.price_usd <= 0 || currentOption.price_inr <= 0) {
+      toast.error("Please fill all option fields including both USD and INR prices");
       return;
     }
 
@@ -219,7 +194,8 @@ const Prerecorded = () => {
     setCurrentOption({
       type: "record-book",
       description: "",
-      price: 0,
+      price_usd: 0,
+      price_inr: 0,
       features: [""],
       is_available: true,
     });
@@ -248,35 +224,69 @@ const Prerecorded = () => {
     setCurrentOption((prev) => ({ ...prev, features: updatedFeatures }));
   };
 
-  // ========== FORM VALIDATION & SUBMIT ==========
+  // ========== PRICE CALCULATION ==========
 
-  const validate = async () => {
-    try {
-      await prerecordSchema.validate(formData, { abortEarly: false });
-      setErrors({});
-      return true;
-    } catch (err: any) {
-      const newErrors: any = {};
-      err.inner.forEach((e: any) => {
-        newErrors[e.path] = e.message;
-      });
-      setErrors(newErrors);
-      return false;
-    }
+  const getCalculatedPrices = () => {
+    if (formData.options.length === 0) return { usd: null, inr: null };
+
+    const pricesUSD = formData.options.map(opt => opt.price_usd);
+    const pricesINR = formData.options.map(opt => opt.price_inr);
+
+    return {
+      usd: Math.min(...pricesUSD),
+      inr: Math.min(...pricesINR)
+    };
   };
 
-  const handleSubmit = async () => {
-    const isValid = await validate();
-    if (!isValid) return;
+  // ========== FORM VALIDATION & SUBMIT ==========
 
-    // ✅ Validate price with options before submitting
-    const priceValidation = validatePriceWithOptions();
-    if (!priceValidation.isValid) {
-      toast.error(priceValidation.message);
+  const validateForm = () => {
+    const newErrors: Partial<Record<keyof FormDataType, string>> = {};
+
+    // Required field validation
+    if (!formData.title.trim()) {
+      newErrors.title = "Title is required";
+    }
+    if (!formData.vimeo_video_id.trim()) {
+      newErrors.vimeo_video_id = "Vimeo Video ID is required";
+    }
+    if (!formData.duration) {
+      newErrors.duration = "Duration is required";
+    }
+    if (!formData.description.trim()) {
+      newErrors.description = "Description is required";
+    }
+    if (!formData.date) {
+      newErrors.date = "Date is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e?: React.MouseEvent<HTMLButtonElement>) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    console.log("Submit clicked"); // Debug log
+
+    // Validate form
+    const isValid = validateForm();
+    if (!isValid) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+
+    // Validate that at least one option exists
+    if (formData.options.length === 0) {
+      toast.error("Please add at least one option");
       return;
     }
 
     setIsSubmitting(true);
+
     const body = {
       title: formData.title,
       category: formData.category,
@@ -284,7 +294,6 @@ const Prerecorded = () => {
       subtitle: formData.subtitle,
       rating: formData.rating,
       vimeo_video_id: formData.vimeo_video_id,
-      price: formData.price,
       duration: formData.duration,
       description: formData.description,
       date: formData.date,
@@ -292,13 +301,15 @@ const Prerecorded = () => {
       options: formData.options,
     };
 
+    console.log("Submitting data:", body); // Debug log
+
     try {
       if (id) {
         const res = await api.put(`${endPointApi.updatePreRecorded}/${id}`, body);
-        toast.success(res.data?.message);
+        toast.success(res.data?.message || "Updated successfully");
       } else {
         const res = await api.post(`${endPointApi.createPreRecorded}`, body);
-        toast.success(res.data?.message);
+        toast.success(res.data?.message || "Created successfully");
       }
       router.push("/prerecord");
     } catch (error: any) {
@@ -310,15 +321,7 @@ const Prerecorded = () => {
     }
   };
 
-  // ✅ Calculate suggested price
-  const getSuggestedPrice = () => {
-    if (formData.options.length === 0) return null;
-    const prices = formData.options.map(opt => opt.price);
-    return Math.min(...prices);
-  };
-
-  const suggestedPrice = getSuggestedPrice();
-  const priceValidation = validatePriceWithOptions();
+  const calculatedPrices = getCalculatedPrices();
 
   return (
     <div className="space-y-6">
@@ -327,7 +330,7 @@ const Prerecorded = () => {
           {/* Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <Label>Title</Label>
+              <Label>Title *</Label>
               <Input
                 placeholder="Enter title"
                 type="text"
@@ -373,7 +376,7 @@ const Prerecorded = () => {
               )}
             </div>
             <div>
-              <Label>Vimeo Video ID</Label>
+              <Label>Vimeo Video ID *</Label>
               <Input
                 placeholder="Enter vimeo video id"
                 type="text"
@@ -385,36 +388,6 @@ const Prerecorded = () => {
                 <p className="text-sm text-error-500 mt-1">{errors.vimeo_video_id}</p>
               )}
             </div>
-            <div className="flex-1">
-              <Label>Main Price (Starting From)</Label>
-              <Input
-                placeholder="Enter price"
-                type="text"
-                value={formData.price}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (/^\d*\.?\d*$/.test(value)) {
-                    handleChange("price", value);
-                  }
-                }}
-                error={errors.price}
-              />
-              {errors.price && <p className="text-sm text-error-500 mt-1">{errors.price}</p>}
-
-              {/* ✅ Price validation warning */}
-              {suggestedPrice !== null && parseFloat(formData.price) !== suggestedPrice && (
-                <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-2">
-                  <FiAlertCircle className="text-yellow-600 mt-0.5 flex-shrink-0" />
-                  <div className="text-xs text-yellow-800">
-                    <p className="font-medium">Price Mismatch!</p>
-                    <p>Main price should be <strong>${suggestedPrice}</strong> (minimum option price)</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <Label>Rating</Label>
               <Input
@@ -431,8 +404,11 @@ const Prerecorded = () => {
               />
               {errors.rating && <p className="text-sm text-error-500 mt-1">{errors.rating}</p>}
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <Label>Duration</Label>
+              <Label>Duration *</Label>
               <div className="relative">
                 <Select
                   options={categoryOptions}
@@ -450,7 +426,7 @@ const Prerecorded = () => {
             <div>
               <DatePicker
                 id="date-picker"
-                label="Date Picker"
+                label="Date Picker *"
                 placeholder="Select a date"
                 defaultDate={formData.date}
                 value={formData.date}
@@ -481,7 +457,7 @@ const Prerecorded = () => {
           </div>
 
           <div>
-            <Label>Description</Label>
+            <Label>Description *</Label>
             <Editor
               value={formData.description}
               style={{ height: "320px" }}
@@ -495,13 +471,44 @@ const Prerecorded = () => {
           </div>
         </div>
 
+        {/* ========== PRICING INFO CARD ========== */}
+        {calculatedPrices.usd && calculatedPrices.inr && (
+          <div className="mt-6 p-6 bg-gradient-to-r from-primary-50 to-primary-100 rounded-lg border-2 border-primary-200">
+            <div className="flex items-start justify-between">
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">Starting Price</h4>
+                <p className="text-sm text-gray-600 mb-4">
+                  Automatically calculated from minimum option price
+                </p>
+                <div className="flex gap-6">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-bold text-primary-600">
+                      ${calculatedPrices.usd}
+                    </span>
+                    <span className="text-sm text-gray-500">USD</span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-bold text-primary-600">
+                      ₹{calculatedPrices.inr}
+                    </span>
+                    <span className="text-sm text-gray-500">INR</span>
+                  </div>
+                </div>
+              </div>
+              <div className="text-primary-600">
+                <FiCheck size={32} className="bg-white rounded-full p-1" />
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ========== OPTIONS SECTION ========== */}
         <div className="mt-8 pt-8 border-t border-gray-200">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Additional Learning Options</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Additional Learning Options *</h3>
               <p className="text-sm text-gray-500 mt-1">
-                Add optional materials students can purchase. Main price will show the minimum option price.
+                Add purchase options with different materials. Main price will be calculated from the minimum option.
               </p>
             </div>
             <Button
@@ -546,10 +553,17 @@ const Prerecorded = () => {
 
                   <p className="text-sm text-gray-700 mb-3 line-clamp-2">{option.description}</p>
 
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xl font-bold text-success-600">${option.price}</span>
+                  <div className="flex flex-col gap-2 mb-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">USD:</span>
+                      <span className="text-lg font-bold text-success-600">${option.price_usd}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">INR:</span>
+                      <span className="text-lg font-bold text-success-600">₹{option.price_inr}</span>
+                    </div>
                     <span
-                      className={`text-xs px-2 py-1 rounded-full font-medium ${option.is_available
+                      className={`text-xs px-2 py-1 rounded-full font-medium text-center ${option.is_available
                         ? "bg-success-100 text-success-700"
                         : "bg-error-100 text-error-700"
                         }`}
@@ -610,16 +624,42 @@ const Prerecorded = () => {
                       <option value="writing-book">Writing Book</option>
                     </select>
                   </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <Label>Price ($)</Label>
-                    <Input
-                      type="number"
-                      placeholder="Enter price"
-                      value={currentOption.price || ""}
-                      onChange={(e) =>
-                        handleOptionChange("price", parseFloat(e.target.value) || 0)
-                      }
-                    />
+                    <Label>Price (USD)</Label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">
+                        $
+                      </span>
+                      <Input
+                        type="number"
+                        placeholder="Enter USD price"
+                        className="pl-8"
+                        value={currentOption.price_usd || ""}
+                        onChange={(e) =>
+                          handleOptionChange("price_usd", parseFloat(e.target.value) || 0)
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Price (INR)</Label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">
+                        ₹
+                      </span>
+                      <Input
+                        type="number"
+                        placeholder="Enter INR price"
+                        className="pl-8"
+                        value={currentOption.price_inr || ""}
+                        onChange={(e) =>
+                          handleOptionChange("price_inr", parseFloat(e.target.value) || 0)
+                        }
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -700,11 +740,28 @@ const Prerecorded = () => {
               </div>
             </div>
           )}
+
+          {/* Warning when no options added */}
+          {formData.options.length === 0 && (
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-3">
+              <FiAlertCircle className="text-yellow-600 mt-0.5 flex-shrink-0" size={20} />
+              <div className="text-sm text-yellow-800">
+                <p className="font-medium mb-1">No options added yet</p>
+                <p>Please add at least one option to set the course pricing.</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Submit Buttons */}
         <div className="flex items-center gap-5 mt-6">
-          <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
+          <Button
+            size="sm"
+            variant="primary"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            type="button"
+          >
             {isSubmitting ? "Saving..." : "Save"}
           </Button>
           <Button size="sm" variant="outline" onClick={() => router.push("/prerecord")}>
