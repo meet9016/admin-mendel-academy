@@ -10,7 +10,7 @@ import CommonDialog from "@/components/tables/CommonDialog";
 import { PlusIcon } from "@/icons";
 
 type PreRecordType = {
-  id: number;
+  _id: string;
   title: string;
   vimeo_video_id: string;
   total_reviews: number;
@@ -55,7 +55,7 @@ export default function Page() {
     if (!selectedRow) return;
 
     try {
-      const res = await api.delete(`${endPointApi.deletePreRecorded}/${selectedRow.id}`);
+      const res = await api.delete(`${endPointApi.deletePreRecorded}/${selectedRow._id}`);
       if (res?.data?.message) {
         getPreRecordData(); // Refresh the table/list after deletion
       }
@@ -112,7 +112,7 @@ export default function Page() {
                 },
               },
             ]}
-            onEdit={(row) => router.push(`/prerecord/add?id=${row.id}`)}
+            onEdit={(row) => router.push(`/prerecord/add?id=${row._id}`)}
             onDelete={handleDeleteClick}
           />
         </div>
