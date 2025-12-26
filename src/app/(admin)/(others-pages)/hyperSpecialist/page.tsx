@@ -17,12 +17,10 @@ type LiveCourseChild = {
 
 export type FormattedTreeData = {
   id: string;
-  course_title: string;
-  instructor_name: string;
-  date?: string;
-  createdAt?: string;
-  qualification?: string;
-  children?: LiveCourseChild[];
+  title: string;
+  description: string;
+  price_dollar: string;
+  price_inr: string;
 };
 
 // ---------------------- MAIN COMPONENT ----------------------
@@ -36,6 +34,7 @@ export default function Page() {
   const [page, setPage] = useState<number>(1);
   const [rows, setRows] = useState<number>(10);
   const [totalRecords, setTotalRecords] = useState<number>(0);
+console.log("data******-----",data);
 
   // ---------------------- DELETE HANDLER ----------------------
   const handleDeleteClick = (row: FormattedTreeData) => {
@@ -46,7 +45,7 @@ export default function Page() {
   const confirmDelete = async () => {
     if (!selectedRow) return;
     try {
-      const res = await api.delete(`${endPointApi.deleteLiveCourses}/${selectedRow.id}`);
+      const res = await api.delete(`${endPointApi.deleteHyperSpecialist}/${selectedRow.id}`);
       if (res?.data?.message) {
         getLiveCoursesData();
       }
@@ -62,19 +61,13 @@ export default function Page() {
   const getLiveCoursesData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.get(`${endPointApi.getAllLiveCourses}?page=${page}&limit=${rows}`);
+      const res = await api.get(`${endPointApi.getAllHyperSpecialist}?page=${page}&limit=${rows}`);
+console.log(":==",res);
 
       const apiData = Array.isArray(res.data.data) ? res.data.data : [];
 
       // Convert API data → TreeTable Format
       const formattedData: FormattedTreeData[] = apiData.map((item: any) => {
-        const children =
-          Array.isArray(item?.choose_plan_list) &&
-          item.choose_plan_list.map((p: any) => ({
-            module_title: p?.title || "-",
-            module_number: p?.moduleNumber || "-",
-            price: p?.price || "-",
-          }));
 
         return {
           id: String(item.id),
@@ -83,12 +76,11 @@ export default function Page() {
           qualification: item.instructor?.qualification ?? "-",
           date: item.date,
           createdAt: item.createdAt,
-          children: children || [],
         };
       });
 
 
-      setData(formattedData);
+      setData(res.data.data);
       setTotalRecords(res.data.total);
     } catch (err) {
       console.error(err);
@@ -111,10 +103,10 @@ export default function Page() {
   return (
     <div className="space-y-6">
       <ComponentCard
-        title="Live Courses List"
+        title="HyperSpecialist List"
         Plusicon={<PlusIcon />}
-        name="Add Live Courses"
-        onAddProductClick="/liveCourses/add"
+        name="Add HyperSpecialists"
+        onAddProductClick="/hyperSpecialist/add"
       >
         <div className="card">
           <PrimeReactTreeTable
@@ -127,16 +119,19 @@ export default function Page() {
               setRows(newRows);
             }}
             columns={[
-              { field: "course_title", header: "Course Title" },
-              { field: "instructor_name", header: "Instructor Name" },
+              { field: "title", header: "Title" },
+              { field: "description", header: "Description" },
               {
-                field: "qualification",
-                header: "Instructor Qualification",
-
+                field: "price_dollar",
+                header: "Price Dollar($)",
+              },
+              {
+                field: "price_inr",
+                header: "Price Inr(₹)",
               },
             ]}
             headerNameMap={headerNameMap}
-            onEdit={(row) => router.push(`/liveCourses/add?id=${row.id}`)}
+            onEdit={(row) => router.push(`/hyperSpecialist/add?id=${row.id}`)}
             onDelete={handleDeleteClick}
           />
         </div>
@@ -153,7 +148,7 @@ export default function Page() {
           <i className="pi pi-exclamation-triangle text-3xl text-red-500" />
           {selectedRow && (
             <span>
-              Are you sure you want to delete <b>{selectedRow.course_title}</b>?
+              Are you sure you want to delete <b>{selectedRow.title}</b>?
             </span>
           )}
         </div>

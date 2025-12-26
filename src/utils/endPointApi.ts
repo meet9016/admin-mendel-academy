@@ -66,6 +66,13 @@ export interface EndPointApi {
     getByIdUpcomeingProgram?: string;
     updateUpcomeingProgram?: string;
 
+    //Hyper-Specialist
+    createHyperSpecialist?: string;
+    getAllHyperSpecialist?: string;
+    deleteHyperSpecialist?: string;
+    getByIdHyperSpecialist?: string;
+    updateHyperSpecialist?: string;
+
     //Cart
     getAllCart?: string;
 }
@@ -139,6 +146,13 @@ const endPointApi: EndPointApi = {
     getByIdUpcomeingProgram: 'upcomming-program/getById',
     updateUpcomeingProgram: 'upcomming-program/update',
 
+    //Hyper-Specialist
+    createHyperSpecialist: 'hyperSpecialist/create',
+    getAllHyperSpecialist: 'hyperSpecialist/getall',
+    deleteHyperSpecialist: 'hyperSpecialist/delete',
+    getByIdHyperSpecialist: 'hyperSpecialist/getById',
+    updateHyperSpecialist: 'hyperSpecialist/update',
+    
     //Cart
     getAllCart: 'cart/get-all-cart',
 };

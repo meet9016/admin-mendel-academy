@@ -33,6 +33,7 @@ export const MAIN_NAV: NavItem[] = [
     icon: <ListIcon />,
     name: "Pathology",
     subItems: [
+      { name: "Hyper Specialist", path: "/hyperSpecialist" },
       { name: "live Courses", path: "/liveCourses" },
       { name: "Pre Recorded", path: "/prerecord" },
       { name: "question", path: "/question" },
