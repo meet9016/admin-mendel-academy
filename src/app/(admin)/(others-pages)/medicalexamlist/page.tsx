@@ -10,7 +10,7 @@ import CommonDialog from "@/components/tables/CommonDialog";
 import { useRouter } from "next/navigation";
 
 interface Plan {
-  plan_day: string | number;
+  plan_month: string | number;
   plan_type: string;
   plan_pricing: number;
   most_popular?: boolean;
@@ -22,7 +22,7 @@ type FormattedData = {
   exam_name: string;
   status: string;
   children?: {
-    plan_day: string;
+    plan_month: string;
     plan_type: string;
     plan_pricing: number;
     plan_popular: boolean;
@@ -57,7 +57,7 @@ export default function DemoPage() {
           Array.isArray(item.choose_plan_list) &&
           item.choose_plan_list.map((plan: Plan) => ({
             plan_type: plan.plan_type ?? "-",
-            plan_day: String(plan.plan_day ?? "-"),
+            plan_month: String(plan.plan_month ?? "-"),
             plan_pricing: Number(plan.plan_pricing ?? 0),
             plan_popular: Boolean(plan.most_popular),
           }));
@@ -102,7 +102,7 @@ export default function DemoPage() {
   }, [getExamData]);
 
   const headerNameMap = {
-    plan_day: "Plan Day",
+    plan_month: "Plan Day",
     plan_type: "Plan Type",
     plan_pricing: "Pricing",
     plan_popular: "Most Popular",

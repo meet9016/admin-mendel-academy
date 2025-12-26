@@ -1,7 +1,7 @@
 import * as yup from "yup";
 
 export const PlanSchema = yup.object({
-    planDay: yup.string().required("Plan day is required"),
+    planMonth: yup.string().required("Plan day is required"),
     planPrice: yup
         .string()
         .required("Plan price is required")

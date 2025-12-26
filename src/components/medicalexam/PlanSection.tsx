@@ -10,7 +10,7 @@ import { FaMinus, FaPlus } from 'react-icons/fa6';
 // Reusable, strict type
 export interface PlanData {
   id?: string | number;
-  planDay: number | string;
+  planMonth: number | string;
   planPrice: string;
   planType: string;
   planSubtitles: string[];
@@ -74,18 +74,18 @@ const PlanSection: React.FC<PlanSectionProps> = ({
               { value: '12', label: '12 Month' },
               { value: 'Custom', label: 'Custom' },
             ]}
-            value={String(data.planDay)}
-            onChange={(val: string) => handleChange('planDay', val)}
+            value={String(data.planMonth)}
+            onChange={(val: string) => handleChange('planMonth', val)}
             placeholder="Select plan duration"
-            error={!!errors?.planDay}
-          // hint={errors?.planDay}
+            error={!!errors?.planMonth}
+          // hint={errors?.planMonth}
           />
-          {errors?.planDay && (
-            <p className="text-sm text-error-500 mt-1">{errors.planDay}</p>
+          {errors?.planMonth && (
+            <p className="text-sm text-error-500 mt-1">{errors.planMonth}</p>
           )}
 
         </div>
-        {data.planDay !== "Custom" && (
+        {data.planMonth !== "Custom" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
             {/* USD PRICE */}
@@ -109,7 +109,7 @@ const PlanSection: React.FC<PlanSectionProps> = ({
                 />
               </div>
 
-              {data.planDay !== "Custom" && errors?.planPriceUSD && (
+              {data.planMonth !== "Custom" && errors?.planPriceUSD && (
                 <p className="text-sm text-error-500 mt-1">{errors.planPriceUSD}</p>
               )}
             </div>
@@ -133,7 +133,7 @@ const PlanSection: React.FC<PlanSectionProps> = ({
                   error={!!errors?.planPriceINR}
                 />
               </div>
-              {data.planDay !== "Custom" && errors?.planPriceINR && (
+              {data.planMonth !== "Custom" && errors?.planPriceINR && (
                 <p className="text-sm text-error-500 mt-1">{errors.planPriceINR}</p>
               )}
             </div>

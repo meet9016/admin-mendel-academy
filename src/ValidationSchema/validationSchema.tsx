@@ -71,27 +71,27 @@ export const examListSchema = Yup.object().shape({
     //PLAN SECTION
     plans: Yup.array().of(
         Yup.object().shape({
-            planDay: Yup.string(),
+            planMonth: Yup.string(),
 
-            planPriceUSD: Yup.string().when("planDay", {
+            planPriceUSD: Yup.string().when("planMonth", {
                 is: (val: string) => val && val !== "" && val !== null,
                 then: (schema) => schema.required("USD price is required"),
                 otherwise: (schema) => schema.notRequired(),
             }),
-            planPriceINR: Yup.string().when("planDay", {
+            planPriceINR: Yup.string().when("planMonth", {
                 is: (val: string) => val && val !== "" && val !== null,
                 then: (schema) => schema.required("INR price is required"),
                 otherwise: (schema) => schema.notRequired(),
             }),
 
-            planType: Yup.string().when("planDay", {
+            planType: Yup.string().when("planMonth", {
                 is: (val: string) => val && val !== "" && val !== null,
                 then: (schema) => schema.required("Plan type is required"),
                 otherwise: (schema) => schema.notRequired(),
             }),
 
             planSubtitles: Yup.array()
-                .when("planDay", {
+                .when("planMonth", {
                     is: (val) => val && val !== "",
                     then: (schema) =>
                         schema

@@ -20,7 +20,7 @@ import { toast } from "react-toastify";
 
 interface PlanData {
     id: number | string;
-    planDay: number | string;
+    planMonth: number | string;
     planPriceUSD: number | string;
     planPriceINR: number | string;
     planType: string;
@@ -71,14 +71,12 @@ const MedicalExam = () => {
         examSteps: [""],
         description: "",
         plans: [
-            { id: "", planDay: "", planPriceUSD: "", planPriceINR: "", planType: "", planSubtitles: [""], isPopular: false },
-            { id: "", planDay: "", planPriceUSD: "", planPriceINR: "", planType: "", planSubtitles: [""], isPopular: false },
-            { id: "", planDay: "", planPriceUSD: "", planPriceINR: "", planType: "", planSubtitles: [""], isPopular: false },
-            { id: "", planDay: "", planPriceUSD: "", planPriceINR: "", planType: "", planSubtitles: [""], isPopular: false },
+            { id: "", planMonth: "", planPriceUSD: "", planPriceINR: "", planType: "", planSubtitles: [""], isPopular: false },
+            { id: "", planMonth: "", planPriceUSD: "", planPriceINR: "", planType: "", planSubtitles: [""], isPopular: false },
+            { id: "", planMonth: "", planPriceUSD: "", planPriceINR: "", planType: "", planSubtitles: [""], isPopular: false },
+            { id: "", planMonth: "", planPriceUSD: "", planPriceINR: "", planType: "", planSubtitles: [""], isPopular: false },
         ],
     });
-
-    console.log(formData, 'formData')
 
     const [enrollData, setEnrollData] = useState({
         title: "",
@@ -180,7 +178,7 @@ const MedicalExam = () => {
                         const existingPlans =
                             data.choose_plan_list && data.choose_plan_list.length > 0
                                 ? data.choose_plan_list.map((plan: any) => ({
-                                    planDay: plan.plan_day ?? "",
+                                    planMonth: plan.plan_month ?? "",
                                     planPriceUSD: plan.plan_pricing_dollar ?? "",
                                     planPriceINR: plan.plan_pricing_inr ?? "",
                                     planType: plan.plan_type ?? "",
@@ -195,7 +193,7 @@ const MedicalExam = () => {
                                 : [];
 
                         const emptyPlan = {
-                            planDay: "",
+                            planMonth: "",
                             planPriceUSD: "",
                             planPriceINR: "",
                             planType: "",
@@ -229,11 +227,8 @@ const MedicalExam = () => {
 
 
     const handleSave = async () => {
-        console.log("22222");
         const isValid = await validate();
-        console.log("00000");
         if (!isValid) return;
-        console.log("1212");
         
         try {
             const formDataToSend = new FormData();
@@ -255,15 +250,15 @@ const MedicalExam = () => {
 
             // Choose Plan List
             formData.plans.forEach((plan, i) => {
-                // if (plan.planPrice && plan.planDay && plan.planType) {
-                if ((plan.planDay && plan.planType) || plan.planDay === "Custom") {
-                    if (plan?.id !== undefined && plan?.id !== null) {
+                // if (plan.planPrice && plan.planMonth && plan.planType) {
+                if ((plan.planMonth && plan.planType) || plan.planMonth === "Custom") {
+                    if (plan?.id !== undefined && plan?.id !== null && id) {
                         formDataToSend.append(`choose_plan_list[${i}][_id]`, String(plan.id));
                     }
 
                     formDataToSend.append(`choose_plan_list[${i}][plan_pricing_dollar]`, plan.planPriceUSD);
                     formDataToSend.append(`choose_plan_list[${i}][plan_pricing_inr]`, plan.planPriceINR);
-                    formDataToSend.append(`choose_plan_list[${i}][plan_day]`, plan.planDay.toString());
+                    formDataToSend.append(`choose_plan_list[${i}][plan_month]`, plan.planMonth.toString());
                     formDataToSend.append(`choose_plan_list[${i}][plan_type]`, plan.planType);
                     plan.planSubtitles.forEach((sub, j) => {
                         formDataToSend.append(`choose_plan_list[${i}][plan_sub_title][${j}]`, sub);
@@ -481,7 +476,7 @@ const MedicalExam = () => {
                         onPopularChange={() => handlePopularChange(index)}
                         // errors={formErrors?.[`plans[${index}]`] || {}}
                         errors={{
-                            planDay: errors[`plans[${index}].planDay`],
+                            planMonth: errors[`plans[${index}].planMonth`],
                             planPriceUSD: errors[`plans[${index}].planPriceUSD`],
                             planPriceINR: errors[`plans[${index}].planPriceINR`],
                             planType: errors[`plans[${index}].planType`],
