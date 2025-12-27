@@ -50,7 +50,7 @@ export const MAIN_NAV: NavItem[] = [
     name: "Content Management",
     subItems: [
       { name: "FAQ", path: "/faq" },
-      { name: "Terms & Condition", path: "/term-condition" },
+      { name: "Terms & Condition", path: "/terms-condition" },
       { name: "Contact Us", path: "/contactus" },
     ],
   },

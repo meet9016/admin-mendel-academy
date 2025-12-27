@@ -76,6 +76,10 @@ export interface EndPointApi {
 
     //Cart
     getAllCart?: string;
+
+    //Terms & Conditions
+    postTermsAndConditions?: string;
+    getAllTermsAndConditions?: string;
 }
 
 // Define and export the API endpoint object
@@ -157,6 +161,10 @@ const endPointApi: EndPointApi = {
     
     //Cart
     getAllCart: 'cart/get-all-cart',
+
+    //Terms & Conditions
+    postTermsAndConditions: 'terms-conditions/create', 
+    getAllTermsAndConditions: 'terms-conditions/get', 
 };
 
 export default endPointApi;
