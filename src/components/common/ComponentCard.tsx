@@ -1,6 +1,7 @@
 "use client"
-import { useRouter } from "next/navigation";
-import React from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { Calendar } from "primereact/calendar";
+import React, { useState } from "react";
 
 interface ComponentCardProps {
   title: string;
@@ -10,6 +11,9 @@ interface ComponentCardProps {
   onAddProductClick?: string; // new prop for click handler
   Plusicon?: React.ReactNode;
   desc?: string; // Description text
+  dates?: [Date | null, Date | null] | null;
+  setDates?: (dates: [Date | null, Date | null] | null) => void;
+  downloadExcel?: () => void;
 }
 
 const ComponentCard: React.FC<ComponentCardProps> = ({
@@ -18,10 +22,18 @@ const ComponentCard: React.FC<ComponentCardProps> = ({
   children,
   className = "",
   onAddProductClick = "",
+  downloadExcel = () => { },
   Plusicon = null,
   desc = "",
+  dates,
+  setDates
 }) => {
   const router = useRouter();
+   const pathname = usePathname();
+
+  // ✅ URL based condition
+  const isPaymentPage = pathname?.includes("payment");
+
   return (
     <>
       <div
@@ -50,6 +62,28 @@ const ComponentCard: React.FC<ComponentCardProps> = ({
               {Plusicon} {name}
             </button>
           )}
+          {/* Date Range */}
+          {/* Date Range + Download */}
+         {isPaymentPage && (
+            <div className="flex items-center gap-3">
+                <Calendar
+                  value={dates}
+                  placeholder="Start Date - End Date"
+                  onChange={(e) => setDates(e.value)}
+                  selectionMode="range"
+                  readOnlyInput
+                  hideOnRangeSelection
+                  className="p-inputtext-sm"
+                />
+
+                <button
+                  onClick={downloadExcel}
+                  className="bg-[#ffca00] px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 whitespace-nowrap"
+                >
+                  Download
+                </button>
+            </div>
+         )}
         </div>
         <div className="p-4 border-t border-gray-100 dark:border-gray-800 sm:p-4">
           <div className="space-y-6">{children}</div>

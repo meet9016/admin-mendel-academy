@@ -440,12 +440,11 @@ const LiveCourses = () => {
               <div>
                 <Label>Sold Out</Label>
                 <Checkbox
-                  name="soldOut"
+                  // name="soldOut"
                   checked={formData.soldOut}
                   onChange={(checked: boolean) =>
                     setFormData(prev => ({ ...prev, soldOut: checked }))
                   }
-
                 />
               </div>
             </div>

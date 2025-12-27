@@ -47,6 +47,7 @@ export interface EndPointApi {
 
     //Payment
     getAllPayment?: string;
+    getPaymentDownloadExcel?: string;
 
     //Contact-Us
     getAllContact?: string;
@@ -127,6 +128,7 @@ const endPointApi: EndPointApi = {
 
     //Payment
     getAllPayment: 'payment/getall',
+    getPaymentDownloadExcel: 'payment/download-excel',
 
     //Contact-Us
     getAllContact: 'contactus/getall',
