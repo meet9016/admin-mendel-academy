@@ -36,7 +36,6 @@ export const MAIN_NAV: NavItem[] = [
       { name: "Hyper Specialist", path: "/hyperSpecialist" },
       { name: "live Courses", path: "/liveCourses" },
       { name: "Pre Recorded", path: "/prerecord" },
-      { name: "question", path: "/question" },
       { name: "Upcoming Programs", path: "/upcomingProgram" },
     ],
   },
@@ -152,29 +151,62 @@ const AppSidebar: React.FC = () => {
   const showText = isExpanded || isHovered || isMobileOpen;
 
   // helper: check active path (memoized)
-  const isActivePath = useCallback((path: string) => path === pathname, [pathname]);
+  // const isActivePath = useCallback((path: string) => path === pathname, [pathname]);
+const isActivePath = (path: string) => {
+  if (!path) return false;
+  return pathname === path || pathname.startsWith(path + "/");
+};
 
   // compute initial open submenu if current path belongs to a subItem
-  useEffect(() => {
-    let matched: { type: "main" | "others"; index: number } | null = null;
+//   useEffect(() => {
+//     let matched: { type: "main" | "others"; index: number } | null = null;
 
-    const scan = (items: NavItem[], type: "main" | "others") => {
-      items.forEach((nav, idx) => {
-        if (nav.subItems) {
-          nav.subItems.forEach((sub) => {
-            if (sub.path === pathname) {
-              matched = { type, index: idx };
-            }
-          });
+//     const scan = (items: NavItem[], type: "main" | "others") => {
+//       items.forEach((nav, idx) => {
+//         if (nav.subItems) {
+//           nav.subItems.forEach((sub) => {
+//             // if (sub.path === pathname) {
+//             //   matched = { type, index: idx };
+//             // }
+//             if (
+//   pathname === sub.path ||
+//   pathname.startsWith(sub.path + "/")
+// ) {
+//   matched = { type, index: idx };
+// }
+
+//           });
+//         }
+//       });
+//     };
+
+//     scan(MAIN_NAV, "main");
+//     scan(OTHER_NAV, "others");
+
+//     setOpenSubmenu(matched);
+//   }, [pathname]);
+
+useEffect(() => {
+  let matched: { type: "main" | "others"; index: number } | null = null;
+
+  const scan = (items: NavItem[], type: "main" | "others") => {
+    items.forEach((nav, idx) => {
+      nav.subItems?.forEach((sub) => {
+        if (
+          pathname === sub.path ||
+          pathname.startsWith(sub.path + "/")
+        ) {
+          matched = { type, index: idx };
         }
       });
-    };
+    });
+  };
 
-    scan(MAIN_NAV, "main");
-    scan(OTHER_NAV, "others");
+  scan(MAIN_NAV, "main");
+  scan(OTHER_NAV, "others");
 
-    setOpenSubmenu(matched);
-  }, [pathname]);
+  setOpenSubmenu(matched);
+}, [pathname]);
 
   // update heights when openSubmenu or window size changes
   useEffect(() => {

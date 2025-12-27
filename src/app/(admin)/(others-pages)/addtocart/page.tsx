@@ -32,8 +32,6 @@ export default function Page() {
     const [rows, setRows] = useState<number>(10);
     const [totalRecords, setTotalRecords] = useState<number>(0);
 
-
-
     const getBlogData = useCallback(async () => {
         setLoading(true);
         try {
@@ -71,45 +69,43 @@ export default function Page() {
     };
 
      /* -------------------- Columns (memoised) ------------------------ */
-      const columns = useMemo(
-        () => [
-          {
-            field: "category_name" as Col,
-            header: "Category Name",
-            // body: ({ id, exam_name }: Blog) => (
-            //   <>
-            //     <Tooltip target={`.exam-${id}`} content={exam_name} position="bottom" />
-            //     <div className={`exam-${id} w-[150px] truncate cursor-pointer`}>
-            //       {truncate(exam_name, 22)}
-            //     </div>
-            //   </>
-            // ),
-          },
-          {
-            field: "duration" as Col,
-            header: "Duration",
-          },
-          {
-            field: "price" as Col,
-            header: "Price",
-          },
-          {
-            field: "quantity" as Col,
-            header: "Quantity",
-          },
-          {
-            field: "product_id" as Col,
-            header: "Product id",
-          },
-          {
-            field: "createdAt" as Col,
-            header: "Created At",
-            body: ({ createdAt }: Blog) =>
-              createdAt ? new Date(createdAt).toLocaleDateString() : "-",
-          },
-        ],
-        []
-      );
+    const columns = useMemo(
+  () => [
+    {
+      field: "category_name" as Col,
+      header: "Category Name",
+      body: (rowData: PreRecordType) => {
+        // Handle if category_name is an object
+        const categoryName = typeof rowData.category_name === 'object' 
+          ? JSON.stringify(rowData.category_name) 
+          : rowData.category_name;
+        return <span>{categoryName || "-"}</span>;
+      },
+    },
+    {
+      field: "duration" as Col,
+      header: "Duration",
+      body: (rowData: PreRecordType) => <span>{rowData.duration || "-"}</span>,
+    },
+    {
+      field: "price" as Col,
+      header: "Price",
+      body: (rowData: PreRecordType) => <span>{rowData.price || "-"}</span>,
+    },
+    {
+      field: "quantity" as Col,
+      header: "Quantity",
+      body: (rowData: PreRecordType) => <span>{rowData.quantity || "-"}</span>,
+    },
+    {
+      field: "createdAt" as Col,
+      header: "Created At",
+      body: (rowData: PreRecordType) =>
+        rowData.createdAt ? <span>{new Date(rowData.createdAt).toLocaleDateString()}</span> : <span>-</span>,
+    },
+  ],
+  []
+);
 
     return (
 

@@ -11,7 +11,6 @@ const apiAdminInstance = axios.create({
   //   'Content-Type': 'multipart/form-data'
   // }
 })
-console.log("baseURL *****", apiAdminInstance);
 
 export const api = apiAdminInstance;
 
