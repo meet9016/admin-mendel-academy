@@ -11,8 +11,9 @@ import { PlusIcon } from "@/icons";
 
 // ---------------------- TYPES ----------------------
 type LiveCourseChild = {
-  session_title: string;
-  session_date: string;
+  module_number: string;
+  module_title: string;
+  price: string | number;
 };
 
 export type FormattedTreeData = {
@@ -39,6 +40,7 @@ export default function Page() {
 
   // ---------------------- DELETE HANDLER ----------------------
   const handleDeleteClick = (row: FormattedTreeData) => {
+    console.log('🗑️ Delete clicked for:', row); // Debug log
     setSelectedRow(row);
     setIsDeleteModalOpen(true);
   };
@@ -46,12 +48,14 @@ export default function Page() {
   const confirmDelete = async () => {
     if (!selectedRow) return;
     try {
+      console.log('🗑️ Deleting course ID:', selectedRow.id); // Debug log
       const res = await api.delete(`${endPointApi.deleteLiveCourses}/${selectedRow.id}`);
-      if (res?.data?.message) {
+      if (res?.data?.message || res?.data?.success) {
+        console.log('✅ Delete successful');
         getLiveCoursesData();
       }
     } catch (error) {
-      console.error("Delete error:", error);
+      console.error("❌ Delete error:", error);
     } finally {
       setIsDeleteModalOpen(false);
       setSelectedRow(null);
@@ -64,20 +68,27 @@ export default function Page() {
     try {
       const res = await api.get(`${endPointApi.getAllLiveCourses}?page=${page}&limit=${rows}`);
 
+      console.log('📦 Raw API Response:', res.data); // Debug log
+
       const apiData = Array.isArray(res.data.data) ? res.data.data : [];
 
-      // Convert API data → TreeTable Format
+      // ✅ Convert API data → TreeTable Format
       const formattedData: FormattedTreeData[] = apiData.map((item: any) => {
+        // ✅ FIX: Use _id (MongoDB ID) instead of id
+        const courseId = item._id || item.id;
+
+        console.log('📝 Processing course:', item.course_title, 'ID:', courseId); // Debug log
+
         const children =
           Array.isArray(item?.choose_plan_list) &&
           item.choose_plan_list.map((p: any) => ({
-            module_title: p?.title || "-",
             module_number: p?.moduleNumber || "-",
+            module_title: p?.title || "-",
             price: p?.price || "-",
           }));
 
         return {
-          id: String(item.id),
+          id: String(courseId), // ✅ FIX: Ensure ID is properly set
           course_title: item.course_title ?? "-",
           instructor_name: item.instructor_name ?? "-",
           qualification: item.instructor?.qualification ?? "-",
@@ -87,11 +98,14 @@ export default function Page() {
         };
       });
 
+      console.log('✅ Formatted Data:', formattedData); // Debug log
 
       setData(formattedData);
-      setTotalRecords(res.data.total);
+
+      // ✅ FIX: Handle pagination data correctly
+      setTotalRecords(res.data.pagination?.totalRecords || res.data.total || apiData.length);
     } catch (err) {
-      console.error(err);
+      console.error('❌ API Error:', err);
     } finally {
       setLoading(false);
     }
@@ -102,10 +116,9 @@ export default function Page() {
   }, [getLiveCoursesData]);
 
   const headerNameMap = {
-    plan_month: "Module Number",
-    plan_type: "Module Name",
-    plan_pricing: "Module Price",
-    plan_popular: "Most Popular",
+    module_number: "Module Number",
+    module_title: "Module Name",
+    price: "Module Price",
   };
 
   return (
@@ -132,11 +145,13 @@ export default function Page() {
               {
                 field: "qualification",
                 header: "Instructor Qualification",
-
               },
             ]}
             headerNameMap={headerNameMap}
-            onEdit={(row) => router.push(`/liveCourses/add?id=${row.id}`)}
+            onEdit={(row) => {
+              console.log('✏️ Edit clicked for ID:', row.id); // Debug log
+              router.push(`/liveCourses/add?id=${row.id}`);
+            }}
             onDelete={handleDeleteClick}
           />
         </div>

@@ -18,7 +18,8 @@ interface ModuleType {
   module_number: number | string;
   module_name: string;
   module_title: string;
-  module_price: string;
+  module_price_usd: string;  // ✅ Added USD price
+  module_price_inr: string;  // ✅ Added INR price
   most_popular: boolean;
   plan_sub_title: string[];
 }
@@ -35,6 +36,7 @@ interface FormDataType {
   soldOut: boolean;
   modules: ModuleType[];
 }
+
 const LiveCourses = () => {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
@@ -55,7 +57,8 @@ const LiveCourses = () => {
         module_number: "",
         module_name: "",
         module_title: "",
-        module_price: "",
+        module_price_usd: "",  // ✅ USD price
+        module_price_inr: "",  // ✅ INR price
         most_popular: false,
         plan_sub_title: [""],
       },
@@ -63,7 +66,8 @@ const LiveCourses = () => {
         module_number: "",
         module_name: "",
         module_title: "",
-        module_price: "",
+        module_price_usd: "",
+        module_price_inr: "",
         most_popular: false,
         plan_sub_title: [""],
       },
@@ -71,13 +75,13 @@ const LiveCourses = () => {
         module_number: "",
         module_name: "",
         module_title: "",
-        module_price: "",
+        module_price_usd: "",
+        module_price_inr: "",
         most_popular: false,
         plan_sub_title: [""],
       },
     ],
   });
-
 
   const handleChange = (e: any) => {
     const { name, value, type, checked } = e.target;
@@ -87,11 +91,9 @@ const LiveCourses = () => {
     }));
   };
 
-
   const handleRadioChange = (value: string) => {
     setFormData((prev) => ({ ...prev, status: value }));
   };
-
 
   const addTag = () => {
     setFormData((prev) => ({ ...prev, tags: [...prev.tags, ""] }));
@@ -110,13 +112,11 @@ const LiveCourses = () => {
     }));
   };
 
-
   const handleModuleChange = (index: number, field: string, value: any) => {
     const modules = [...formData.modules];
     (modules[index] as any)[field] = value;
     setFormData((prev) => ({ ...prev, modules }));
   };
-
 
   const addSubTitle = (mIndex: number) => {
     const modules = [...formData.modules];
@@ -138,7 +138,6 @@ const LiveCourses = () => {
     setFormData((prev) => ({ ...prev, modules }));
   };
 
-
   const handlePopularChange = (moduleIndex: number) => {
     const modules = formData.modules.map((m, i) => ({
       ...m,
@@ -147,7 +146,6 @@ const LiveCourses = () => {
     setFormData((prev) => ({ ...prev, modules }));
   };
 
-  // Handle date selection
   const handleDateChange = (_dates: unknown, currentDateString: string) => {
     setFormData((prev) => ({ ...prev, date: currentDateString }));
   };
@@ -158,7 +156,7 @@ const LiveCourses = () => {
 
       try {
         const res = await api.get(`${endPointApi.getByIdLiveCourses}/${id}`);
-        const data = res.data;
+        const data = res.data.data; // ✅ Access nested data
 
         setFormData((prev) => ({
           ...prev,
@@ -173,12 +171,13 @@ const LiveCourses = () => {
           soldOut: data.isSoldOut ?? false,
 
           modules: (() => {
-            // Convert API modules
+            // ✅ Convert API modules with both USD and INR prices
             const apiModules = data.choose_plan_list?.map((m: any) => ({
               module_number: m.moduleNumber ?? "",
               module_name: m.title ?? "",
               module_title: m.subtitle ?? "",
-              module_price: m.price ?? "",
+              module_price_usd: m.price_usd ?? "",  // ✅ Get USD price
+              module_price_inr: m.price_inr ?? "",  // ✅ Get INR price
               most_popular: m.isMostPopular ?? false,
               plan_sub_title: m.features?.length ? m.features : [""],
             })) || [];
@@ -189,7 +188,8 @@ const LiveCourses = () => {
                 module_number: "",
                 module_name: "",
                 module_title: "",
-                module_price: "",
+                module_price_usd: "",
+                module_price_inr: "",
                 most_popular: false,
                 plan_sub_title: [""],
               });
@@ -197,25 +197,20 @@ const LiveCourses = () => {
 
             return apiModules;
           })(),
-
         }));
 
       } catch (error) {
         console.log("Error fetching live course:", error);
+        toast.error("Failed to fetch course data");
       }
     };
 
     fetchData();
   }, [id]);
 
-
-
-
-
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true);
-
 
       const instructorObj = {
         name: formData.instructor_name,
@@ -223,14 +218,14 @@ const LiveCourses = () => {
         image: ""
       };
 
-
       const modulePayload = formData.modules
         .filter(mod => {
           const isNotEmpty =
             mod.module_number !== "" ||
             mod.module_name !== "" ||
             mod.module_title !== "" ||
-            mod.module_price !== "" ||
+            mod.module_price_usd !== "" ||
+            mod.module_price_inr !== "" ||
             mod.plan_sub_title.some(s => s !== "");
 
           return isNotEmpty;
@@ -240,10 +235,20 @@ const LiveCourses = () => {
           title: mod.module_name,
           subtitle: mod.module_title,
           description: "",
-          price: Number(mod.module_price || 0),
+          price_usd: Number(mod.module_price_usd || 0),  // ✅ Send USD price
+          price_inr: Number(mod.module_price_inr || 0),  // ✅ Send INR price
           features: mod.plan_sub_title.filter(x => x !== ""),
           isMostPopular: mod.most_popular
         }));
+
+      // ✅ Validate that each module has both prices
+      for (let i = 0; i < modulePayload.length; i++) {
+        if (!modulePayload[i].price_usd || !modulePayload[i].price_inr) {
+          toast.error(`Module ${i + 1} must have both USD and INR prices`);
+          setIsSubmitting(false);
+          return;
+        }
+      }
 
       const body = {
         course_title: formData.title,
@@ -259,25 +264,23 @@ const LiveCourses = () => {
       };
 
       console.log("FINAL BODY SENDING:", body);
+
       let res;
       if (id) {
-        // UPDATE
         res = await api.put(`${endPointApi.updateLiveCourses}/${id}`, body);
         toast.success(res.data?.message);
       } else {
-        // CREATE
         res = await api.post(`${endPointApi.createLiveCourses}`, body);
         toast.success(res.data?.message);
       }
       router.push("/liveCourses");
-    } catch (error) {
-      toast.error("Something went wrong! Please try again.");
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Something went wrong! Please try again.");
       console.log("Submission error", error);
     } finally {
       setIsSubmitting(false);
     }
   };
-
 
   return (
     <>
@@ -285,7 +288,6 @@ const LiveCourses = () => {
         <ComponentCard title="Add Live Courses" name="">
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Title */}
               <div>
                 <Label>Course Title</Label>
                 <Input
@@ -306,7 +308,6 @@ const LiveCourses = () => {
                   onChange={handleChange}
                 />
               </div>
-              {/* Qualification */}
               <div>
                 <Label>Instructor Qualification</Label>
                 <Input
@@ -341,25 +342,12 @@ const LiveCourses = () => {
                 />
               </div>
               <div>
-                {/* <DatePicker
-                  id="date-picker"
-                  label="Date Picker Input"
-                  placeholder="Select a date"
-                  onChange={(date: any) => {
-                    const selected = Array.isArray(date) ? date[0] : date;
-                    setFormData(prev => ({
-                      ...prev,
-                      date: selected?.toString() || ""
-                    }));
-                  }}
-                /> */}
                 <DatePicker
                   id="date-picker"
                   label="Date Picker Input"
                   placeholder="Select a date"
                   defaultDate={formData.date}
                   onChange={handleDateChange}
-                // error={errors.date}
                 />
               </div>
             </div>
@@ -376,7 +364,6 @@ const LiveCourses = () => {
                 </button>
               </div>
 
-              {/* Tags Inputs */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {formData.tags.map((tag, i) => (
                   <div key={i} className="relative">
@@ -387,7 +374,6 @@ const LiveCourses = () => {
                       onChange={(e) => handleTagChange(i, e.target.value)}
                     />
 
-                    {/* Remove Button */}
                     {formData.tags.length > 1 && (
                       <button
                         type="button"
@@ -406,7 +392,6 @@ const LiveCourses = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Status Label + Radio Buttons */}
               <div>
                 <Label>Status</Label>
                 <div className="flex flex-wrap items-center gap-8 mt-2">
@@ -440,7 +425,6 @@ const LiveCourses = () => {
               <div>
                 <Label>Sold Out</Label>
                 <Checkbox
-                  // name="soldOut"
                   checked={formData.soldOut}
                   onChange={(checked: boolean) =>
                     setFormData(prev => ({ ...prev, soldOut: checked }))
@@ -452,14 +436,11 @@ const LiveCourses = () => {
         </ComponentCard>
       </div>
 
-
       {/* MODULE SECTION */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
         {formData.modules.map((module, mIndex) => (
           <ComponentCard key={mIndex} title={`Module ${mIndex + 1}`}>
             <div className="space-y-6">
-
-              {/* MOD INPUTS */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <Label>Module Number</Label>
@@ -490,26 +471,39 @@ const LiveCourses = () => {
                 </div>
               </div>
 
-              {/* PRICE + POPULAR */}
+              {/* ✅ DUAL CURRENCY PRICE FIELDS */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <Label>Module Price</Label>
+                  <Label>Module Price (USD)</Label>
                   <Input
-                    value={module.module_price}
+                    type="number"
+                    placeholder="Enter USD price"
+                    value={module.module_price_usd}
                     onChange={(e) =>
-                      handleModuleChange(mIndex, "module_price", e.target.value)
+                      handleModuleChange(mIndex, "module_price_usd", e.target.value)
                     }
                   />
                 </div>
-
                 <div>
-                  <Label>Most Popular</Label>
-                  <Checkbox
-                    checked={module.most_popular}
-                    onChange={() => handlePopularChange(mIndex)}
-                    label="Most Popular"
+                  <Label>Module Price (INR)</Label>
+                  <Input
+                    type="number"
+                    placeholder="Enter INR price"
+                    value={module.module_price_inr}
+                    onChange={(e) =>
+                      handleModuleChange(mIndex, "module_price_inr", e.target.value)
+                    }
                   />
                 </div>
+              </div>
+
+              <div>
+                <Label>Most Popular</Label>
+                <Checkbox
+                  checked={module.most_popular}
+                  onChange={() => handlePopularChange(mIndex)}
+                  label="Most Popular"
+                />
               </div>
 
               {/* SUB-TITLES */}
@@ -550,6 +544,7 @@ const LiveCourses = () => {
           </ComponentCard>
         ))}
       </div>
+
       <div className="flex items-center gap-5 mt-5">
         <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
           {isSubmitting ? "Saving..." : "Save"}
