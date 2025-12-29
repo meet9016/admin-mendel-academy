@@ -78,14 +78,14 @@ export default function SignInForm() {
   };
 
   const signIn = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault(); // Prevent default button submission behavior
+    e.preventDefault();
 
     if (!validateForm()) {
       return;
     }
 
     setIsLoading(true);
-    setError({}); // Clear previous errors
+    setError({});
 
     try {
       const body = {
@@ -93,15 +93,22 @@ export default function SignInForm() {
         password: formData.password,
       };
 
-      // Removed template literal for cleaner code if endPointApi.login is a string
       const res = await api.post(endPointApi.login, body);
 
       if (res.status === 200) {
+        // Save token (this will save to both localStorage and cookies)
         saveToken(res.data.token.access);
-      //  localStorage.setItem("userData", JSON.stringify(res.data.user));
-        router.push("/");
+
+        // Optional: Save user data to localStorage
+        localStorage.setItem("userData", JSON.stringify(res.data.user));
+
+        // Check if there's a redirect parameter in URL
+        const searchParams = new URLSearchParams(window.location.search);
+        const redirectTo = searchParams.get('redirect') || '/';
+
+        // Redirect to the intended page or home
+        router.push(redirectTo);
       } else {
-        // Handle application-specific error messages from the API
         setError({ message: res.data.message || "An unknown error occurred during sign-in." });
       }
     } catch (err: unknown) {
@@ -112,8 +119,7 @@ export default function SignInForm() {
       } else {
         setError({ message: "An unexpected error occurred. Please try again." });
       }
-    }
-    finally {
+    } finally {
       setIsLoading(false);
     }
   };
