@@ -449,6 +449,7 @@ const LiveCourses = () => {
                     onChange={(e) =>
                       handleModuleChange(mIndex, "module_number", e.target.value)
                     }
+                    placeholder="Module number"
                   />
                 </div>
                 <div>
@@ -458,6 +459,7 @@ const LiveCourses = () => {
                     onChange={(e) =>
                       handleModuleChange(mIndex, "module_name", e.target.value)
                     }
+                    placeholder="Module name"
                   />
                 </div>
                 <div>
@@ -467,6 +469,7 @@ const LiveCourses = () => {
                     onChange={(e) =>
                       handleModuleChange(mIndex, "module_title", e.target.value)
                     }
+                    placeholder="Module title"
                   />
                 </div>
               </div>
