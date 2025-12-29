@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import PrimeReactTreeTable from "@/components/tables/PrimeReactTreeTable";
 import CommonDialog from "@/components/tables/CommonDialog";
 import { PlusIcon } from "@/icons";
+import { Skeleton } from "primereact/skeleton";
 
 // ---------------------- TYPES ----------------------
 type LiveCourseChild = {
@@ -109,6 +110,10 @@ console.log(":==",res);
         onAddProductClick="/hyperSpecialist/add"
       >
         <div className="card">
+          {
+          !loading ? (
+            renderSkeletonRows()
+          ) : (
           <PrimeReactTreeTable
             data={data}
             loading={loading}
@@ -134,6 +139,7 @@ console.log(":==",res);
             onEdit={(row) => router.push(`/hyperSpecialist/add?id=${row.id}`)}
             onDelete={handleDeleteClick}
           />
+          )}
         </div>
       </ComponentCard>
 
@@ -156,3 +162,21 @@ console.log(":==",res);
     </div>
   );
 }
+
+const renderSkeletonRows = () => (
+  <div className="card p-4">
+    {Array.from({ length: 10 }).map((_, i) => (
+      <div key={i} className="flex items-center py-2 border-b">
+        <Skeleton size="1.5rem" className="mr-3" />
+        <Skeleton width="15rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="35rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="10rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="8rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="8rem" height="2.2rem" className="mr-4" />
+        {/* <Skeleton width="10rem" height="2.2rem" className="mr-4" /> */}
+        <Skeleton shape="circle" size="2rem" className="mr-2" />
+        <Skeleton shape="circle" size="2rem" />
+      </div>
+    ))}
+  </div>
+);

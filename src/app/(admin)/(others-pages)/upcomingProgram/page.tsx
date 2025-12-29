@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import PrimeReactTable from "@/components/tables/PrimeReactTable";
 import CommonDialog from "@/components/tables/CommonDialog";
 import { PlusIcon } from "@/icons";
+import { Skeleton } from "primereact/skeleton";
 
 type PreRecordType = {
   id: number;
@@ -75,12 +76,16 @@ export default function Page() {
         onAddProductClick="/upcomingProgram/add"
       >
         <div className="card">
+           {
+          loading ? (
+            renderSkeletonRows()
+          ) : (
           <PrimeReactTable
             data={data}
             loading={loading}
             totalRecords={totalRecords}
             rows={rows}
-            onPageChange={(newPage, newRows) => {
+            onPageChange={(newPage: number, newRows:number) => {
               setPage(newPage);
               setRows(newRows);
             }}
@@ -92,6 +97,7 @@ export default function Page() {
             onEdit={(row) => router.push(`/upcomingProgram/add?id=${row.id}`)}
             onDelete={handleDeleteClick}
           />
+          )}
         </div>
         {/* <ConfirmationModal
           isOpen={isDeleteModalOpen}
@@ -119,3 +125,20 @@ export default function Page() {
 
   );
 }
+
+const renderSkeletonRows = () => (
+  <div className="card p-4">
+    {Array.from({ length: 10 }).map((_, i) => (
+      <div key={i} className="flex items-center py-2 border-b">
+        <Skeleton size="1.5rem" className="mr-3" />
+        <Skeleton width="25rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="20rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="20rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="20rem" height="2.2rem" className="mr-4" />
+        {/* <Skeleton width="10rem" height="2.2rem" className="mr-4" /> */}
+        <Skeleton shape="circle" size="2rem" className="mr-2" />
+        <Skeleton shape="circle" size="2rem" />
+      </div>
+    ))}
+  </div>
+);
