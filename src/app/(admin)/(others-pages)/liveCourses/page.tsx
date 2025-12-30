@@ -132,7 +132,7 @@ export default function Page() {
       >
         <div className="card">
            {
-          !loading ? (
+          loading ? (
             renderSkeletonRows()
           ) : (
           <PrimeReactTreeTable
