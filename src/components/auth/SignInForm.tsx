@@ -106,8 +106,8 @@ export default function SignInForm() {
         const searchParams = new URLSearchParams(window.location.search);
         const redirectTo = searchParams.get('redirect') || '/';
 
-        // Redirect to the intended page or home
-        router.push(redirectTo);
+        // Use window.location.href for hard redirect instead of router.push
+        window.location.href = redirectTo;
       } else {
         setError({ message: res.data.message || "An unknown error occurred during sign-in." });
       }

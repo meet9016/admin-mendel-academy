@@ -161,8 +161,8 @@ const OptionSection = ({
         <Label>Description</Label>
         <textarea
           className={`w-full px-3 py-2 border ${errors?.[`${data.type}_description`]
-              ? "border-error-500"
-              : "border-gray-300"
+            ? "border-error-500"
+            : "border-gray-300"
             } rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none resize-none`}
           rows={3}
           placeholder="Enter description"
@@ -514,8 +514,6 @@ const Prerecorded = () => {
       options: cleanedOptions,
     };
 
-    console.log("Submitting data:", body);
-
     try {
       if (id) {
         const res = await api.put(`${endPointApi.updatePreRecorded}/${id}`, body);
@@ -524,13 +522,17 @@ const Prerecorded = () => {
         const res = await api.post(`${endPointApi.createPreRecorded}`, body);
         toast.success(res.data?.message || "Created successfully");
       }
-      router.push("/prerecord");
+
+      // Add a small delay to ensure toast is visible before redirect
+      setTimeout(() => {
+        router.push("/prerecord");
+      }, 500);
+
     } catch (error: any) {
       const errorMessage = error?.response?.data?.message || "Something went wrong! Please try again.";
       toast.error(errorMessage);
       console.error("Submission error:", error);
-    } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false); // Re-enable button on error
     }
   };
 
