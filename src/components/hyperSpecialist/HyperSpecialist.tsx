@@ -5,21 +5,11 @@ import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Button from "../ui/button/Button";
 import ComponentCard from "../common/ComponentCard";
-import Radio from "../form/input/Radio";
 import { FaMinus, FaPlus } from "react-icons/fa6";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import { toast } from "react-toastify";
-
-interface ModuleType {
-    module_number: number | string;
-    module_name: string;
-    module_title: string;
-    module_price: string;
-    most_popular: boolean;
-    plan_sub_title: string[];
-}
 
 interface FormDataType {
     title: string;
@@ -40,7 +30,6 @@ const HyperSpecialist = () => {
         priceUSD: "",
         priceINR: "",
     });
-
 
     const handleChange = (e: any) => {
         const { name, value } = e.target;
@@ -73,7 +62,7 @@ const HyperSpecialist = () => {
 
             try {
                 const res = await api.get(`${endPointApi.getByIdHyperSpecialist}/${id}`);
-                const data = res.data;
+                const data = res.data.data;
 
                 setFormData((prev) => ({
                     ...prev,
@@ -91,7 +80,6 @@ const HyperSpecialist = () => {
 
         fetchData();
     }, [id]);
-
 
     const handleSubmit = async () => {
         try {
@@ -119,9 +107,7 @@ const HyperSpecialist = () => {
         } catch (error) {
             toast.error("Something went wrong! Please try again.");
             console.log("Submission error", error);
-        } finally {
-            setIsSubmitting(false);
-        }
+        } 
     };
 
     return (
