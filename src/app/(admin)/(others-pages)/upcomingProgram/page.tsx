@@ -94,7 +94,7 @@ export default function Page() {
               { field: "waitlistCount", header: "WaitlistCount" },
               { field: "course_types", header: "Course Type" }
             ]}
-            onEdit={(row) => router.push(`/upcomingProgram/add?id=${row.id}`)}
+            onEdit={(row) => router.push(`/upcomingProgram/add?id=${row._id}`)}
             onDelete={handleDeleteClick}
           />
           )}
