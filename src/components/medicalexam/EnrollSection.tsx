@@ -12,14 +12,14 @@ interface EnrollData {
 }
 
 interface EnrollSectionProps {
-  data: EnrollData;
-  onChange: (data: EnrollData) => void;
-  previewWho: string | null; //  matches useState<string | null>
-  setPreviewWho: React.Dispatch<React.SetStateAction<string | null>>;
-  errors?: { title?: string; description?: string };
+    data: EnrollData;
+    onChange: (data: EnrollData) => void;
+    preview: string | null;               // renamed
+    setPreview: React.Dispatch<React.SetStateAction<string | null>>;
+    errors?: { title?: string; description?: string };
 }
 
-const EnrollSection: React.FC<EnrollSectionProps> = ({ data, onChange, previewWho, setPreviewWho, errors }) => {
+const EnrollSection: React.FC<EnrollSectionProps> = ({ data, onChange, preview, setPreview  , errors }) => {
 
   const handleChange = (field: keyof EnrollData, value: any) => {
     onChange({ ...data, [field]: value });
@@ -59,16 +59,16 @@ const EnrollSection: React.FC<EnrollSectionProps> = ({ data, onChange, previewWh
               <p className="text-sm text-error-500 mt-1">{errors.description}</p>
             )}
           </div>
-          <div>
-            <Label>Select Image</Label>
-            {/*  Image Dropzone */}
-            <DropzoneComponent
-              preview={previewWho}
-              setPreview={setPreviewWho}
-              onFileSelect={(file: File) => handleChange("image", file)}
-            />
-          </div>
-        </div>
+            <div>
+              <Label>Select Image</Label>
+              {/*  Image Dropzone */}
+              <DropzoneComponent
+                preview={preview}
+                setPreview={setPreview}
+                onFileSelect={(file: File) => handleChange("image", file)}
+              />
+            </div>
+        </div>  
       </ComponentCard>
     </div>
   );

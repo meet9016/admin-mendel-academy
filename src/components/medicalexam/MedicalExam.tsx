@@ -84,6 +84,7 @@ const MedicalExam = () => {
         image: null as File | null,
 
     });
+    const [enrollPreview, setEnrollPreview] = useState<string | null>(null);
     const [mainImage, setMainImage] = useState<File | null>(null);
 
     //  Handle updates to any field in formData
@@ -214,9 +215,11 @@ const MedicalExam = () => {
                 setEnrollData({
                     title: data?.who_can_enroll_title ?? "",
                     description: data?.who_can_enroll_description ?? "",
-                    image: data?.who_can_enroll_image ?? "",
+                    image: null,
                 });
-                (data?.who_can_enroll_image)
+                if (data?.who_can_enroll_image) {
+                setEnrollPreview(data.who_can_enroll_image);
+            }
             } catch (err) {
                 console.error("Error fetching data by ID:", err);
             }
@@ -456,8 +459,8 @@ const MedicalExam = () => {
                 <EnrollSection
                     data={enrollData}
                     onChange={(data) => setEnrollData(data)}
-                    previewWho={previewWho}
-                    setPreviewWho={setPreviewWho}
+                    preview={enrollPreview}
+                    setPreview={setEnrollPreview}
                     errors={{
                         title: errors["enrollData.title"],
                         description: errors["enrollData.description"]
