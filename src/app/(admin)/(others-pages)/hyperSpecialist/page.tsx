@@ -69,19 +69,17 @@ console.log(":==",res);
 
       // Convert API data → TreeTable Format
       const formattedData: FormattedTreeData[] = apiData.map((item: any) => {
-
         return {
           id: String(item.id),
-          course_title: item.course_title ?? "-",
-          instructor_name: item.instructor_name ?? "-",
-          qualification: item.instructor?.qualification ?? "-",
-          date: item.date,
-          createdAt: item.createdAt,
+          title: item.course_title ?? "-",
+          description: item.instructor_name ?? "-",
+          price_dollar: item.price_dollar ?? "-",
+          price_inr: item.price_inr ?? "-",
         };
       });
 
-
-      setData(res.data.data);
+      // Use the formatted data for the table
+      setData(formattedData);
       setTotalRecords(res.data.total);
     } catch (err) {
       console.error(err);

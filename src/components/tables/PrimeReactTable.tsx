@@ -105,43 +105,44 @@ export default function PrimeReactTable<T extends { id: number; status?: string 
       </>
     )
   };
-   const [selectedCustomers, setSelectedCustomers] = useState([]);
+  const [selectedCustomers, setSelectedCustomers] = useState([]);
 
- return (
-  <div className="card">
-    {/* @ts-expect-error PrimeReact type mismatch (safe to ignore) */}
-    <DataTable<T>
-     value={data}
+  return (
+    <div className="card">
+      {/* @ts-expect-error PrimeReact type mismatch (safe to ignore) */}
+      <DataTable<T>
+        value={data}
         paginator
         rows={rows}
-         className="p-datatable-sm p-fluid" 
+        className="p-datatable-sm p-fluid"
         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
         rowsPerPageOptions={[10, 25, 50]}
         dataKey="id"
         selectionMode="checkbox"
         selection={selectedCustomers}
         onSelectionChange={(e) => setSelectedCustomers(e.value)}
-        emptyMessage={loading ? null : "No customers found."}  
+        emptyMessage={loading ? null : "No customers found."}
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-    >
-      <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} exportable={false} />
+        key={data.id}
+      >
+        <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} exportable={false} />
 
-      {columns.map((col, idx) => (
-        <Column
-          key={idx}
-          field={col.field as string}
-          header={col.header}
-          sortable={col.sortable}
-          body={(rowData) =>
-             col.body
+        {columns.map((col, idx) => (
+          <Column
+            key={idx}
+            field={col.field as string}
+            header={col.header}
+            sortable={col.sortable}
+            body={(rowData) =>
+              col.body
                 ? col.body(rowData)
                 : rowData[col.field as keyof T]
-          }
-        />
-      ))}
+            }
+          />
+        ))}
 
-      <Column header="Action" body={actionBodyTemplate} />
-    </DataTable>
-  </div>
-);
+        <Column header="Action" body={actionBodyTemplate} />
+      </DataTable>
+    </div>
+  );
 }

@@ -12,7 +12,9 @@ import { toast } from "react-toastify";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import DatePicker from "../form/date-picker";
-import { Editor, EditorTextChangeEvent } from "primereact/editor";
+import dynamic from "next/dynamic";
+const Editor = dynamic(() => import("primereact/editor").then((mod) => mod.Editor), { ssr: false });
+import type { EditorTextChangeEvent } from "primereact/editor";
 import DropzoneComponent from "../blogs/DropZone";
 import { upcomingProgramSchema } from "@/ValidationSchema/validationSchema";
 

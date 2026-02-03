@@ -135,7 +135,8 @@
 "use client";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ComponentCard from "@/components/common/ComponentCard";
-import PrimeReactTable from "@/components/tables/PrimeReactTable";
+import dynamic from "next/dynamic";
+const PrimeReactTable = dynamic(() => import("@/components/tables/PrimeReactTable"), { ssr: false });
 import CommonDialog from "@/components/tables/CommonDialog";
 import { PlusIcon } from "@/icons";
 import { api } from "@/utils/axiosInstance";

@@ -3,7 +3,9 @@ import React, { useEffect, useState } from 'react'
 import ComponentCard from '../common/ComponentCard'
 import Button from '../ui/button/Button'
 import { useRouter } from 'next/navigation'
-import { Editor, EditorTextChangeEvent } from 'primereact/editor';
+import dynamic from 'next/dynamic';
+const Editor = dynamic(() => import('primereact/editor').then((m) => m.Editor), { ssr: false });
+import type { EditorTextChangeEvent } from 'primereact/editor';
 import { api } from '@/utils/axiosInstance';
 import endPointApi from '@/utils/endPointApi';
 import { decodeHtml } from '@/utils/helper';

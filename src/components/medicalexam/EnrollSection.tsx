@@ -3,7 +3,8 @@ import ComponentCard from "../common/ComponentCard";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import DropzoneComponent from "../blogs/DropZone";
-import { Editor } from "primereact/editor";
+import dynamic from "next/dynamic";
+const Editor = dynamic(() => import("primereact/editor").then((m) => m.Editor), { ssr: false });
 
 interface EnrollData {
   title: string;

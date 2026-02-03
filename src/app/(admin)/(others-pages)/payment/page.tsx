@@ -2,7 +2,8 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import ComponentCard from "@/components/common/ComponentCard";
-import PrimeReactTable from "@/components/tables/PrimeReactTable";
+import dynamic from "next/dynamic";
+const PrimeReactTable = dynamic(() => import("@/components/tables/PrimeReactTable"), { ssr: false });
 import endPointApi from "@/utils/endPointApi";
 import { api } from "@/utils/axiosInstance";
 import CommonDialog from "@/components/tables/CommonDialog";

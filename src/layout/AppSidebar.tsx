@@ -71,7 +71,7 @@ const IconWrapper: React.FC<{ active?: boolean; children: React.ReactNode }> = (
 const SidebarLink: React.FC<{ item: NavItem; active: boolean; showText: boolean }> = React.memo(({ item, active, showText }) => {
   if (!item.path) return null;
   return (
-    <Link href={item.path} className={`menu-item group ${active ? "menu-item-active" : "menu-item-inactive"}`}>
+    <Link href={item.path} prefetch={false} className={`menu-item group ${active ? "menu-item-active" : "menu-item-inactive"}`}>
       <IconWrapper active={active}>{item.icon}</IconWrapper>
       {showText && <span className="menu-item-text">{item.name}</span>}
     </Link>
@@ -115,7 +115,7 @@ const SidebarDropdown: React.FC<{
             const active = isActivePath(sub.path);
             return (
               <li key={sub.name}>
-                <Link href={sub.path} className={`menu-dropdown-item ${active ? "menu-dropdown-item-active" : "menu-dropdown-item-inactive"}`}>
+                <Link href={sub.path} prefetch={false} className={`menu-dropdown-item ${active ? "menu-dropdown-item-active" : "menu-dropdown-item-inactive"}`}>
                   {sub.name}
                   <span className="flex items-center gap-1 ml-auto">
                     {sub.new && <span className={`menu-dropdown-badge ${active ? "menu-dropdown-badge-active" : "menu-dropdown-badge-inactive"}`}>new</span>}
