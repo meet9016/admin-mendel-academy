@@ -83,7 +83,7 @@ export default function PrimeReactTreeTable<
             <div className="p-3">
                 <h5 className="font-semibold mb-3">Additional Information</h5>
 
-                <DataTable value={data.children} dataKey="session_title" key={data.id}>
+                <DataTable value={data.children} dataKey="session_title" key={data?.id}>
                     {Object.keys(firstChild).map((key, idx) => (
                         <Column
                             key={idx}
