@@ -69,9 +69,11 @@ const PlanSection: React.FC<PlanSectionProps> = ({
           <Label>Plan Day</Label>
           <Select
             options={[
+              { value: '1', label: '1 Month' },
               { value: '3', label: '3 Month' },
               { value: '6', label: '6 Month' },
               { value: '12', label: '12 Month' },
+              { value: '24', label: '24 Month' },
               { value: 'Custom', label: 'Custom' },
             ]}
             value={String(data.planMonth)}

@@ -102,6 +102,14 @@ export const examListSchema = Yup.object().shape({
 
             isPopular: Yup.boolean(),
         })
+    ),
+    // RAPID LEARNING TOOLS SECTION
+    rapidLearningTools: Yup.array().of(
+        Yup.object().shape({
+            toolType: Yup.string(),
+            priceUSD: Yup.string(),
+            priceINR: Yup.string(),
+        })
     )
 })
 

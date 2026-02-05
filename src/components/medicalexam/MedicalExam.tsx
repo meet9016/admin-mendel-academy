@@ -29,6 +29,13 @@ interface PlanData {
     isPopular: boolean;
 }
 
+interface RapidLearningTool {
+    id: number | string;
+    toolType: string;
+    priceUSD: number | string;
+    priceINR: number | string;
+}
+
 interface FormData {
     // id: string;
     country: string;
@@ -39,6 +46,7 @@ interface FormData {
     examSteps: string[];
     description: string;
     plans: PlanData[];
+    rapidLearningTools: RapidLearningTool[];
 }
 
 const MedicalExam = () => {
@@ -57,6 +65,14 @@ const MedicalExam = () => {
         { value: "International Exams", label: "International Exams" },
     ];
 
+    const rapidLearningToolOptions = [
+        { value: "mendel chitras", label: "Mendel Chitras" },
+        { value: "mendel anki flashcards", label: "Mendel Anki Flashcards" },
+        { value: "mendel rapid recall", label: "Mendel Rapid Recall" },
+        { value: "mendel memory hacks", label: "Mendel Memory Hacks" },
+        { value: "mendel library", label: "Mendel Library" },
+    ];
+
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [preview, setPreview] = useState<string | null>(null);
     const [previewWho, setPreviewWho] = useState<string | null>(null);
@@ -73,9 +89,9 @@ const MedicalExam = () => {
         description: "",
         plans: [
             { id: "", planMonth: "", planPriceUSD: "", planPriceINR: "", planType: "", planSubtitles: [""], isPopular: false },
-            { id: "", planMonth: "", planPriceUSD: "", planPriceINR: "", planType: "", planSubtitles: [""], isPopular: false },
-            { id: "", planMonth: "", planPriceUSD: "", planPriceINR: "", planType: "", planSubtitles: [""], isPopular: false },
-            { id: "", planMonth: "", planPriceUSD: "", planPriceINR: "", planType: "", planSubtitles: [""], isPopular: false },
+        ],
+        rapidLearningTools: [
+            { id: "", toolType: "", priceUSD: "", priceINR: "" },
         ],
     });
 
@@ -115,6 +131,28 @@ const MedicalExam = () => {
     };
 
     //  Plans
+    const addPlan = () => {
+        if (formData.plans.length < 8) {
+            const newPlan: PlanData = {
+                id: "",
+                planMonth: "",
+                planPriceUSD: "",
+                planPriceINR: "",
+                planType: "",
+                planSubtitles: [""],
+                isPopular: false
+            };
+            handleChange("plans", [...formData.plans, newPlan]);
+        }
+    };
+
+    const removePlan = (index: number) => {
+        if (formData.plans.length > 1) {
+            const updatedPlans = formData.plans.filter((_, i) => i !== index);
+            handleChange("plans", updatedPlans);
+        }
+    };
+
     const handlePlanChange = (index: number, updatedPlan: PlanData) => {
         const updatedPlans = [...formData.plans];
         updatedPlans[index] = updatedPlan;
@@ -127,6 +165,36 @@ const MedicalExam = () => {
             isPopular: i === index,
         }));
         handleChange("plans", updatedPlans);
+    };
+
+    // Rapid Learning Tools
+    const addRapidTool = () => {
+        if (formData.rapidLearningTools.length < 5) {
+            const newTool: RapidLearningTool = {
+                id: "",
+                toolType: "",
+                priceUSD: "",
+                priceINR: ""
+            };
+            handleChange("rapidLearningTools", [...formData.rapidLearningTools, newTool]);
+        }
+    };
+
+    const removeRapidTool = (index: number) => {
+        if (formData.rapidLearningTools.length > 1) {
+            const updatedTools = formData.rapidLearningTools.filter((_, i) => i !== index);
+            handleChange("rapidLearningTools", updatedTools);
+        }
+    };
+
+    const handleRapidToolChange = (index: number, field: keyof RapidLearningTool, value: string | number) => {
+        const updatedTools = [...formData.rapidLearningTools];
+        updatedTools[index] = { ...updatedTools[index], [field]: value };
+        handleChange("rapidLearningTools", updatedTools);
+        setErrors((prev) => ({
+            ...prev,
+            [`rapidLearningTools[${index}].${field}`]: "",
+        }));
     };
 
     // Handle radio button selection
@@ -164,7 +232,7 @@ const MedicalExam = () => {
 
                 //  Set form data from API
                 setFormData({
-                    id: data.exams[0]._id ?? "",
+                    ...(id && { id: data.exams[0]._id ?? "" }),
                     category: data?.category_name ?? "",
                     country: data.exams[0].country ?? "",
                     status: data.exams[0].status ?? "Active",
@@ -192,22 +260,34 @@ const MedicalExam = () => {
                                         plan.most_popular === true || plan.most_popular === "true",
                                     id: plan._id
                                 }))
-                                : [];
-
-                        const emptyPlan = {
-                            planMonth: "",
-                            planPriceUSD: "",
-                            planPriceINR: "",
-                            planType: "",
-                            planSubtitles: [""],
-                            isPopular: false,
-                        };
-
-                        while (existingPlans.length < 4) {
-                            existingPlans.push({ ...emptyPlan });
-                        }
+                                : [{
+                                    id: "",
+                                    planMonth: "",
+                                    planPriceUSD: "",
+                                    planPriceINR: "",
+                                    planType: "",
+                                    planSubtitles: [""],
+                                    isPopular: false,
+                                }];
 
                         return existingPlans;
+                    })(),
+                    rapidLearningTools: (() => {
+                        const existingTools =
+                            data.rapid_learning_tools && data.rapid_learning_tools.length > 0
+                                ? data.rapid_learning_tools.map((tool: any) => ({
+                                    id: tool._id,
+                                    toolType: tool.tool_type ?? "",
+                                    priceUSD: tool.price_usd ?? "",
+                                    priceINR: tool.price_inr ?? ""
+                                }))
+                                : [{
+                                    id: "",
+                                    toolType: "",
+                                    priceUSD: "",
+                                    priceINR: ""
+                                }];
+                        return existingTools;
                     })(),
                 });
 
@@ -239,7 +319,7 @@ const MedicalExam = () => {
             // Category
             if (id) {
                 // formDataToSend.append("_id", id);
-                formDataToSend.append("exams[0][_id]", formData.id);
+                formDataToSend.append("exams[0][_id]", formData.id || id);
             }
             formDataToSend.append("category_name", formData.category);
             // Exams
@@ -256,7 +336,7 @@ const MedicalExam = () => {
             formData.plans.forEach((plan, i) => {
                 // if (plan.planPrice && plan.planMonth && plan.planType) {
                 if ((plan.planMonth && plan.planType) || plan.planMonth === "Custom") {
-                    if (plan?.id !== undefined && plan?.id !== null && id) {
+                    if (plan?.id !== undefined && plan?.id !== null && plan.id !== "" && id) {
                         formDataToSend.append(`choose_plan_list[${i}][_id]`, String(plan.id));
                     }
 
@@ -268,6 +348,18 @@ const MedicalExam = () => {
                         formDataToSend.append(`choose_plan_list[${i}][plan_sub_title][${j}]`, sub);
                     });
                     formDataToSend.append(`choose_plan_list[${i}][most_popular]`, String(plan.isPopular));
+                }
+            });
+
+            // Rapid Learning Tools
+            formData.rapidLearningTools.forEach((tool, i) => {
+                if (tool.toolType && (tool.priceUSD || tool.priceINR)) {
+                    if (tool?.id !== undefined && tool?.id !== null && tool.id !== "" && id) {
+                        formDataToSend.append(`rapid_learning_tools[${i}][_id]`, String(tool.id));
+                    }
+                    formDataToSend.append(`rapid_learning_tools[${i}][tool_type]`, tool.toolType);
+                    formDataToSend.append(`rapid_learning_tools[${i}][price_usd]`, String(tool.priceUSD));
+                    formDataToSend.append(`rapid_learning_tools[${i}][price_inr]`, String(tool.priceINR));
                 }
             });
 
@@ -470,29 +562,140 @@ const MedicalExam = () => {
             </div>
 
             {/* PLAN SECTION */}
-            <div className="grid grid-cols-2 gap-6">
+            <ComponentCard title="Plans" name="">
+                <div className="flex items-center justify-between mb-4">
+                    <Label>Choose Plans</Label>
+                    {formData.plans.length < 8 && (
+                        <button
+                            type="button"
+                            onClick={addPlan}
+                            className="bg-[#ffcb07] text-black px-4 py-2 flex items-center gap-2 rounded-md hover:bg-[#ffcb07] transition-colors duration-200"
+                        >
+                            <FaPlus /> Add Plan
+                        </button>
+                    )}
+                </div>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {formData.plans.map((plan, index) => (
+                        <div key={index} className="relative">
+                            <PlanSection
+                                data={plan}
+                                onChange={(updated: PlanData) => handlePlanChange(index, updated)}
+                                onPopularChange={() => handlePopularChange(index)}
+                                errors={{
+                                    planMonth: errors[`plans[${index}].planMonth`],
+                                    planPriceUSD: errors[`plans[${index}].planPriceUSD`],
+                                    planPriceINR: errors[`plans[${index}].planPriceINR`],
+                                    planType: errors[`plans[${index}].planType`],
+                                    ...Object.fromEntries(
+                                        Object.entries(errors).filter(([key]) =>
+                                            key.startsWith(`plans[${index}].planSubtitles`)
+                                        )
+                                    )
+                                }}
+                            />
+                            {formData.plans.length > 1 && (
+                                <button
+                                    type="button"
+                                    onClick={() => removePlan(index)}
+                                    className="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
+                                >
+                                    <FaMinus />
+                                </button>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </ComponentCard>
 
-                {formData.plans.map((plan, index) => (
-                    <PlanSection
-                        key={index}
-                        data={plan}
-                        onChange={(updated: PlanData) => handlePlanChange(index, updated)}
-                        onPopularChange={() => handlePopularChange(index)}
-                        // errors={formErrors?.[`plans[${index}]`] || {}}
-                        errors={{
-                            planMonth: errors[`plans[${index}].planMonth`],
-                            planPriceUSD: errors[`plans[${index}].planPriceUSD`],
-                            planPriceINR: errors[`plans[${index}].planPriceINR`],
-                            planType: errors[`plans[${index}].planType`],
-                            ...Object.fromEntries(
-                                Object.entries(errors).filter(([key]) =>
-                                    key.startsWith(`plans[${index}].planSubtitles`)
-                                )
-                            )
-                        }}
-                    />
-                ))}
-            </div>
+            {/* RAPID LEARNING TOOLS SECTION */}
+            <ComponentCard title="Rapid Learning Tools" name="">
+                <div className="flex items-center justify-between mb-4">
+                    <Label>Learning Tools</Label>
+                    {formData.rapidLearningTools.length < 5 && (
+                        <button
+                            type="button"
+                            onClick={addRapidTool}
+                            className="bg-[#ffcb07] text-black px-4 py-2 flex items-center gap-2 rounded-md hover:bg-[#ffcb07] transition-colors duration-200"
+                        >
+                            <FaPlus /> Add Tool
+                        </button>
+                    )}
+                </div>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {formData.rapidLearningTools.map((tool, index) => (
+                        <div key={index} className="relative border border-gray-200 rounded-lg p-4">
+                            <div className="space-y-4">
+                                <div>
+                                    <Label>Tool Type</Label>
+                                    <Select
+                                        options={rapidLearningToolOptions}
+                                        placeholder="Select tool type"
+                                        value={tool.toolType}
+                                        onChange={(value: string) => handleRapidToolChange(index, 'toolType', value)}
+                                        error={!!errors?.[`rapidLearningTools[${index}].toolType`]}
+                                    />
+                                    {errors[`rapidLearningTools[${index}].toolType`] && (
+                                        <p className="text-sm text-error-500 mt-1">
+                                            {errors[`rapidLearningTools[${index}].toolType`]}
+                                        </p>
+                                    )}
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <Label>Plan Price (USD) $</Label>
+                                        <Input
+                                            type="number"
+                                            placeholder="Enter USD price"
+                                            value={tool.priceUSD}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                                handleRapidToolChange(index, 'priceUSD', e.target.value)
+                                            }
+                                            error={!!errors?.[`rapidLearningTools[${index}].priceUSD`]}
+                                        />
+                                        {errors[`rapidLearningTools[${index}].priceUSD`] && (
+                                            <p className="text-sm text-error-500 mt-1">
+                                                {errors[`rapidLearningTools[${index}].priceUSD`]}
+                                            </p>
+                                        )}
+                                    </div>
+                                    
+                                    <div>
+                                        <Label>Plan Price (INR) ₹</Label>
+                                        <Input
+                                            type="number"
+                                            placeholder="Enter INR price"
+                                            value={tool.priceINR}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                                handleRapidToolChange(index, 'priceINR', e.target.value)
+                                            }
+                                            error={!!errors?.[`rapidLearningTools[${index}].priceINR`]}
+                                        />
+                                        {errors[`rapidLearningTools[${index}].priceINR`] && (
+                                            <p className="text-sm text-error-500 mt-1">
+                                                {errors[`rapidLearningTools[${index}].priceINR`]}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {formData.rapidLearningTools.length > 1 && (
+                                <button
+                                    type="button"
+                                    onClick={() => removeRapidTool(index)}
+                                    className="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
+                                >
+                                    <FaMinus />
+                                </button>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </ComponentCard>
 
             <div className="flex items-center gap-5">
                 <Button size="sm" variant="primary" onClick={handleSave} >
