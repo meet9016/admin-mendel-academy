@@ -26,6 +26,7 @@ export interface PlanSectionProps {
   onPopularChange: () => void;
   errors?: Record<string, string>;
   selectedDays?: (string | number)[];
+  selectedTypes?: string[];
 }
 
 const PlanSection: React.FC<PlanSectionProps> = ({
@@ -34,6 +35,7 @@ const PlanSection: React.FC<PlanSectionProps> = ({
   onPopularChange,
   errors,
   selectedDays = [],
+  selectedTypes = [],
 }) => {
   //  Update single field with generic safety
   const handleChange = <K extends keyof PlanData>(
@@ -77,6 +79,21 @@ const PlanSection: React.FC<PlanSectionProps> = ({
 
   const availableOptions = allOptions.filter(
     (option) => !selectedDays.includes(option.value) || option.value === String(data.planMonth)
+  );
+
+  const allTypeOptions = [
+    { value: 'Essential', label: 'Essential' },
+    { value: 'Standard', label: 'Standard' },
+    { value: 'Silver', label: 'Silver' },
+    { value: 'Gold', label: 'Gold' },
+    { value: 'Platinum', label: 'Platinum' },
+    { value: 'Diamond', label: 'Diamond' },
+    { value: 'Signature', label: 'Signature' },
+    { value: 'Ultra_Pro', label: 'Ultra Pro' },
+  ];
+
+  const availableTypeOptions = allTypeOptions.filter(
+    (option) => !selectedTypes.includes(option.value) || option.value === data.planType
   );
 
   return (
@@ -158,16 +175,7 @@ const PlanSection: React.FC<PlanSectionProps> = ({
         <div>
           <Label>Plan Type</Label>
           <Select
-            options={[
-              { value: 'Essential', label: 'Essential' },
-              { value: 'Standard', label: 'Standard' },
-              { value: 'Silver', label: 'Silver' },
-              { value: 'Gold', label: 'Gold' },
-              { value: 'Platinum', label: 'Platinum' },
-              { value: 'Diamond', label: 'Diamond' },
-              { value: 'Signature', label: 'Signature' },
-              { value: 'Ultra_Pro', label: 'Ultra Pro' },
-            ]}
+            options={availableTypeOptions}
             value={data.planType}
             onChange={(val: string) => handleChange('planType', val)}
             placeholder="Select category"

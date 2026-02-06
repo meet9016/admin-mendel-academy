@@ -580,7 +580,11 @@ const MedicalExam = () => {
                     {formData.plans.map((plan, index) => {
                         const selectedDays = formData.plans
                             .filter((_, i) => i !== index)
-                            .map(p => p.planMonth);
+                            .map(p => String(p.planMonth));
+                        
+                        const selectedTypes = formData.plans
+                            .filter((_, i) => i !== index)
+                            .map(p => p.planType);
                         
                         return (
                             <div key={index} className="relative">
@@ -589,6 +593,7 @@ const MedicalExam = () => {
                                     onChange={(updated: PlanData) => handlePlanChange(index, updated)}
                                     onPopularChange={() => handlePopularChange(index)}
                                     selectedDays={selectedDays}
+                                    selectedTypes={selectedTypes}
                                     errors={{
                                         planMonth: errors[`plans[${index}].planMonth`],
                                         planPriceUSD: errors[`plans[${index}].planPriceUSD`],
