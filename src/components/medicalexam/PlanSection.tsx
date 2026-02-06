@@ -25,6 +25,7 @@ export interface PlanSectionProps {
   onChange: (updatedData: PlanData) => void;
   onPopularChange: () => void;
   errors?: Record<string, string>;
+  selectedDays?: (string | number)[];
 }
 
 const PlanSection: React.FC<PlanSectionProps> = ({
@@ -32,6 +33,7 @@ const PlanSection: React.FC<PlanSectionProps> = ({
   onChange,
   onPopularChange,
   errors,
+  selectedDays = [],
 }) => {
   //  Update single field with generic safety
   const handleChange = <K extends keyof PlanData>(
@@ -62,22 +64,28 @@ const PlanSection: React.FC<PlanSectionProps> = ({
     onChange({ ...data, planSubtitles: updated });
   };
 
+  const allOptions = [
+    { value: '1', label: '1 Month' },
+    { value: '3', label: '3 Month' },
+    { value: '6', label: '6 Month' },
+    { value: '12', label: '12 Month' },
+    { value: '24', label: '24 Month' },
+    { value: '36', label: '36 Month' },
+    { value: '48', label: '48 Month' },
+    { value: 'Custom', label: 'Custom' },
+  ];
+
+  const availableOptions = allOptions.filter(
+    (option) => !selectedDays.includes(option.value) || option.value === String(data.planMonth)
+  );
+
   return (
     <ComponentCard title="Add Plan" name="">
       <div className="grid grid-cols-2 gap-6">
         <div>
           <Label>Plan Day</Label>
           <Select
-            options={[
-              { value: '1', label: '1 Month' },
-              { value: '3', label: '3 Month' },
-              { value: '6', label: '6 Month' },
-              { value: '12', label: '12 Month' },
-              { value: '24', label: '24 Month' },
-              { value: '36', label: '36 Month' },
-              { value: '48', label: '48 Month' },
-              { value: 'Custom', label: 'Custom' },
-            ]}
+            options={availableOptions}
             value={String(data.planMonth)}
             onChange={(val: string) => handleChange('planMonth', val)}
             placeholder="Select plan duration"

@@ -577,35 +577,42 @@ const MedicalExam = () => {
                 </div>
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {formData.plans.map((plan, index) => (
-                        <div key={index} className="relative">
-                            <PlanSection
-                                data={plan}
-                                onChange={(updated: PlanData) => handlePlanChange(index, updated)}
-                                onPopularChange={() => handlePopularChange(index)}
-                                errors={{
-                                    planMonth: errors[`plans[${index}].planMonth`],
-                                    planPriceUSD: errors[`plans[${index}].planPriceUSD`],
-                                    planPriceINR: errors[`plans[${index}].planPriceINR`],
-                                    planType: errors[`plans[${index}].planType`],
-                                    ...Object.fromEntries(
-                                        Object.entries(errors).filter(([key]) =>
-                                            key.startsWith(`plans[${index}].planSubtitles`)
+                    {formData.plans.map((plan, index) => {
+                        const selectedDays = formData.plans
+                            .filter((_, i) => i !== index)
+                            .map(p => p.planMonth);
+                        
+                        return (
+                            <div key={index} className="relative">
+                                <PlanSection
+                                    data={plan}
+                                    onChange={(updated: PlanData) => handlePlanChange(index, updated)}
+                                    onPopularChange={() => handlePopularChange(index)}
+                                    selectedDays={selectedDays}
+                                    errors={{
+                                        planMonth: errors[`plans[${index}].planMonth`],
+                                        planPriceUSD: errors[`plans[${index}].planPriceUSD`],
+                                        planPriceINR: errors[`plans[${index}].planPriceINR`],
+                                        planType: errors[`plans[${index}].planType`],
+                                        ...Object.fromEntries(
+                                            Object.entries(errors).filter(([key]) =>
+                                                key.startsWith(`plans[${index}].planSubtitles`)
+                                            )
                                         )
-                                    )
-                                }}
-                            />
-                            {formData.plans.length > 1 && (
-                                <button
-                                    type="button"
-                                    onClick={() => removePlan(index)}
-                                    className="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
-                                >
-                                    <FaMinus />
-                                </button>
-                            )}
-                        </div>
-                    ))}
+                                    }}
+                                />
+                                {formData.plans.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => removePlan(index)}
+                                        className="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
+                                    >
+                                        <FaMinus />
+                                    </button>
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
             </ComponentCard>
 
@@ -625,75 +632,85 @@ const MedicalExam = () => {
                 </div>
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {formData.rapidLearningTools.map((tool, index) => (
-                        <div key={index} className="relative border border-gray-200 rounded-lg p-4">
-                            <div className="space-y-4">
-                                <div>
-                                    <Label>Tool Type</Label>
-                                    <Select
-                                        options={rapidLearningToolOptions}
-                                        placeholder="Select tool type"
-                                        value={tool.toolType}
-                                        onChange={(value: string) => handleRapidToolChange(index, 'toolType', value)}
-                                        error={!!errors?.[`rapidLearningTools[${index}].toolType`]}
-                                    />
-                                    {errors[`rapidLearningTools[${index}].toolType`] && (
-                                        <p className="text-sm text-error-500 mt-1">
-                                            {errors[`rapidLearningTools[${index}].toolType`]}
-                                        </p>
-                                    )}
-                                </div>
-                                
-                                <div className="grid grid-cols-2 gap-4">
+                    {formData.rapidLearningTools.map((tool, index) => {
+                        const selectedToolTypes = formData.rapidLearningTools
+                            .filter((_, i) => i !== index)
+                            .map(t => t.toolType);
+                        
+                        const availableToolOptions = rapidLearningToolOptions.filter(
+                            option => !selectedToolTypes.includes(option.value) || option.value === tool.toolType
+                        );
+                        
+                        return (
+                            <div key={index} className="relative border border-gray-200 rounded-lg p-4">
+                                <div className="space-y-4">
                                     <div>
-                                        <Label>Plan Price (USD) $</Label>
-                                        <Input
-                                            type="number"
-                                            placeholder="Enter USD price"
-                                            value={tool.priceUSD}
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                                handleRapidToolChange(index, 'priceUSD', e.target.value)
-                                            }
-                                            error={!!errors?.[`rapidLearningTools[${index}].priceUSD`]}
+                                        <Label>Tool Type</Label>
+                                        <Select
+                                            options={availableToolOptions}
+                                            placeholder="Select tool type"
+                                            value={tool.toolType}
+                                            onChange={(value: string) => handleRapidToolChange(index, 'toolType', value)}
+                                            error={!!errors?.[`rapidLearningTools[${index}].toolType`]}
                                         />
-                                        {errors[`rapidLearningTools[${index}].priceUSD`] && (
+                                        {errors[`rapidLearningTools[${index}].toolType`] && (
                                             <p className="text-sm text-error-500 mt-1">
-                                                {errors[`rapidLearningTools[${index}].priceUSD`]}
+                                                {errors[`rapidLearningTools[${index}].toolType`]}
                                             </p>
                                         )}
                                     </div>
                                     
-                                    <div>
-                                        <Label>Plan Price (INR) ₹</Label>
-                                        <Input
-                                            type="number"
-                                            placeholder="Enter INR price"
-                                            value={tool.priceINR}
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                                handleRapidToolChange(index, 'priceINR', e.target.value)
-                                            }
-                                            error={!!errors?.[`rapidLearningTools[${index}].priceINR`]}
-                                        />
-                                        {errors[`rapidLearningTools[${index}].priceINR`] && (
-                                            <p className="text-sm text-error-500 mt-1">
-                                                {errors[`rapidLearningTools[${index}].priceINR`]}
-                                            </p>
-                                        )}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <Label>Plan Price (USD) $</Label>
+                                            <Input
+                                                type="number"
+                                                placeholder="Enter USD price"
+                                                value={tool.priceUSD}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                                    handleRapidToolChange(index, 'priceUSD', e.target.value)
+                                                }
+                                                error={!!errors?.[`rapidLearningTools[${index}].priceUSD`]}
+                                            />
+                                            {errors[`rapidLearningTools[${index}].priceUSD`] && (
+                                                <p className="text-sm text-error-500 mt-1">
+                                                    {errors[`rapidLearningTools[${index}].priceUSD`]}
+                                                </p>
+                                            )}
+                                        </div>
+                                        
+                                        <div>
+                                            <Label>Plan Price (INR) ₹</Label>
+                                            <Input
+                                                type="number"
+                                                placeholder="Enter INR price"
+                                                value={tool.priceINR}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                                    handleRapidToolChange(index, 'priceINR', e.target.value)
+                                                }
+                                                error={!!errors?.[`rapidLearningTools[${index}].priceINR`]}
+                                            />
+                                            {errors[`rapidLearningTools[${index}].priceINR`] && (
+                                                <p className="text-sm text-error-500 mt-1">
+                                                    {errors[`rapidLearningTools[${index}].priceINR`]}
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
+                                
+                                {formData.rapidLearningTools.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => removeRapidTool(index)}
+                                        className="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
+                                    >
+                                        <FaMinus />
+                                    </button>
+                                )}
                             </div>
-                            
-                            {formData.rapidLearningTools.length > 1 && (
-                                <button
-                                    type="button"
-                                    onClick={() => removeRapidTool(index)}
-                                    className="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
-                                >
-                                    <FaMinus />
-                                </button>
-                            )}
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </ComponentCard>
 
