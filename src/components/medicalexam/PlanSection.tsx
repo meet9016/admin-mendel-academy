@@ -74,6 +74,8 @@ const PlanSection: React.FC<PlanSectionProps> = ({
               { value: '6', label: '6 Month' },
               { value: '12', label: '12 Month' },
               { value: '24', label: '24 Month' },
+              { value: '36', label: '36 Month' },
+              { value: '48', label: '48 Month' },
               { value: 'Custom', label: 'Custom' },
             ]}
             value={String(data.planMonth)}
@@ -149,10 +151,14 @@ const PlanSection: React.FC<PlanSectionProps> = ({
           <Label>Plan Type</Label>
           <Select
             options={[
-              { value: 'Starter', label: 'Starter' },
-              { value: 'Pro', label: 'Pro' },
-              { value: 'Premium', label: 'Premium' },
-              { value: 'Flexible', label: 'Flexible' },
+              { value: 'Essential', label: 'Essential' },
+              { value: 'Standard', label: 'Standard' },
+              { value: 'Silver', label: 'Silver' },
+              { value: 'Gold', label: 'Gold' },
+              { value: 'Platinum', label: 'Platinum' },
+              { value: 'Diamond', label: 'Diamond' },
+              { value: 'Signature', label: 'Signature' },
+              { value: 'Ultra_Pro', label: 'Ultra Pro' },
             ]}
             value={data.planType}
             onChange={(val: string) => handleChange('planType', val)}
