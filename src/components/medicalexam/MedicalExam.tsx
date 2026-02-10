@@ -361,17 +361,26 @@ const MedicalExam = () => {
                 }
             });
 
-            // Rapid Learning Tools
-            formData.rapidLearningTools.forEach((tool, i) => {
-                if (tool.toolType && (tool.priceUSD || tool.priceINR)) {
-                    if (tool?.id !== undefined && tool?.id !== null && tool.id !== "" && id) {
-                        formDataToSend.append(`rapid_learning_tools[${i}][_id]`, String(tool.id));
+            // Rapid Learning Tools - always send the array (even if empty)
+            const hasValidTools = formData.rapidLearningTools.some(tool => 
+                tool.toolType && (tool.priceUSD || tool.priceINR)
+            );
+            
+            if (hasValidTools) {
+                formData.rapidLearningTools.forEach((tool, i) => {
+                    if (tool.toolType && (tool.priceUSD || tool.priceINR)) {
+                        if (tool?.id !== undefined && tool?.id !== null && tool.id !== "" && id) {
+                            formDataToSend.append(`rapid_learning_tools[${i}][_id]`, String(tool.id));
+                        }
+                        formDataToSend.append(`rapid_learning_tools[${i}][tool_type]`, tool.toolType);
+                        formDataToSend.append(`rapid_learning_tools[${i}][price_usd]`, String(tool.priceUSD));
+                        formDataToSend.append(`rapid_learning_tools[${i}][price_inr]`, String(tool.priceINR));
                     }
-                    formDataToSend.append(`rapid_learning_tools[${i}][tool_type]`, tool.toolType);
-                    formDataToSend.append(`rapid_learning_tools[${i}][price_usd]`, String(tool.priceUSD));
-                    formDataToSend.append(`rapid_learning_tools[${i}][price_inr]`, String(tool.priceINR));
-                }
-            });
+                });
+            } else if (id) {
+                // Send empty array indicator when updating and no valid tools
+                formDataToSend.append('rapid_learning_tools', JSON.stringify([]));
+            }
 
             // Enroll Section
             formDataToSend.append("who_can_enroll_title", enrollData.title);
