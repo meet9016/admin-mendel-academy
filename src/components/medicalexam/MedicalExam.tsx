@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import Label from "../form/Label";
 import ComponentCard from "../common/ComponentCard";
 import Input from "../form/input/InputField";
@@ -103,12 +103,26 @@ const MedicalExam = () => {
     });
     const [enrollPreview, setEnrollPreview] = useState<string | null>(null);
     const [mainImage, setMainImage] = useState<File | null>(null);
+    const descriptionRef = useRef<string>("");
+    const enrollDescriptionRef = useRef<string>("");
+
+    // Sync refs with state
+    useEffect(() => {
+        descriptionRef.current = formData.description;
+    }, [formData.description]);
+
+    useEffect(() => {
+        enrollDescriptionRef.current = enrollData.description;
+    }, [enrollData.description]);
 
     //  Handle updates to any field in formData
-    const handleChange = <K extends keyof FormData>(field: K, value: FormData[K]) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
+    const handleChange = useCallback(<K extends keyof FormData>(field: K, value: FormData[K]) => {
+        setFormData((prev) => {
+            if (prev[field] === value) return prev;
+            return { ...prev, [field]: value };
+        });
         setErrors((prev) => ({ ...prev, [field]: "" }));
-    };
+    }, []);
 
     //  Steps (array)
     const addStep = () => {
@@ -230,6 +244,11 @@ const MedicalExam = () => {
                 const data = res.data || {};
                 const decodedDescription = decodeHtml(data.exams[0].description ?? "");
 
+                // Update refs with loaded data
+                descriptionRef.current = decodedDescription;
+                const enrollDesc = data?.who_can_enroll_description ?? "";
+                enrollDescriptionRef.current = enrollDesc;
+
                 //  Set form data from API
                 setFormData({
                     ...(id && { id: data.exams[0]._id ?? "" }),
@@ -295,7 +314,7 @@ const MedicalExam = () => {
                 //  Enroll Section
                 setEnrollData({
                     title: data?.who_can_enroll_title ?? "",
-                    description: data?.who_can_enroll_description ?? "",
+                    description: enrollDesc,
                     image: null,
                 });
                 if (data?.who_can_enroll_image) {
@@ -531,7 +550,11 @@ const MedicalExam = () => {
                             style={{ height: "320px" }}
                             value={formData.description}
                             onTextChange={(e) => {
-                                handleChange("description", e.htmlValue ?? "");
+                                const newValue = e.htmlValue ?? "";
+                                if (newValue !== descriptionRef.current) {
+                                    descriptionRef.current = newValue;
+                                    handleChange("description", newValue);
+                                }
                             }}
                         />
                         {errors.description && <p className="text-sm text-error-500 mt-1">{errors.description}</p>}
@@ -554,6 +577,7 @@ const MedicalExam = () => {
                     onChange={(data) => setEnrollData(data)}
                     preview={enrollPreview}
                     setPreview={setEnrollPreview}
+                    descriptionRef={enrollDescriptionRef}
                     errors={{
                         title: errors["enrollData.title"],
                         description: errors["enrollData.description"]

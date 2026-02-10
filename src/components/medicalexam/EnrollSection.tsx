@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import ComponentCard from "../common/ComponentCard";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
@@ -15,12 +15,18 @@ interface EnrollData {
 interface EnrollSectionProps {
     data: EnrollData;
     onChange: (data: EnrollData) => void;
-    preview: string | null;               // renamed
+    preview: string | null;
     setPreview: React.Dispatch<React.SetStateAction<string | null>>;
+    descriptionRef: React.MutableRefObject<string>;
     errors?: { title?: string; description?: string };
 }
 
-const EnrollSection: React.FC<EnrollSectionProps> = ({ data, onChange, preview, setPreview  , errors }) => {
+const EnrollSection: React.FC<EnrollSectionProps> = ({ data, onChange, preview, setPreview, descriptionRef, errors }) => {
+
+  // Sync ref with prop data
+  useEffect(() => {
+    descriptionRef.current = data.description;
+  }, [data.description, descriptionRef]);
 
   const handleChange = (field: keyof EnrollData, value: any) => {
     onChange({ ...data, [field]: value });
@@ -52,9 +58,13 @@ const EnrollSection: React.FC<EnrollSectionProps> = ({ data, onChange, preview, 
             <Editor
               style={{ height: "320px" }}
               value={data.description}
-              onTextChange={(e) =>
-                handleChange("description", e.htmlValue ?? "")
-              }
+              onTextChange={(e) => {
+                const newValue = e.htmlValue ?? "";
+                if (newValue !== descriptionRef.current) {
+                  descriptionRef.current = newValue;
+                  handleChange("description", newValue);
+                }
+              }}
             />
             {errors?.description && (
               <p className="text-sm text-error-500 mt-1">{errors.description}</p>
