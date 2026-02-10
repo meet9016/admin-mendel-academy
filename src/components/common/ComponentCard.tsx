@@ -14,6 +14,7 @@ interface ComponentCardProps {
   dates?: [Date | null, Date | null] | null;
   setDates?: (dates: [Date | null, Date | null] | null) => void;
   downloadExcel?: () => void;
+  action?: React.ReactNode; // Custom action element to display in header
 }
 
 const ComponentCard: React.FC<ComponentCardProps> = ({
@@ -26,7 +27,8 @@ const ComponentCard: React.FC<ComponentCardProps> = ({
   Plusicon = null,
   desc = "",
   dates,
-  setDates
+  setDates,
+  action
 }) => {
   const router = useRouter();
    const pathname = usePathname();
@@ -62,6 +64,7 @@ const ComponentCard: React.FC<ComponentCardProps> = ({
               {Plusicon} {name}
             </button>
           )}
+          {action && action}
           {/* Date Range */}
           {/* Date Range + Download */}
          {isPaymentPage && (

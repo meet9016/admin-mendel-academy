@@ -97,7 +97,7 @@ const PlanSection: React.FC<PlanSectionProps> = ({
   );
 
   return (
-    <ComponentCard title="Add Plan" name="">
+    <div className="border border-gray-200 rounded-lg p-4">
       <div className="grid grid-cols-2 gap-6">
         <div>
           <Label>Plan Day</Label>
@@ -240,7 +240,7 @@ const PlanSection: React.FC<PlanSectionProps> = ({
           ))}
         </div>
       </div>
-    </ComponentCard>
+    </div>
   );
 };
 
