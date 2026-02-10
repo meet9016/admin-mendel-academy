@@ -90,9 +90,7 @@ const MedicalExam = () => {
         plans: [
             { id: "", planMonth: "", planPriceUSD: "", planPriceINR: "", planType: "", planSubtitles: [""], isPopular: false },
         ],
-        rapidLearningTools: [
-            { id: "", toolType: "", priceUSD: "", priceINR: "" },
-        ],
+        rapidLearningTools: [],
     });
 
     const [enrollData, setEnrollData] = useState({
@@ -181,10 +179,8 @@ const MedicalExam = () => {
     };
 
     const removeRapidTool = (index: number) => {
-        if (formData.rapidLearningTools.length > 1) {
-            const updatedTools = formData.rapidLearningTools.filter((_, i) => i !== index);
-            handleChange("rapidLearningTools", updatedTools);
-        }
+        const updatedTools = formData.rapidLearningTools.filter((_, i) => i !== index);
+        handleChange("rapidLearningTools", updatedTools);
     };
 
     const handleRapidToolChange = (index: number, field: keyof RapidLearningTool, value: string | number) => {
@@ -281,12 +277,7 @@ const MedicalExam = () => {
                                     priceUSD: tool.price_usd ?? "",
                                     priceINR: tool.price_inr ?? ""
                                 }))
-                                : [{
-                                    id: "",
-                                    toolType: "",
-                                    priceUSD: "",
-                                    priceINR: ""
-                                }];
+                                : [];
                         return existingTools;
                     })(),
                 });
@@ -562,10 +553,11 @@ const MedicalExam = () => {
             </div>
 
             {/* PLAN SECTION */}
-            <ComponentCard title="Plans" name="">
-                <div className="flex items-center justify-between mb-4">
-                    <Label>Choose Plans</Label>
-                    {formData.plans.length < 8 && (
+            <ComponentCard 
+                title="Plans" 
+                name=""
+                action={
+                    formData.plans.length < 8 ? (
                         <button
                             type="button"
                             onClick={addPlan}
@@ -573,8 +565,9 @@ const MedicalExam = () => {
                         >
                             <FaPlus /> Add Plan
                         </button>
-                    )}
-                </div>
+                    ) : undefined
+                }
+            >
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {formData.plans.map((plan, index) => {
@@ -617,10 +610,11 @@ const MedicalExam = () => {
             </ComponentCard>
 
             {/* RAPID LEARNING TOOLS SECTION */}
-            <ComponentCard title="Rapid Learning Tools" name="">
-                <div className="flex items-center justify-between mb-4">
-                    <Label>Learning Tools</Label>
-                    {formData.rapidLearningTools.length < 5 && (
+            <ComponentCard 
+                title="Rapid Learning Tools" 
+                name=""
+                action={
+                    formData.rapidLearningTools.length < 5 ? (
                         <button
                             type="button"
                             onClick={addRapidTool}
@@ -628,8 +622,9 @@ const MedicalExam = () => {
                         >
                             <FaPlus /> Add Tool
                         </button>
-                    )}
-                </div>
+                    ) : undefined
+                }
+            >
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {formData.rapidLearningTools.map((tool, index) => {
@@ -699,15 +694,13 @@ const MedicalExam = () => {
                                     </div>
                                 </div>
                                 
-                                {formData.rapidLearningTools.length > 1 && (
-                                    <button
-                                        type="button"
-                                        onClick={() => removeRapidTool(index)}
-                                        className="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
-                                    >
-                                        <FaMinus />
-                                    </button>
-                                )}
+                                <button
+                                    type="button"
+                                    onClick={() => removeRapidTool(index)}
+                                    className="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
+                                >
+                                    <FaMinus />
+                                </button>
                             </div>
                         );
                     })}
