@@ -9,6 +9,7 @@ import endPointApi from "@/utils/endPointApi";
 import CommonDialog from "@/components/tables/CommonDialog";
 import { useRouter } from "next/navigation";
 import TableSkeleton from "@/components/common/TableSkeleton";
+import { DemoPageSkeleton, TreeTableSkeleton } from "@/components/skeltons/Skeltons";
 
 interface Plan {
   plan_month: string | number;
@@ -33,7 +34,7 @@ type FormattedData = {
 export default function DemoPage() {
   const [data, setData] = useState<FormattedData[]>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
   const [rows, setRows] = useState<number>(10);
   const [totalRecords, setTotalRecords] = useState<number>(0);
@@ -93,6 +94,7 @@ export default function DemoPage() {
       setSelectedRow(null);
     }
   };
+
   const handleDeleteClick = (row: FormattedData) => {
     setSelectedRow(row);
     setIsDeleteModalOpen(true);
@@ -109,6 +111,10 @@ export default function DemoPage() {
     plan_popular: "Most Popular",
   };
 
+  // Show skeleton while loading
+  if (loading) {
+    return <DemoPageSkeleton />;
+  }
 
   return (
     <div className="space-y-6">
@@ -118,51 +124,37 @@ export default function DemoPage() {
         name="Add Exam"
         onAddProductClick="/medicalexamlist/add"
       >
-        {loading ? (
-          <TableSkeleton
-            count={10}
-            columns={[
-              "20rem",
-              "12rem",
-              "7rem",
-              "18rem",
-              "8rem",
-              "8rem",
-            ]}
-          />
-        ) :
-          (<PrimeReactTreeTable
-            data={data}
-            loading={loading}
-            totalRecords={totalRecords}
-            rows={rows}
-            onPageChange={(newPage, newRows) => {
-              setPage(newPage);
-              setRows(newRows);
-            }}
-            columns={[
-              { field: "category_name", header: "Course" },
-              { field: "exam_name", header: "Exam Name" },
-              {
-                field: "status",
-                header: "Status",
-                body: (row: { status?: string }) => {
-                  const status = row.status || "Inactive";
-                  const severity =
-                    status === "Active"
-                      ? "success"
-                      : status === "Pending"
-                        ? "warning"
-                        : "danger";
-                  return <Tag value={status} severity={severity} />;
-                },
+        <PrimeReactTreeTable
+          data={data}
+          loading={false}
+          totalRecords={totalRecords}
+          rows={rows}
+          onPageChange={(newPage, newRows) => {
+            setPage(newPage);
+            setRows(newRows);
+          }}
+          columns={[
+            { field: "category_name", header: "Course" },
+            { field: "exam_name", header: "Exam Name" },
+            {
+              field: "status",
+              header: "Status",
+              body: (row: { status?: string }) => {
+                const status = row.status || "Inactive";
+                const severity =
+                  status === "Active"
+                    ? "success"
+                    : status === "Pending"
+                      ? "warning"
+                      : "danger";
+                return <Tag value={status} severity={severity} />;
               },
-            ]}
-            headerNameMap={headerNameMap}
-            // onEdit={(row) => console.log("Edit", row)}
-            onEdit={(row) => router.push(`/medicalexamlist/add?id=${row.id}`)}
-            onDelete={handleDeleteClick}
-          />)}
+            },
+          ]}
+          headerNameMap={headerNameMap}
+          onEdit={(row) => router.push(`/medicalexamlist/add?id=${row.id}`)}
+          onDelete={handleDeleteClick}
+        />
       </ComponentCard>
 
       <CommonDialog

@@ -13,13 +13,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import { toast } from "react-toastify";
+import { LiveCoursesSkeleton } from "../skeltons/Skeltons";
 
 interface ModuleType {
   module_number: number | string;
   module_name: string;
   module_title: string;
-  module_price_usd: string;  // ✅ Added USD price
-  module_price_inr: string;  // ✅ Added INR price
+  module_price_usd: string;
+  module_price_inr: string;
   most_popular: boolean;
   plan_sub_title: string[];
 }
@@ -41,6 +42,7 @@ const LiveCourses = () => {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<FormDataType>({
     title: "",
@@ -57,8 +59,8 @@ const LiveCourses = () => {
         module_number: "",
         module_name: "",
         module_title: "",
-        module_price_usd: "",  // ✅ USD price
-        module_price_inr: "",  // ✅ INR price
+        module_price_usd: "",
+        module_price_inr: "",
         most_popular: false,
         plan_sub_title: [""],
       },
@@ -152,39 +154,63 @@ const LiveCourses = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!id) return;
-
       try {
-        const res = await api.get(`${endPointApi.getByIdLiveCourses}/${id}`);
-        const data = res.data.data; // ✅ Access nested data
+        if (id) {
+          const res = await api.get(`${endPointApi.getByIdLiveCourses}/${id}`);
+          const data = res.data.data;
 
-        setFormData((prev) => ({
-          ...prev,
-          title: data.course_title ?? "",
-          instructor_name: data.instructor?.name ?? "",
-          instructor_qualification: data.instructor?.qualification ?? "",
-          duration: data.duration ?? "",
-          zoom_link: data.zoom_link ?? "",
-          date: data.date ?? "",
-          tags: data.tags ?? [""],
-          status: data.status ?? "",
-          soldOut: data.isSoldOut ?? false,
+          setFormData((prev) => ({
+            ...prev,
+            title: data.course_title ?? "",
+            instructor_name: data.instructor?.name ?? "",
+            instructor_qualification: data.instructor?.qualification ?? "",
+            duration: data.duration ?? "",
+            zoom_link: data.zoom_link ?? "",
+            date: data.date ?? "",
+            tags: data.tags ?? [""],
+            status: data.status ?? "",
+            soldOut: data.isSoldOut ?? false,
 
-          modules: (() => {
-            // ✅ Convert API modules with both USD and INR prices
-            const apiModules = data.choose_plan_list?.map((m: any) => ({
-              module_number: m.moduleNumber ?? "",
-              module_name: m.title ?? "",
-              module_title: m.subtitle ?? "",
-              module_price_usd: m.price_usd ?? "",  // ✅ Get USD price
-              module_price_inr: m.price_inr ?? "",  // ✅ Get INR price
-              most_popular: m.isMostPopular ?? false,
-              plan_sub_title: m.features?.length ? m.features : [""],
-            })) || [];
+            modules: (() => {
+              const apiModules = data.choose_plan_list?.map((m: any) => ({
+                module_number: m.moduleNumber ?? "",
+                module_name: m.title ?? "",
+                module_title: m.subtitle ?? "",
+                module_price_usd: m.price_usd ?? "",
+                module_price_inr: m.price_inr ?? "",
+                most_popular: m.isMostPopular ?? false,
+                plan_sub_title: m.features?.length ? m.features : [""],
+              })) || [];
 
-            // Ensure always 3 modules
-            while (apiModules.length < 3) {
-              apiModules.push({
+              while (apiModules.length < 3) {
+                apiModules.push({
+                  module_number: "",
+                  module_name: "",
+                  module_title: "",
+                  module_price_usd: "",
+                  module_price_inr: "",
+                  most_popular: false,
+                  plan_sub_title: [""],
+                });
+              }
+
+              return apiModules;
+            })(),
+          }));
+        } else {
+          // Create mode - set default empty form
+          setFormData({
+            title: "",
+            instructor_name: "",
+            instructor_qualification: "",
+            duration: "",
+            zoom_link: "",
+            date: "",
+            tags: [""],
+            status: "",
+            soldOut: false,
+            modules: [
+              {
                 module_number: "",
                 module_name: "",
                 module_title: "",
@@ -192,16 +218,36 @@ const LiveCourses = () => {
                 module_price_inr: "",
                 most_popular: false,
                 plan_sub_title: [""],
-              });
-            }
-
-            return apiModules;
-          })(),
-        }));
-
+              },
+              {
+                module_number: "",
+                module_name: "",
+                module_title: "",
+                module_price_usd: "",
+                module_price_inr: "",
+                most_popular: false,
+                plan_sub_title: [""],
+              },
+              {
+                module_number: "",
+                module_name: "",
+                module_title: "",
+                module_price_usd: "",
+                module_price_inr: "",
+                most_popular: false,
+                plan_sub_title: [""],
+              },
+            ],
+          });
+        }
       } catch (error) {
         console.log("Error fetching live course:", error);
         toast.error("Failed to fetch course data");
+      } finally {
+        // Minimum loading time for better UX
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 300);
       }
     };
 
@@ -235,13 +281,12 @@ const LiveCourses = () => {
           title: mod.module_name,
           subtitle: mod.module_title,
           description: "",
-          price_usd: Number(mod.module_price_usd || 0),  // ✅ Send USD price
-          price_inr: Number(mod.module_price_inr || 0),  // ✅ Send INR price
+          price_usd: Number(mod.module_price_usd || 0),
+          price_inr: Number(mod.module_price_inr || 0),
           features: mod.plan_sub_title.filter(x => x !== ""),
           isMostPopular: mod.most_popular
         }));
 
-      // ✅ Validate that each module has both prices
       for (let i = 0; i < modulePayload.length; i++) {
         if (!modulePayload[i].price_usd || !modulePayload[i].price_inr) {
           toast.error(`Module ${i + 1} must have both USD and INR prices`);
@@ -263,8 +308,6 @@ const LiveCourses = () => {
         choose_plan_list: modulePayload
       };
 
-      console.log("FINAL BODY SENDING:", body);
-
       let res;
       if (id) {
         res = await api.put(`${endPointApi.updateLiveCourses}/${id}`, body);
@@ -282,10 +325,15 @@ const LiveCourses = () => {
     }
   };
 
+  // Show skeleton while loading
+  if (isLoading) {
+    return <LiveCoursesSkeleton />;
+  }
+
   return (
     <>
       <div className="space-y-6">
-        <ComponentCard title="Add Live Courses" name="">
+        <ComponentCard title={id ? "Edit Live Course" : "Add Live Courses"} name="">
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
@@ -445,7 +493,7 @@ const LiveCourses = () => {
                 <div>
                   <Label>Module Number</Label>
                   <Input
-                    value={module.module_number}
+                    value={module.module_number as any}
                     onChange={(e) =>
                       handleModuleChange(mIndex, "module_number", e.target.value)
                     }
@@ -474,7 +522,7 @@ const LiveCourses = () => {
                 </div>
               </div>
 
-              {/* ✅ DUAL CURRENCY PRICE FIELDS */}
+              {/* DUAL CURRENCY PRICE FIELDS */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <Label>Module Price (USD)</Label>
@@ -550,7 +598,7 @@ const LiveCourses = () => {
 
       <div className="flex items-center gap-5 mt-5">
         <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : "Save"}
+          {isSubmitting ? "Saving..." : (id ? "Update" : "Save")}
         </Button>
         <Button size="sm" variant="outline" onClick={() => router.push("/liveCourses")}>
           Cancel

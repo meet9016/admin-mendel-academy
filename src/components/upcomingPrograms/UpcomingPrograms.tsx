@@ -17,6 +17,7 @@ const Editor = dynamic(() => import("primereact/editor").then((mod) => mod.Edito
 import type { EditorTextChangeEvent } from "primereact/editor";
 import DropzoneComponent from "../blogs/DropZone";
 import { upcomingProgramSchema } from "@/ValidationSchema/validationSchema";
+import { UpcomingProgramsSkeleton } from "../skeltons/Skeltons";
 
 interface FormDataType {
   title: string;
@@ -30,7 +31,8 @@ const UpcomingPrograms = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
-
+  
+  const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState<FormDataType>({
     title: "",
     waitlistCount: "",
@@ -44,8 +46,7 @@ const UpcomingPrograms = () => {
   const [preview, setPreview] = useState<string | null>(null);
   const [mainImage, setMainImage] = useState<File | null>(null);
 
-
-  //  SINGLE onChange function for all inputs
+  // Single onChange function for all inputs
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -72,6 +73,7 @@ const UpcomingPrograms = () => {
     }));
     setErrors((prev: any) => ({ ...prev, description: "" }));
   };
+
   // Form validation
   const validate = async () => {
     try {
@@ -90,27 +92,45 @@ const UpcomingPrograms = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!id) return;
       try {
-        const res = await api.get(`${endPointApi.getByIdUpcomeingProgram}/${id}`);
-        const data = res.data || {};
-        setFormData({
-          title: data.title ?? "",
-          waitlistCount: data.waitlistCount?.toString() ?? "",
-          date: data.date ?? "",
-          course_types: data.course_types ?? "",
-          description: data.description ?? "",
-        });
-        if (data.image) {
-          setPreview(data.image);
+        if (id) {
+          const res = await api.get(`${endPointApi.getByIdUpcomeingProgram}/${id}`);
+          const data = res.data || {};
+          
+          setFormData({
+            title: data.title ?? "",
+            waitlistCount: data.waitlistCount?.toString() ?? "",
+            date: data.date ?? "",
+            course_types: data.course_types ?? "",
+            description: data.description ?? "",
+          });
+          
+          if (data.image) {
+            setPreview(data.image);
+          }
+        } else {
+          // Create mode - set empty form
+          setFormData({
+            title: "",
+            waitlistCount: "",
+            date: "",
+            course_types: "",
+            description: "",
+          });
         }
       } catch (err) {
         console.error("Error fetching data:", err);
+        toast.error("Failed to load data");
+      } finally {
+        // Minimum loading time for better UX
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 300);
       }
     };
+    
     fetchData();
   }, [id]);
-
 
   // Submit Handler
   const handleSubmit = async () => {
@@ -143,10 +163,14 @@ const UpcomingPrograms = () => {
     }
   };
 
+  // Show skeleton while loading
+  if (isLoading) {
+    return <UpcomingProgramsSkeleton />;
+  }
 
   return (
     <div className="space-y-6">
-      <ComponentCard title="Add Upcoming Program" name="">
+      <ComponentCard title={id ? "Edit Upcoming Program" : "Add Upcoming Program"} name="">
         <div className="space-y-6">
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -249,10 +273,10 @@ const UpcomingPrograms = () => {
         {/* ---------- Buttons ---------- */}
         <div className="flex items-center gap-5 mt-6">
           <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : "Save"}
+            {isSubmitting ? "Saving..." : (id ? "Update" : "Save")}
           </Button>
 
-          <Button size="sm" variant="outline" onClick={() => router.push("/prerecord")}>
+          <Button size="sm" variant="outline" onClick={() => router.push("/upcomingProgram")}>
             Cancel
           </Button>
         </div>

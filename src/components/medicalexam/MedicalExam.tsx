@@ -18,6 +18,7 @@ import EnrollSection from "./EnrollSection";
 import { decodeHtml } from "@/utils/helper";
 import { examListSchema } from "@/ValidationSchema/validationSchema";
 import { toast } from "react-toastify";
+import { MedicalExamSkeleton } from "../skeltons/Skeltons";
 
 interface PlanData {
     id: number | string;
@@ -37,7 +38,6 @@ interface RapidLearningTool {
 }
 
 interface FormData {
-    // id: string;
     country: string;
     status: string;
     category: string;
@@ -52,6 +52,7 @@ interface FormData {
 const MedicalExam = () => {
     const router = useRouter();
     const [id, setId] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -77,9 +78,7 @@ const MedicalExam = () => {
     const [preview, setPreview] = useState<string | null>(null);
     const [previewWho, setPreviewWho] = useState<string | null>(null);
 
-    //  Main single state
     const [formData, setFormData] = useState<FormData>({
-        // id: "",
         country: "",
         status: "Active",
         category: "",
@@ -97,14 +96,13 @@ const MedicalExam = () => {
         title: "",
         description: "",
         image: null as File | null,
-
     });
+    
     const [enrollPreview, setEnrollPreview] = useState<string | null>(null);
     const [mainImage, setMainImage] = useState<File | null>(null);
     const descriptionRef = useRef<string>("");
     const enrollDescriptionRef = useRef<string>("");
 
-    // Sync refs with state
     useEffect(() => {
         descriptionRef.current = formData.description;
     }, [formData.description]);
@@ -113,7 +111,6 @@ const MedicalExam = () => {
         enrollDescriptionRef.current = enrollData.description;
     }, [enrollData.description]);
 
-    //  Handle updates to any field in formData
     const handleChange = useCallback(<K extends keyof FormData>(field: K, value: FormData[K]) => {
         setFormData((prev) => {
             if (prev[field] === value) return prev;
@@ -122,7 +119,6 @@ const MedicalExam = () => {
         setErrors((prev) => ({ ...prev, [field]: "" }));
     }, []);
 
-    //  Steps (array)
     const addStep = () => {
         handleChange("examSteps", [...formData.examSteps, ""]);
     };
@@ -142,7 +138,6 @@ const MedicalExam = () => {
         }));
     };
 
-    //  Plans
     const addPlan = () => {
         if (formData.plans.length < 8) {
             const newPlan: PlanData = {
@@ -179,7 +174,6 @@ const MedicalExam = () => {
         handleChange("plans", updatedPlans);
     };
 
-    // Rapid Learning Tools
     const addRapidTool = () => {
         if (formData.rapidLearningTools.length < 5) {
             const newTool: RapidLearningTool = {
@@ -207,7 +201,6 @@ const MedicalExam = () => {
         }));
     };
 
-    // Handle radio button selection
     const handleRadioChange = (value: string) => {
         setFormData((prev) => ({ ...prev, status: value }));
     };
@@ -234,91 +227,114 @@ const MedicalExam = () => {
     useEffect(() => {
         const fetchById = async () => {
             try {
-                if (!id) return;
+                if (id) {
+                    const res = await api.get(`${endPointApi.getByIdExamList}/${id}`);
+                    const data = res.data || {};
+                    const decodedDescription = decodeHtml(data.exams[0].description ?? "");
 
-                const res = await api.get(`${endPointApi.getByIdExamList}/${id}`);
-                const data = res.data || {};
-                const decodedDescription = decodeHtml(data.exams[0].description ?? "");
+                    descriptionRef.current = decodedDescription;
+                    const enrollDesc = data?.who_can_enroll_description ?? "";
+                    enrollDescriptionRef.current = enrollDesc;
 
-                // Update refs with loaded data
-                descriptionRef.current = decodedDescription;
-                const enrollDesc = data?.who_can_enroll_description ?? "";
-                enrollDescriptionRef.current = enrollDesc;
+                    setFormData({
+                        ...(id && { id: data.exams[0]._id ?? "" }),
+                        category: data?.category_name ?? "",
+                        country: data.exams[0].country ?? "",
+                        status: data.exams[0].status ?? "Active",
+                        examName: data.exams[0].exam_name ?? "",
+                        title: data.exams[0].title ?? "",
+                        examSteps:
+                            data.exams[0].sub_titles && data.exams[0].sub_titles.length > 0
+                                ? data.exams[0].sub_titles
+                                : [""],
+                        description: decodedDescription,
+                        plans: (() => {
+                            const existingPlans =
+                                data.choose_plan_list && data.choose_plan_list.length > 0
+                                    ? data.choose_plan_list.map((plan: any) => ({
+                                        planMonth: plan.plan_month ?? "",
+                                        planPriceUSD: plan.plan_pricing_dollar ?? "",
+                                        planPriceINR: plan.plan_pricing_inr ?? "",
+                                        planType: plan.plan_type ?? "",
+                                        planSubtitles:
+                                            plan.plan_sub_title && plan.plan_sub_title.length > 0
+                                                ? plan.plan_sub_title
+                                                : [""],
+                                        isPopular:
+                                            plan.most_popular === true || plan.most_popular === "true",
+                                        id: plan._id
+                                    }))
+                                    : [{
+                                        id: "",
+                                        planMonth: "",
+                                        planPriceUSD: "",
+                                        planPriceINR: "",
+                                        planType: "",
+                                        planSubtitles: [""],
+                                        isPopular: false,
+                                    }];
 
-                //  Set form data from API
-                setFormData({
-                    ...(id && { id: data.exams[0]._id ?? "" }),
-                    category: data?.category_name ?? "",
-                    country: data.exams[0].country ?? "",
-                    status: data.exams[0].status ?? "Active",
-                    examName: data.exams[0].exam_name ?? "",
-                    title: data.exams[0].title ?? "",
-                    examSteps:
-                        data.exams[0].sub_titles && data.exams[0].sub_titles.length > 0
-                            ? data.exams[0].sub_titles
-                            : [""],
-                    description: decodedDescription,
-                    plans: (() => {
-                        //  Map existing plans (if any)
-                        const existingPlans =
-                            data.choose_plan_list && data.choose_plan_list.length > 0
-                                ? data.choose_plan_list.map((plan: any) => ({
-                                    planMonth: plan.plan_month ?? "",
-                                    planPriceUSD: plan.plan_pricing_dollar ?? "",
-                                    planPriceINR: plan.plan_pricing_inr ?? "",
-                                    planType: plan.plan_type ?? "",
-                                    planSubtitles:
-                                        plan.plan_sub_title && plan.plan_sub_title.length > 0
-                                            ? plan.plan_sub_title
-                                            : [""],
-                                    isPopular:
-                                        plan.most_popular === true || plan.most_popular === "true",
-                                    id: plan._id
-                                }))
-                                : [{
-                                    id: "",
-                                    planMonth: "",
-                                    planPriceUSD: "",
-                                    planPriceINR: "",
-                                    planType: "",
-                                    planSubtitles: [""],
-                                    isPopular: false,
-                                }];
+                            return existingPlans;
+                        })(),
+                        rapidLearningTools: (() => {
+                            const existingTools =
+                                data.rapid_learning_tools && data.rapid_learning_tools.length > 0
+                                    ? data.rapid_learning_tools.map((tool: any) => ({
+                                        id: tool._id,
+                                        toolType: tool.tool_type ?? "",
+                                        priceUSD: tool.price_usd ?? "",
+                                        priceINR: tool.price_inr ?? ""
+                                    }))
+                                    : [];
+                            return existingTools;
+                        })(),
+                    });
 
-                        return existingPlans;
-                    })(),
-                    rapidLearningTools: (() => {
-                        const existingTools =
-                            data.rapid_learning_tools && data.rapid_learning_tools.length > 0
-                                ? data.rapid_learning_tools.map((tool: any) => ({
-                                    id: tool._id,
-                                    toolType: tool.tool_type ?? "",
-                                    priceUSD: tool.price_usd ?? "",
-                                    priceINR: tool.price_inr ?? ""
-                                }))
-                                : [];
-                        return existingTools;
-                    })(),
-                });
-
-                setPreview(data?.exams[0]?.image)
-                //  Enroll Section
-                setEnrollData({
-                    title: data?.who_can_enroll_title ?? "",
-                    description: enrollDesc,
-                    image: null,
-                });
-                if (data?.who_can_enroll_image) {
-                setEnrollPreview(data.who_can_enroll_image);
-            }
+                    setPreview(data?.exams[0]?.image)
+                    setEnrollData({
+                        title: data?.who_can_enroll_title ?? "",
+                        description: enrollDesc,
+                        image: null,
+                    });
+                    
+                    if (data?.who_can_enroll_image) {
+                        setEnrollPreview(data.who_can_enroll_image);
+                    }
+                } else {
+                    // Create mode - initialize empty form
+                    setFormData({
+                        country: "",
+                        status: "Active",
+                        category: "",
+                        examName: "",
+                        title: "",
+                        examSteps: [""],
+                        description: "",
+                        plans: [
+                            { id: "", planMonth: "", planPriceUSD: "", planPriceINR: "", planType: "", planSubtitles: [""], isPopular: false },
+                        ],
+                        rapidLearningTools: [],
+                    });
+                    
+                    setEnrollData({
+                        title: "",
+                        description: "",
+                        image: null,
+                    });
+                }
             } catch (err) {
                 console.error("Error fetching data by ID:", err);
+                toast.error("Failed to load data");
+            } finally {
+                // Minimum loading time for better UX
+                setTimeout(() => {
+                    setIsLoading(false);
+                }, 300);
             }
         };
 
         fetchById();
     }, [id]);
-
 
     const handleSave = async () => {
         const isValid = await validate();
@@ -326,13 +342,10 @@ const MedicalExam = () => {
         
         try {
             const formDataToSend = new FormData();
-            // Category
             if (id) {
-                // formDataToSend.append("_id", id);
                 formDataToSend.append("exams[0][_id]", formData.id || id);
             }
             formDataToSend.append("category_name", formData.category);
-            // Exams
             formDataToSend.append("exams[0][exam_name]", formData.examName);
             formDataToSend.append("exams[0][country]", formData.country);
             formDataToSend.append("exams[0][status]", formData.status);
@@ -342,9 +355,7 @@ const MedicalExam = () => {
                 formDataToSend.append(`exams[0][sub_titles][${i}]`, step);
             });
 
-            // Choose Plan List
             formData.plans.forEach((plan, i) => {
-                // if (plan.planPrice && plan.planMonth && plan.planType) {
                 if ((plan.planMonth && plan.planType) || plan.planMonth === "Custom") {
                     if (plan?.id !== undefined && plan?.id !== null && plan.id !== "" && id) {
                         formDataToSend.append(`choose_plan_list[${i}][_id]`, String(plan.id));
@@ -361,7 +372,6 @@ const MedicalExam = () => {
                 }
             });
 
-            // Rapid Learning Tools - always send the array (even if empty)
             const hasValidTools = formData.rapidLearningTools.some(tool => 
                 tool.toolType && (tool.priceUSD || tool.priceINR)
             );
@@ -378,21 +388,19 @@ const MedicalExam = () => {
                     }
                 });
             } else if (id) {
-                // Send empty array indicator when updating and no valid tools
                 formDataToSend.append('rapid_learning_tools', JSON.stringify([]));
             }
 
-            // Enroll Section
             formDataToSend.append("who_can_enroll_title", enrollData.title);
             formDataToSend.append("who_can_enroll_description", enrollData.description);
             if (enrollData.image) {
                 formDataToSend.append("who_can_enroll_image", enrollData.image);
             }
 
-            // Exam main image
             if (mainImage) {
                 formDataToSend.append("image", mainImage);
             }
+            
             let res;
 
             if (id) {
@@ -411,9 +419,14 @@ const MedicalExam = () => {
         }
     };
 
+    // Show skeleton while loading
+    if (isLoading) {
+        return <MedicalExamSkeleton />;
+    }
+
     return (
         <div className="space-y-6">
-            <ComponentCard title="Add Medical Exam" name="">
+            <ComponentCard title={id ? "Edit Medical Exam" : "Add Medical Exam"} name="">
                 {/* Category + Exam Name */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
@@ -424,7 +437,6 @@ const MedicalExam = () => {
                             value={formData.category}
                             onChange={(value: string) => handleChange("category", value)}
                             error={!!errors?.category}
-                        // hint={formErrors?.category}
                         />
                         {errors.category && <p className="text-sm text-error-500 mt-1">{errors.category}</p>}
                     </div>
@@ -439,7 +451,6 @@ const MedicalExam = () => {
                                 handleChange("examName", e.target.value)
                             }
                             error={!!errors?.examName}
-                        // hint={formErrors?.examName}
                         />
                         {errors.examName && <p className="text-sm text-error-500 mt-1">{errors.examName}</p>}
                     </div>
@@ -476,7 +487,6 @@ const MedicalExam = () => {
                                 handleChange("country", e.target.value)
                             }
                             error={!!errors?.country}
-                        // hint={formErrors?.examName}
                         />
                         {errors.country && <p className="text-sm text-error-500 mt-1">{errors.country}</p>}
                     </div>
@@ -508,7 +518,6 @@ const MedicalExam = () => {
                         </button>
                     </div>
 
-                    {/* Inputs in 2-column layout same as Exam Name */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {formData.examSteps.map((step, index) => (
                             <div key={index} className="relative">
@@ -520,7 +529,6 @@ const MedicalExam = () => {
                                         handleStepChange(index, e.target.value)
                                     }
                                     error={!!errors?.[`examSteps[${index}]`]}
-                                // hint={formErrors?.[`examSteps[${index}]`]
                                 />
                                 {errors[`examSteps[${index}]`] && (
                                     <p className="text-sm text-error-500 mt-1">
@@ -535,7 +543,6 @@ const MedicalExam = () => {
                                     >
                                         <FaMinus />
                                     </button>
-
                                 )}
                             </div>
                         ))}
@@ -601,7 +608,6 @@ const MedicalExam = () => {
                     ) : undefined
                 }
             >
-                
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {formData.plans.map((plan, index) => {
                         const selectedDays = formData.plans
@@ -663,7 +669,6 @@ const MedicalExam = () => {
                     ) : undefined
                 }
             >
-                
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {formData.rapidLearningTools.map((tool, index) => {
                         const selectedToolTypes = formData.rapidLearningTools
@@ -746,8 +751,8 @@ const MedicalExam = () => {
             </ComponentCard>
 
             <div className="flex items-center gap-5">
-                <Button size="sm" variant="primary" onClick={handleSave} >
-                    Save
+                <Button size="sm" variant="primary" onClick={handleSave}>
+                    {id ? "Update" : "Save"}
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => router.push("/medicalexamlist")}>
                     Cancel

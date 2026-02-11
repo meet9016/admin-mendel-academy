@@ -1,37 +1,29 @@
-const nextConfig = {
-  // Enable React strict mode for better dev warnings
+
+
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
   reactStrictMode: true,
-
-  // Use SWC to minify and produce smaller client bundles (faster loads)
   swcMinify: true,
-
-  // Important: Silence turbopack warning
-  turbopack: {},
-
-  // Experimental options to improve navigation and streaming
-  experimental: {
-    reactRoot: true,
-    serverActions: true,
-    scrollRestoration: true,
+   experimental: {
     optimizeCss: true,
   },
 
-  // Your webpack SVG loader
-  webpack(config : any) {
-    config.module.rules.push({
-      test: /\.svg$/,
-      use: ["@svgr/webpack"],
-    });
-    return config;
+  output: "standalone",
+
+  turbopack: {
+    rules: {
+      "*.svg": {
+        loaders: ["@svgr/webpack"],
+        as: "*.js",
+      },
+    },
   },
-  standalone: true,
-  // Allow builds to pass even with type errors
+
   typescript: {
     ignoreBuildErrors: true,
   },
-
-  // Skip ESLint during build
-  eslint: {
+   eslint: {
     ignoreDuringBuilds: true,
   },
 };

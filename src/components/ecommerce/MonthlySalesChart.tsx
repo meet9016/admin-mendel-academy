@@ -3,15 +3,33 @@ import { ApexOptions } from "apexcharts";
 import dynamic from "next/dynamic";
 import { MoreDotIcon } from "@/icons";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
+import { MonthlySalesChartSkeleton } from "../skeltons/Skeltons";
 
-// Dynamically import the ReactApexChart component
+
+// Dynamically import the ReactApexChart component with skeleton
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
+  loading: MonthlySalesChartSkeleton
 });
 
 export default function MonthlySalesChart() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+
+    // Simulate data loading delay
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const options: ApexOptions = {
     colors: ["#ffcc09"],
     chart: {
@@ -81,7 +99,6 @@ export default function MonthlySalesChart() {
     fill: {
       opacity: 1,
     },
-
     tooltip: {
       x: {
         show: false,
@@ -91,13 +108,13 @@ export default function MonthlySalesChart() {
       },
     },
   };
+
   const series = [
     {
       name: "Sales",
       data: [168, 385, 201, 298, 187, 195, 291, 110, 215, 390, 280, 112],
     },
   ];
-  const [isOpen, setIsOpen] = useState(false);
 
   function toggleDropdown() {
     setIsOpen(!isOpen);
@@ -105,6 +122,11 @@ export default function MonthlySalesChart() {
 
   function closeDropdown() {
     setIsOpen(false);
+  }
+
+  // Show skeleton while loading
+  if (isLoading || !isClient) {
+    return <MonthlySalesChartSkeleton />;
   }
 
   return (

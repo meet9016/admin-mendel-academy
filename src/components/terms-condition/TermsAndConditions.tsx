@@ -4,16 +4,23 @@ import ComponentCard from '../common/ComponentCard'
 import Button from '../ui/button/Button'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic';
-const Editor = dynamic(() => import('primereact/editor').then((m) => m.Editor), { ssr: false });
+const Editor = dynamic(() => import('primereact/editor').then((m) => m.Editor), { 
+    ssr: false,
+    loading: () => (
+        <div className="h-[420px] bg-gray-100 animate-pulse rounded-lg"></div>
+    )
+});
 import type { EditorTextChangeEvent } from 'primereact/editor';
 import { api } from '@/utils/axiosInstance';
 import endPointApi from '@/utils/endPointApi';
 import { decodeHtml } from '@/utils/helper';
 import { toast } from 'react-toastify';
+import { SkeletonLoader } from '../skeltons/Skeltons';
 
 const TermsAndConditions = () => {
     const router = useRouter();
     const [id, setId] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -42,6 +49,7 @@ const TermsAndConditions = () => {
     useEffect(() => {
         const fetchById = async () => {
             try {
+                setIsLoading(true);
                 const res = await api.get(`${endPointApi.getAllTermsAndConditions}`);
                 const data = res.data || {};
                 console.log(":==", data.data?.description);
@@ -53,6 +61,9 @@ const TermsAndConditions = () => {
                 });
             } catch (err) {
                 console.error("Error fetching data by ID:", err);
+                toast.error("Failed to load terms and conditions");
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -121,12 +132,16 @@ const TermsAndConditions = () => {
         </span>
     );
 
+
+    if (isLoading) {
+        return <SkeletonLoader />;
+    }
+
     return (
         <div className="space-y-6">
             <ComponentCard title="Add T&C" name="">
 
                 <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-
                     <div>
                         <div>
                             <Editor
@@ -145,8 +160,18 @@ const TermsAndConditions = () => {
                 </div>
 
                 <div className="flex items-center gap-5">
-                    <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting} >
-                        {isSubmitting ? "Saving..." : "Save"}
+                    <Button 
+                        size="sm" 
+                        variant="primary" 
+                        onClick={handleSubmit} 
+                        disabled={isSubmitting || isLoading}
+                    >
+                        {isSubmitting ? (
+                            <div className="flex items-center gap-2">
+                                <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                Saving...
+                            </div>
+                        ) : "Save"}
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => router.push("/faq")}>
                         Cancel

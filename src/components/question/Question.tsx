@@ -15,6 +15,7 @@ import MultiSelect from "../form/MultiSelect";
 import { decodeHtml } from "@/utils/helper";
 import { questionSchema } from "@/ValidationSchema/validationSchema";
 import { toast } from "react-toastify";
+import { QuestionSkeleton } from "../skeltons/Skeltons";
 
 // const categoryOptions = [
 //   { value: "3", label: "3 Month" },
@@ -30,6 +31,7 @@ const featuresOptions = [
 
 const Question = () => {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState({
     title: "",
     tag: "",
@@ -49,32 +51,47 @@ const Question = () => {
   useEffect(() => {
     const fetchById = async () => {
       try {
-        if (!id) return;
-        const res = await api.get(`${endPointApi.getByIdQuestion}/${id}`);
-        const data = res.data || {};
-        const decodedDescription = decodeHtml(data.description ?? "");
+        if (id) {
+          const res = await api.get(`${endPointApi.getByIdQuestion}/${id}`);
+          const data = res.data || {};
+          const decodedDescription = decodeHtml(data.description ?? "");
 
-        // Ensure duration is a string for select matching
-        setFormData({
-          title: data.title ?? "",
-          tag: data.tag ?? "",
-          rating: data.rating?.toString() ?? "",
-          total_reviews: data.total_reviews?.toString() ?? "",
-          // features: Array.isArray(data.features) ? data.features.join(", ") : data.features ?? "",
-          features: Array.isArray(data.features) ? data.features : [],
-          price: data.price ?? '',
-          sort_description: data.sort_description ?? "",
-          description: decodedDescription,
-        });
-        console.log(formData, 'formDataaa')
+          setFormData({
+            title: data.title ?? "",
+            tag: data.tag ?? "",
+            rating: data.rating?.toString() ?? "",
+            total_reviews: data.total_reviews?.toString() ?? "",
+            features: Array.isArray(data.features) ? data.features : [],
+            price: data.price ?? '',
+            sort_description: data.sort_description ?? "",
+            description: decodedDescription,
+          });
+        } else {
+          // Create mode - set empty form
+          setFormData({
+            title: "",
+            tag: "",
+            rating: "",
+            total_reviews: "",
+            features: [] as string[],
+            price: "",
+            sort_description: "",
+            description: "",
+          });
+        }
       } catch (err) {
         console.error("Error fetching data by ID:", err);
+        toast.error("Failed to load data");
+      } finally {
+        // Minimum loading time for better UX
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 300);
       }
     };
 
     fetchById();
   }, [id]);
-
 
   const handleChange = (field: keyof typeof formData, value: string | string[]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -120,7 +137,6 @@ const Question = () => {
       price: formData.price,
       sort_description: formData.sort_description,
       description: formData.description,
-      // duration: formData.duration,
     };
 
     try {
@@ -140,9 +156,14 @@ const Question = () => {
     }
   };
 
+  // Show skeleton while loading
+  if (isLoading) {
+    return <QuestionSkeleton />;
+  }
+
   return (
     <div className="space-y-6">
-      <ComponentCard title="Add Question" name="">
+      <ComponentCard title={id ? "Edit Question" : "Add Question"} name="">
         <div className="space-y-6">
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -246,20 +267,18 @@ const Question = () => {
                 : "border border-gray-100"
                 }`}
             />
-            {errors.descripton && <p className="text-sm text-error-500 mt-1">{errors.description}</p>}
+            {errors.description && <p className="text-sm text-error-500 mt-1">{errors.description}</p>}
           </div>
         </div>
         <div className="flex items-center gap-5">
           <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : "Save"}
+            {isSubmitting ? "Saving..." : (id ? "Update" : "Save")}
           </Button>
           <Button size="sm" variant="outline" onClick={() => router.push("/question")}>
             Cancel
           </Button>
         </div>
       </ComponentCard>
-
-      {/* Buttons */}
     </div>
   );
 };

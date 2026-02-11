@@ -19,6 +19,7 @@ import { decodeHtml } from "@/utils/helper";
 import { toast } from "react-toastify";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import { FaMinus } from "react-icons/fa6";
+import { PrerecordedSkeleton } from "../skeltons/Skeltons";
 
 const categoryOptions = [
   { value: "3", label: "3 Month" },
@@ -120,7 +121,7 @@ const OptionSection = ({
               type="number"
               placeholder="Enter USD"
               className="pl-8"
-              value={data.price_usd || ""}
+              value={data.price_usd || "" as any}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 handleChange("price_usd", parseFloat(e.target.value) || 0)
               }
@@ -144,7 +145,7 @@ const OptionSection = ({
               type="number"
               placeholder="Enter INR"
               className="pl-8"
-              value={data.price_inr || ""}
+              value={data.price_inr || "" as any}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 handleChange("price_inr", parseFloat(e.target.value) || 0)
               }
@@ -247,6 +248,7 @@ const Prerecorded = () => {
     "writing-book",
   ];
 
+  const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState<FormDataType>({
     title: "",
     category: "",
@@ -283,42 +285,56 @@ const Prerecorded = () => {
   useEffect(() => {
     const fetchById = async () => {
       try {
-        if (!id) return;
-        const res = await api.get(`${endPointApi.getByIdPreRecorded}/${id}`);
-        const data = res.data?.data || res.data || {};
-        const decodedDescription = decodeHtml(data.description ?? "");
+        if (id) {
+          const res = await api.get(`${endPointApi.getByIdPreRecorded}/${id}`);
+          const data = res.data?.data || res.data || {};
+          const decodedDescription = decodeHtml(data.description ?? "");
 
-        setFormData({
-          title: data.title ?? "",
-          category: data.category ?? "",
-          total_reviews: data.total_reviews ?? "",
-          subtitle: data.subtitle ?? "",
-          vimeo_video_id: data.vimeo_video_id ?? "",
-          rating: data.rating ?? "",
-          duration: data.duration ? String(data.duration) : "",
-          description: decodedDescription,
-          date: data.date ?? "",
-          status: data.status == "Active" ? "Active" : "Inactive",
-          options: data.options || [],
-        });
-
-        // Populate options data for editing
-        if (data.options && data.options.length > 0) {
-          const loadedOptions = [...optionsData];
-          data.options.forEach((opt: OptionType) => {
-            const index = allOptionTypes.indexOf(opt.type);
-            if (index !== -1) {
-              loadedOptions[index] = opt;
-            }
+          setFormData({
+            title: data.title ?? "",
+            category: data.category ?? "",
+            total_reviews: data.total_reviews ?? "",
+            subtitle: data.subtitle ?? "",
+            vimeo_video_id: data.vimeo_video_id ?? "",
+            rating: data.rating ?? "",
+            duration: data.duration ? String(data.duration) : "",
+            description: decodedDescription,
+            date: data.date ?? "",
+            status: data.status == "Active" ? "Active" : "Inactive",
+            options: data.options || [],
           });
-          setOptionsData(loadedOptions);
+
+          // Populate options data for editing
+          if (data.options && data.options.length > 0) {
+            const loadedOptions = [...optionsData];
+            data.options.forEach((opt: OptionType) => {
+              const index = allOptionTypes.indexOf(opt.type);
+              if (index !== -1) {
+                loadedOptions[index] = opt;
+              }
+            });
+            setOptionsData(loadedOptions);
+          }
         }
       } catch (err) {
         console.error("Error fetching data by ID:", err);
+        toast.error("Failed to load data");
+      } finally {
+        // Minimum loading time for better UX
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 300);
       }
     };
 
     fetchById();
+    
+    // If no id (create mode), still show skeleton briefly
+    if (!id) {
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 300);
+    }
   }, [id]);
 
   const handleChange = (field: keyof FormDataType, value: string) => {
@@ -540,9 +556,14 @@ const Prerecorded = () => {
 
   const calculatedPrices = getCalculatedPrices();
 
+  // Show skeleton while loading
+  if (isLoading) {
+    return <PrerecordedSkeleton isEditMode={!!id} />;
+  }
+
   return (
     <div className="space-y-6">
-      <ComponentCard title="Add PreRecorded" name="">
+      <ComponentCard title={id ? "Edit PreRecorded" : "Add PreRecorded"} name="">
         <div className="space-y-6">
           {/* Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -632,7 +653,7 @@ const Prerecorded = () => {
                   placeholder="Select month"
                   defaultValue={formData.duration || ""}
                   onChange={(selectedOption) => handleChange("duration", selectedOption || "")}
-                  error={errors.duration}
+                  error={errors.duration as any}
                 />
                 {errors.duration && <p className="text-sm text-error-500 mt-1">{errors.duration}</p>}
                 <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
@@ -646,7 +667,7 @@ const Prerecorded = () => {
                 label="Date Picker *"
                 placeholder="Select a date"
                 defaultDate={formData.date}
-                value={formData.date}
+                value={formData.date as any}
                 onChange={handleDateChange}
                 error={errors.date}
               />
@@ -724,9 +745,8 @@ const Prerecorded = () => {
             variant="primary"
             onClick={handleSubmit}
             disabled={isSubmitting}
-            type="button"
           >
-            {isSubmitting ? "Saving..." : "Save"}
+            {isSubmitting ? "Saving..." : (id ? "Update" : "Save")}
           </Button>
           <Button size="sm" variant="outline" onClick={() => router.push("/prerecord")}>
             Cancel

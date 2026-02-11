@@ -3,13 +3,12 @@ import { useState, useEffect, useCallback } from "react";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import ComponentCard from "@/components/common/ComponentCard";
-// import { PlusIcon } from "@/icons";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 const PrimeReactTable = dynamic(() => import("@/components/tables/PrimeReactTable"), { ssr: false });
 import CommonDialog from "@/components/tables/CommonDialog";
 import { PlusIcon } from "@/icons";
-import { Skeleton } from "primereact/skeleton";
+import { UpcomingProgramSkeleton } from "@/components/skeltons/Skeltons";
 
 type PreRecordType = {
   id: number;
@@ -22,7 +21,7 @@ type PreRecordType = {
 export default function Page() {
   const router = useRouter();
   const [data, setData] = useState<PreRecordType[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<PreRecordType | null>(null);
   const [page, setPage] = useState<number>(1);
@@ -67,23 +66,24 @@ export default function Page() {
   useEffect(() => {
     getPreRecordData();
   }, [getPreRecordData]);
-  return (
 
+  // Show skeleton while loading
+  if (loading) {
+    return <UpcomingProgramSkeleton />;
+  }
+
+  return (
     <div className="space-y-6">
       <ComponentCard
-        title="Upcomeing Program"
+        title="Upcoming Program"
         Plusicon={<PlusIcon />}
         name="Add Prerecord"
         onAddProductClick="/upcomingProgram/add"
       >
         <div className="card">
-           {
-          loading ? (
-            renderSkeletonRows()
-          ) : (
           <PrimeReactTable
             data={data}
-            loading={loading}
+            loading={false}
             totalRecords={totalRecords}
             rows={rows}
             onPageChange={(newPage: number, newRows:number) => {
@@ -98,13 +98,8 @@ export default function Page() {
             onEdit={(row) => router.push(`/upcomingProgram/add?id=${row._id}`)}
             onDelete={handleDeleteClick}
           />
-          )}
         </div>
-        {/* <ConfirmationModal
-          isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-          onConfirm={confirmDelete}
-        /> */}
+
         <CommonDialog
           visible={isDeleteModalOpen}
           header="Confirm Delete"
@@ -123,23 +118,5 @@ export default function Page() {
         </CommonDialog>
       </ComponentCard>
     </div>
-
   );
 }
-
-const renderSkeletonRows = () => (
-  <div className="card p-4">
-    {Array.from({ length: 10 }).map((_, i) => (
-      <div key={i} className="flex items-center py-2 border-b">
-        <Skeleton size="1.5rem" className="mr-3" />
-        <Skeleton width="25rem" height="2.2rem" className="mr-4" />
-        <Skeleton width="20rem" height="2.2rem" className="mr-4" />
-        <Skeleton width="20rem" height="2.2rem" className="mr-4" />
-        <Skeleton width="20rem" height="2.2rem" className="mr-4" />
-        {/* <Skeleton width="10rem" height="2.2rem" className="mr-4" /> */}
-        <Skeleton shape="circle" size="2rem" className="mr-2" />
-        <Skeleton shape="circle" size="2rem" />
-      </div>
-    ))}
-  </div>
-);
