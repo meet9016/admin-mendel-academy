@@ -110,7 +110,6 @@ function AddQuestionForm() {
     const validOptions = mcqOptions.filter((opt) => opt.text.trim());
     if (validOptions.length < 2) newErrors.options = "At least 2 options are required";
     if (!correctAnswer.trim()) newErrors.correctAnswer = "Correct answer is required";
-    if (!description.trim() || description === "<p></p>") newErrors.description = "Description is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
