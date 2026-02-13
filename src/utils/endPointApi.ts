@@ -30,6 +30,7 @@ export interface EndPointApi {
     createLiveCourses?: string;
     updateLiveCourses?: string;
     deleteLiveCourses?: string;
+    convertLiveToPreRecord?: string;
 
     //Exam-List
     getAllExamList?: string;
@@ -115,6 +116,7 @@ const endPointApi: EndPointApi = {
     createLiveCourses: 'livecourses/create',
     updateLiveCourses: 'livecourses/update',
     deleteLiveCourses: 'livecourses/delete',
+    convertLiveToPreRecord: 'livecourses/convert-to-prerecord',
 
     //Exam-List
     getAllExamList: 'examlist/getall',

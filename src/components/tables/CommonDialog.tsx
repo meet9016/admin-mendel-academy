@@ -10,8 +10,10 @@ type CommonDialogProps = {
     onHide: () => void;
     onSave?: () => void;
     onCancel?: () => void;
-    footerType?: "save-cancel" | "confirm-delete";
+    footerType?: "save-cancel" | "confirm-delete" | "confirm-save";
     children?: React.ReactNode;
+    saveLabel?: string;
+    cancelLabel?: string;
 };
 
 export default function CommonDialog({
@@ -22,36 +24,49 @@ export default function CommonDialog({
     onCancel,
     footerType = "save-cancel",
     children,
+    saveLabel,
+    cancelLabel,
 }: CommonDialogProps) {
     const footer =
         footerType === "save-cancel" ? (
             <>
                 <Button
-                    label="Cancel"
+                    label={cancelLabel || "Cancel"}
                     icon={<RxCross2 size={18} style={{ marginRight: "6px" }} />} // bigger icon + spacing
                     outlined
                     onClick={onCancel || onHide}
                     className="flex items-center"
                 />
                 <Button
-                    label="Save"
+                    label={saveLabel || "Save"}
                     icon={<FiCheck size={18} style={{ marginRight: "6px" }} />} // bigger icon + spacing
                     onClick={onSave}
                     className="flex items-center"
                 />
             </>
-        ) : (
+        ) : footerType === "confirm-save" ? (
             <>
                 <Button
-                    label="Yes"
-                    // icon={<FiCheck size={18} style={{ marginRight: "6px" }} />}
-                    // severity="danger"
+                    label={cancelLabel || "No"}
+                    outlined
+                    onClick={onCancel || onHide}
+                    className="flex items-center popup-no"
+                />
+                <Button
+                    label={saveLabel || "Yes"}
                     onClick={onSave}
                     className="flex items-center popup-yes"
                 />
-                  <Button
-                    label="No"
-                    // icon={<RxCross2 size={18} style={{ marginRight: "6px" }} />}
+            </>
+        ) : (
+            <>
+                <Button
+                    label={saveLabel || "Yes"}
+                    onClick={onSave}
+                    className="flex items-center popup-yes"
+                />
+                <Button
+                    label={cancelLabel || "No"}
                     outlined
                     onClick={onCancel || onHide}
                     className="flex items-center popup-no"
