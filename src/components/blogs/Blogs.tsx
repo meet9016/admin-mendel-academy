@@ -15,7 +15,7 @@ import dynamic from "next/dynamic";
 const Editor = dynamic(() => import("primereact/editor").then((m) => m.Editor), { ssr: false });
 import type { EditorTextChangeEvent } from "primereact/editor";
 import { toast } from 'react-toastify';
-import { decodeHtml } from "@/utils/helper";
+import { decodeHtml, generateSlug } from "@/utils/helper";
 import { blogSchema } from "@/ValidationSchema/validationSchema";
 import { BlogsSkeleton } from "../skeltons/Skeltons";
 
@@ -27,6 +27,7 @@ const Blogs = () => {
   const [formData, setFormData] = useState({
     examName: "",
     title: "",
+    slug: "",
     date: "",
     status: "Active",
     shortDescription: "",
@@ -41,7 +42,18 @@ const Blogs = () => {
   // Handle text input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    setFormData((prev) => {
+      const newData = { ...prev, [name]: value };
+      
+      // Auto-generate slug from title if in create mode or slug is empty
+      if (name === "title" && (!id || !prev.slug)) {
+        newData.slug = generateSlug(value);
+      }
+      
+      return newData;
+    });
+    
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
@@ -76,6 +88,7 @@ const Blogs = () => {
           setFormData({
             examName: data.exam_name ?? "",
             title: data.title ?? "",
+            slug: data.slug ?? "",
             date: data.date ?? "",
             status: data.status == "Active" ? "Active" : "Inactive",
             shortDescription: data.sort_description ?? "",
@@ -136,6 +149,7 @@ const Blogs = () => {
 
     formDataToSend.append("exam_name", formData.examName);
     formDataToSend.append("title", formData.title);
+    formDataToSend.append("slug", formData.slug);
     formDataToSend.append("sort_description", formData.shortDescription);
     formDataToSend.append("long_description", formData.description);
     formDataToSend.append("date", formData.date);
@@ -198,6 +212,18 @@ const Blogs = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <Label>Slug</Label>
+              <Input
+                name="slug"
+                placeholder="Slug (auto-generated)"
+                type="text"
+                value={formData.slug}
+                onChange={handleChange}
+                error={!!errors.slug}
+              />
+              {errors.slug && <p className="text-sm text-error-500 mt-1">{errors.slug}</p>}
+            </div>
             <div>
               <DatePicker
                 id="date-picker"

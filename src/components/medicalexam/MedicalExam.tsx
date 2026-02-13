@@ -15,7 +15,7 @@ import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import DropzoneComponent from "../blogs/DropZone";
 import EnrollSection from "./EnrollSection";
-import { decodeHtml } from "@/utils/helper";
+import { decodeHtml, generateSlug } from "@/utils/helper";
 import { examListSchema } from "@/ValidationSchema/validationSchema";
 import { toast } from "react-toastify";
 import { MedicalExamSkeleton } from "../skeltons/Skeltons";
@@ -42,6 +42,7 @@ interface FormData {
     status: string;
     category: string;
     examName: string;
+    slug: string;
     title: string;
     examSteps: string[];
     description: string;
@@ -83,6 +84,7 @@ const MedicalExam = () => {
         status: "Active",
         category: "",
         examName: "",
+        slug: "",
         title: "",
         examSteps: [""],
         description: "",
@@ -114,10 +116,18 @@ const MedicalExam = () => {
     const handleChange = useCallback(<K extends keyof FormData>(field: K, value: FormData[K]) => {
         setFormData((prev) => {
             if (prev[field] === value) return prev;
-            return { ...prev, [field]: value };
+            
+            const newData = { ...prev, [field]: value };
+            
+            // Auto-generate slug from examName if in create mode or slug is empty
+            if (field === "examName" && (!id || !prev.slug)) {
+                newData.slug = generateSlug(value as string);
+            }
+            
+            return newData;
         });
         setErrors((prev) => ({ ...prev, [field]: "" }));
-    }, []);
+    }, [id]);
 
     const addStep = () => {
         handleChange("examSteps", [...formData.examSteps, ""]);
@@ -241,8 +251,9 @@ const MedicalExam = () => {
                         category: data?.category_name ?? "",
                         country: data.exams[0].country ?? "",
                         status: data.exams[0].status ?? "Active",
-                        examName: data.exams[0].exam_name ?? "",
-                        title: data.exams[0].title ?? "",
+                    examName: data.exams[0].exam_name ?? "",
+                    slug: data.exams[0].slug ?? "",
+                    title: data.exams[0].title ?? "",
                         examSteps:
                             data.exams[0].sub_titles && data.exams[0].sub_titles.length > 0
                                 ? data.exams[0].sub_titles
@@ -347,6 +358,7 @@ const MedicalExam = () => {
             }
             formDataToSend.append("category_name", formData.category);
             formDataToSend.append("exams[0][exam_name]", formData.examName);
+            formDataToSend.append("exams[0][slug]", formData.slug);
             formDataToSend.append("exams[0][country]", formData.country);
             formDataToSend.append("exams[0][status]", formData.status);
             formDataToSend.append("exams[0][title]", formData.title);
@@ -453,6 +465,20 @@ const MedicalExam = () => {
                             error={!!errors?.examName}
                         />
                         {errors.examName && <p className="text-sm text-error-500 mt-1">{errors.examName}</p>}
+                    </div>
+
+                    <div>
+                        <Label htmlFor="slug">Slug</Label>
+                        <Input
+                            type="text"
+                            placeholder="Slug (auto-generated)"
+                            value={formData.slug}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                handleChange("slug", e.target.value)
+                            }
+                            error={!!errors?.slug}
+                        />
+                        {errors.slug && <p className="text-sm text-error-500 mt-1">{errors.slug}</p>}
                     </div>
 
                     <div className="flex flex-wrap items-center gap-8">
