@@ -42,6 +42,7 @@ export const MAIN_NAV: NavItem[] = [
   { icon: <CalenderIcon />, name: "Medical Exam List", path: "/medicalexamlist" },
   { icon: <CalenderIcon />, name: "Blogs", path: "/blogs" },
   { icon: <CalenderIcon />, name: "Question", path: "/question" },
+  { icon: <CalenderIcon />, name: "Question Bank", path: "/question-bank" },
   { icon: <CalenderIcon />, name: "Add To Cart", path: "/addtocart" },
   { icon: <CalenderIcon />, name: "Payment", path: "/payment" },
   {
