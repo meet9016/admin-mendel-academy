@@ -6,7 +6,7 @@ import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 import CommonDialog from "@/components/tables/CommonDialog";
-import { CartListSkeleton } from "@/components/skeltons/Skeltons";
+import { Skeleton } from "primereact/skeleton";
 
 type PreRecordType = {
     id: number;
@@ -107,9 +107,9 @@ export default function Page() {
     );
 
     // Show skeleton while loading
-    if (loading) {
-        return <CartListSkeleton />;
-    }
+  if (loading) {
+    // fallthrough to render inside card skeleton (below)
+  }
 
     return (
         <div className="space-y-6">
@@ -117,17 +117,21 @@ export default function Page() {
                 title="Add to Cart List"
             >
                 <div className="card">
-                    <PrimeReactTable
-                        data={data}
-                        loading={false}
-                        totalRecords={totalRecords}
-                        rows={rows}
-                        columns={columns}
-                        onPageChange={(newPage, newRows) => {
-                            setPage(newPage);
-                            setRows(newRows);
-                        }}
-                    />
+          {loading ? (
+            renderSkeletonRows()
+          ) : (
+            <PrimeReactTable
+              data={data}
+              loading={false}
+              totalRecords={totalRecords}
+              rows={rows}
+              columns={columns}
+              onPageChange={(newPage, newRows) => {
+                setPage(newPage);
+                setRows(newRows);
+              }}
+            />
+          )}
                 </div>
                 <ConfirmationModal
                     isOpen={isDeleteModalOpen}
@@ -154,3 +158,20 @@ export default function Page() {
         </div>
     );
 }
+
+const renderSkeletonRows = () => (
+  <div className="card p-4">
+    {Array.from({ length: 10 }).map((_, i) => (
+      <div key={i} className="flex items-center py-2 border-b">
+        <Skeleton size="1.5rem" className="mr-3" />
+        <Skeleton width="25rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="20rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="15rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="8rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="8rem" height="2.2rem" className="mr-4" />
+        <Skeleton shape="circle" size="2rem" className="mr-2" />
+        <Skeleton shape="circle" size="2rem" />
+      </div>
+    ))}
+  </div>
+);

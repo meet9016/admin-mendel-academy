@@ -3,13 +3,12 @@ import { Tag } from "primereact/tag";
 import ComponentCard from "@/components/common/ComponentCard";
 import PrimeReactTreeTable from "@/components/tables/PrimeReactTreeTable";
 import { PlusIcon } from "@/icons";
+import { Skeleton } from "primereact/skeleton";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import CommonDialog from "@/components/tables/CommonDialog";
 import { useRouter } from "next/navigation";
-import TableSkeleton from "@/components/common/TableSkeleton";
-import { DemoPageSkeleton, TreeTableSkeleton } from "@/components/skeltons/Skeltons";
 
 interface Plan {
   plan_month: string | number;
@@ -111,11 +110,6 @@ export default function DemoPage() {
     plan_popular: "Most Popular",
   };
 
-  // Show skeleton while loading
-  if (loading) {
-    return <DemoPageSkeleton />;
-  }
-
   return (
     <div className="space-y-6">
       <ComponentCard
@@ -124,37 +118,43 @@ export default function DemoPage() {
         name="Add Exam"
         onAddProductClick="/medicalexamlist/add"
       >
-        <PrimeReactTreeTable
-          data={data}
-          loading={false}
-          totalRecords={totalRecords}
-          rows={rows}
-          onPageChange={(newPage, newRows) => {
-            setPage(newPage);
-            setRows(newRows);
-          }}
-          columns={[
-            { field: "category_name", header: "Course" },
-            { field: "exam_name", header: "Exam Name" },
-            {
-              field: "status",
-              header: "Status",
-              body: (row: { status?: string }) => {
-                const status = row.status || "Inactive";
-                const severity =
-                  status === "Active"
-                    ? "success"
-                    : status === "Pending"
-                      ? "warning"
-                      : "danger";
-                return <Tag value={status} severity={severity} />;
-              },
-            },
-          ]}
-          headerNameMap={headerNameMap}
-          onEdit={(row) => router.push(`/medicalexamlist/add?id=${row.id}`)}
-          onDelete={handleDeleteClick}
-        />
+        <div className="card">
+          {loading ? (
+            renderSkeletonRows()
+          ) : (
+            <PrimeReactTreeTable
+              data={data}
+              loading={false}
+              totalRecords={totalRecords}
+              rows={rows}
+              onPageChange={(newPage, newRows) => {
+                setPage(newPage);
+                setRows(newRows);
+              }}
+              columns={[
+                { field: "category_name", header: "Course" },
+                { field: "exam_name", header: "Exam Name" },
+                {
+                  field: "status",
+                  header: "Status",
+                  body: (row: { status?: string }) => {
+                    const status = row.status || "Inactive";
+                    const severity =
+                      status === "Active"
+                        ? "success"
+                        : status === "Pending"
+                          ? "warning"
+                          : "danger";
+                    return <Tag value={status} severity={severity} />;
+                  },
+                },
+              ]}
+              headerNameMap={headerNameMap}
+              onEdit={(row) => router.push(`/medicalexamlist/add?id=${row.id}`)}
+              onDelete={handleDeleteClick}
+            />
+          )}
+        </div>
       </ComponentCard>
 
       <CommonDialog
@@ -176,3 +176,20 @@ export default function DemoPage() {
     </div>
   );
 }
+
+const renderSkeletonRows = () => (
+  <div className="card p-4">
+    {Array.from({ length: 10 }).map((_, i) => (
+      <div key={i} className="flex items-center py-2 border-b">
+        <Skeleton size="1.5rem" className="mr-3" />
+        <Skeleton width="25rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="20rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="15rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="8rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="8rem" height="2.2rem" className="mr-4" />
+        <Skeleton shape="circle" size="2rem" className="mr-2" />
+        <Skeleton shape="circle" size="2rem" />
+      </div>
+    ))}
+  </div>
+);

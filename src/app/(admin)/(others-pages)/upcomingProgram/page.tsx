@@ -8,7 +8,7 @@ import dynamic from "next/dynamic";
 const PrimeReactTable = dynamic(() => import("@/components/tables/PrimeReactTable"), { ssr: false });
 import CommonDialog from "@/components/tables/CommonDialog";
 import { PlusIcon } from "@/icons";
-import { UpcomingProgramSkeleton } from "@/components/skeltons/Skeltons";
+import { Skeleton } from "primereact/skeleton";
 
 type PreRecordType = {
   id: number;
@@ -67,11 +67,6 @@ export default function Page() {
     getPreRecordData();
   }, [getPreRecordData]);
 
-  // Show skeleton while loading
-  if (loading) {
-    return <UpcomingProgramSkeleton />;
-  }
-
   return (
     <div className="space-y-6">
       <ComponentCard
@@ -81,23 +76,27 @@ export default function Page() {
         onAddProductClick="/upcomingProgram/add"
       >
         <div className="card">
-          <PrimeReactTable
-            data={data}
-            loading={false}
-            totalRecords={totalRecords}
-            rows={rows}
-            onPageChange={(newPage: number, newRows:number) => {
-              setPage(newPage);
-              setRows(newRows);
-            }}
-            columns={[
-              { field: "title", header: "Title" },
-              { field: "waitlistCount", header: "WaitlistCount" },
-              { field: "course_types", header: "Course Type" }
-            ]}
-            onEdit={(row) => router.push(`/upcomingProgram/add?id=${row._id}`)}
-            onDelete={handleDeleteClick}
-          />
+          {loading ? (
+            renderSkeletonRows()
+          ) : (
+            <PrimeReactTable
+              data={data}
+              loading={false}
+              totalRecords={totalRecords}
+              rows={rows}
+              onPageChange={(newPage: number, newRows:number) => {
+                setPage(newPage);
+                setRows(newRows);
+              }}
+              columns={[
+                { field: "title", header: "Title" },
+                { field: "waitlistCount", header: "WaitlistCount" },
+                { field: "course_types", header: "Course Type" }
+              ]}
+              onEdit={(row) => router.push(`/upcomingProgram/add?id=${row._id}`)}
+              onDelete={handleDeleteClick}
+            />
+          )}
         </div>
 
         <CommonDialog
@@ -120,3 +119,20 @@ export default function Page() {
     </div>
   );
 }
+
+const renderSkeletonRows = () => (
+  <div className="card p-4">
+    {Array.from({ length: 10 }).map((_, i) => (
+      <div key={i} className="flex items-center py-2 border-b">
+        <Skeleton size="1.5rem" className="mr-3" />
+        <Skeleton width="25rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="20rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="15rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="8rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="8rem" height="2.2rem" className="mr-4" />
+        <Skeleton shape="circle" size="2rem" className="mr-2" />
+        <Skeleton shape="circle" size="2rem" />
+      </div>
+    ))}
+  </div>
+);
