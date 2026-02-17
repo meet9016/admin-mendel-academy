@@ -81,6 +81,36 @@ export interface EndPointApi {
     //Terms & Conditions
     postTermsAndConditions?: string;
     getAllTermsAndConditions?: string;
+
+    //question bank related
+
+    createSubject?: string;
+    getAllSubject?: string;
+    deleteSubject?: string;
+    getByIdSubject?: string;
+    updateSubject?: string;
+
+    createChapter?: string;
+    getAllChapter?: string;
+    getChapterBySubject?: string;
+    deleteChapter?: string;
+    getByIdChapter?: string;
+    updateChapter?: string;
+
+    createTopic?: string;
+    getAllTopic?: string;
+    getTopicByChapter?: string;
+    deleteTopic?: string;
+    getByIdTopic?: string;
+    updateTopic?: string;
+
+    createQuestionBank?: string;
+    getAllQuestionBank?: string;
+    getQuestionBankByTopic?: string;
+    deleteQuestionBank?: string;
+    getByIdQuestionBank?: string;
+    updateQuestionBank?: string;
+
 }
 
 // Define and export the API endpoint object
@@ -167,6 +197,37 @@ const endPointApi: EndPointApi = {
     //Terms & Conditions
     postTermsAndConditions: 'terms-conditions/create', 
     getAllTermsAndConditions: 'terms-conditions/get', 
+
+    //question bank related
+
+    createSubject: 'subject/create',
+    getAllSubject: 'subject/getall',
+    deleteSubject: 'subject/delete',
+    getByIdSubject: 'subject/get-by-id',
+    updateSubject: 'subject/update',
+
+    createChapter: 'chapter/create',
+    getAllChapter: 'chapter/getall',
+    getChapterBySubject: 'chapter/get-by-subject',
+    deleteChapter: 'chapter/delete',
+    getByIdChapter: 'chapter/get-by-id',
+    updateChapter: 'chapter/update',
+
+    createTopic: 'topic/create',
+    getAllTopic: 'topic/getall',
+    getTopicByChapter: 'topic/get-by-chapter',
+    deleteTopic: 'topic/delete',
+    getByIdTopic: 'topic/get-by-id',
+    updateTopic: 'topic/update',
+
+    createQuestionBank: 'questions/create',
+    getAllQuestionBank: 'questions/getall',
+    getQuestionBankByTopic: 'questions/get-by-topic',
+    deleteQuestionBank: 'questions/delete',
+    getByIdQuestionBank: 'questions/get-by-id',
+    updateQuestionBank: 'questions/update',
+
+
 };
 
 export default endPointApi;
