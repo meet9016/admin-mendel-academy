@@ -111,6 +111,10 @@ export interface EndPointApi {
     getByIdQuestionBank?: string;
     updateQuestionBank?: string;
 
+    listDemoQuestions?: string;
+    createDemoQuestion?: string;
+    updateDemoQuestion?: string;
+    deleteDemoQuestion?: string;
 }
 
 // Define and export the API endpoint object
@@ -227,6 +231,10 @@ const endPointApi: EndPointApi = {
     getByIdQuestionBank: 'questions/get-by-id',
     updateQuestionBank: 'questions/update',
 
+    listDemoQuestions: 'demo-question/list',
+    createDemoQuestion: 'demo-question/create',
+    updateDemoQuestion: 'demo-question',
+    deleteDemoQuestion: 'demo-question',
 
 };
 
