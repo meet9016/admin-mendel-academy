@@ -55,8 +55,8 @@ const DropzoneComponent: React.FC<DropzoneProps> = ({
             <img
               src={preview}
               alt="Preview"
-              // 🔹 Fixed image size (same for all)
-              className="w-60 h-60 sm:w-72 sm:h-72 object-cover rounded-lg border border-gray-300 shadow-md"
+              className="max-w-full rounded-lg border border-gray-300 shadow-md"
+              style={{ maxHeight: '300px' }}
             />
             <p className="text-sm text-gray-600 dark:text-gray-300 mt-4 text-center">
               Drag & drop another image or click to change
