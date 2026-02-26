@@ -129,3 +129,32 @@ export const upcomingProgramSchema = Yup.object().shape({
     course_types: Yup.string().required("Course types is required"),
     description: Yup.string().required("Description is required"),
 });
+
+export const planSchema = Yup.object().shape({
+    name: Yup.string().required('Plan name is required'),
+    price_inr: Yup.string().required('Price display is required'),
+    price_usd: Yup.string().required('Price display is required'),
+    duration: Yup.string().required('Duration description is required'),
+    duration_months: Yup
+        .number()
+        .typeError('Duration months must be a number')
+        .integer('Duration months must be an integer')
+        .positive('Duration months must be positive')
+        .required('Duration months is required'),
+    features: Yup
+        .array()
+        .of(Yup.string())
+        .min(1, 'At least one feature is required')
+        .required('Features are required'),
+    is_popular: Yup.boolean(),
+    is_best_value: Yup.boolean(),
+    sort_order: Yup
+        .number()
+        .typeError('Sort order must be a number')
+        .integer('Sort order must be an integer')
+        .min(0, 'Sort order cannot be negative'),
+    status: Yup
+        .string()
+        .oneOf(['Active', 'Inactive'], 'Invalid status')
+        .required('Status is required'),
+});

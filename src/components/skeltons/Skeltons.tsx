@@ -1,3 +1,4 @@
+import { Skeleton } from "primereact/skeleton";
 import ComponentCard from "../common/ComponentCard";
 
 export const UpcomingProgramsSkeleton = () => {
@@ -1167,3 +1168,34 @@ export function DemoPageSkeleton() {
     </div>
   );
 }
+
+export const PlanSkeleton = () => (
+  <div className="space-y-6 p-6">
+    <div className="flex justify-between items-center">
+      <Skeleton width="200px" height="2.5rem" />
+      <Skeleton width="100px" height="2.5rem" />
+    </div>
+    
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="space-y-2">
+          <Skeleton width="120px" height="1.5rem" />
+          <Skeleton width="100%" height="3rem" />
+        </div>
+      ))}
+    </div>
+    
+    <div className="space-y-4">
+      <Skeleton width="150px" height="2rem" />
+      <div className="flex gap-2">
+        <Skeleton width="300px" height="3rem" />
+        <Skeleton width="80px" height="3rem" />
+      </div>
+    </div>
+    
+    <div className="flex gap-4 mt-8">
+      <Skeleton width="120px" height="3rem" />
+      <Skeleton width="120px" height="3rem" />
+    </div>
+  </div>
+);

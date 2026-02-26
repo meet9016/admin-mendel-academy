@@ -194,13 +194,13 @@ const endPointApi: EndPointApi = {
     deleteHyperSpecialist: 'hyperSpecialist/delete',
     getByIdHyperSpecialist: 'hyperSpecialist/getById',
     updateHyperSpecialist: 'hyperSpecialist/update',
-    
+
     //Cart
     getAllCart: 'cart/get-all-cart',
 
     //Terms & Conditions
-    postTermsAndConditions: 'terms-conditions/create', 
-    getAllTermsAndConditions: 'terms-conditions/get', 
+    postTermsAndConditions: 'terms-conditions/create',
+    getAllTermsAndConditions: 'terms-conditions/get',
 
     //question bank related
 
@@ -235,6 +235,14 @@ const endPointApi: EndPointApi = {
     createDemoQuestion: 'demo-question/create',
     updateDemoQuestion: 'demo-question',
     deleteDemoQuestion: 'demo-question',
+
+    getAllPlans: 'plans/get-all-plans',
+    getActivePlans: 'plans/get-active-plans',
+    getPlanById: 'plans/get-plan-by-id',
+    createPlan: 'plans/create-plan',
+    updatePlan: 'plans/update-plan',
+    deletePlan: 'plans/delete-plan',
+    bulkUpdatePlans: 'plans/bulk-update-plans',
 
 };
 
