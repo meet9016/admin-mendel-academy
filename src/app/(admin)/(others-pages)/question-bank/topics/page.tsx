@@ -90,7 +90,11 @@ function TopicsContent() {
             {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => (
               <div key={i} className="border rounded-lg p-6">
                 <Skeleton width="100%" height="2rem" className="mb-4" />
-                <Skeleton width="100%" height="4rem" />
+                <Skeleton width="100%" height="4rem" className="mb-4" />
+                <div className="flex gap-2 mt-4">
+                  <Skeleton width="4rem" height="2rem" />
+                  <Skeleton width="4rem" height="2rem" />
+                </div>
               </div>
             ))}
           </div>
@@ -99,23 +103,26 @@ function TopicsContent() {
             {filteredTopics.map(topic => (
               <div
                 key={topic.id}
-                className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer bg-white dark:bg-gray-800"
+                className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer bg-white dark:bg-gray-800 flex flex-col h-full"
               >
-                <div onClick={() => router.push(`/question-bank/questions?topicId=${topic.id}&chapterId=${chapterId}&subjectId=${subjectId}`)}>
+                <div 
+                  onClick={() => router.push(`/question-bank/questions?topicId=${topic.id}&chapterId=${chapterId}&subjectId=${subjectId}`)}
+                  className="flex-1"
+                >
                   <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
                     {topic.name}
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    {topic.description}
+                  <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
+                    {topic.description || "No description provided"}
                   </p>
                 </div>
-                <div className="flex gap-2 mt-4">
+                <div className="flex gap-2 mt-4 pt-2 border-t border-gray-100 dark:border-gray-700">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       router.push(`/question-bank/topics/add-topic?id=${topic.id}&chapterId=${chapterId}&subjectId=${subjectId}`);
                     }}
-                    className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                    className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
                   >
                     Edit
                   </button>
@@ -124,7 +131,7 @@ function TopicsContent() {
                       e.stopPropagation();
                       setToDelete(topic);
                     }}
-                    className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+                    className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
                   >
                     Delete
                   </button>
