@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import { toast } from "react-toastify";
+import { HyperSpecialistSkeleton } from "../skeltons/Skeltons";
 
 interface FormDataType {
     title: string;
@@ -22,6 +23,7 @@ const HyperSpecialist = () => {
     const searchParams = useSearchParams();
     const id = searchParams.get("id");
     const router = useRouter();
+    const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState<FormDataType>({
         title: "",
@@ -58,27 +60,45 @@ const HyperSpecialist = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            if (!id) return;
-
             try {
-                const res = await api.get(`${endPointApi.getByIdHyperSpecialist}/${id}`);
-                const data = res.data.data;
+                if (id) {
+                    // Edit mode: fetch data from API
+                    const res = await api.get(`${endPointApi.getByIdHyperSpecialist}/${id}`);
+                    const data = res.data.data;
 
-                setFormData((prev) => ({
-                    ...prev,
-                    title: data.title ?? "",
-                    description: data.description ?? "",
-                    priceUSD: data.price_dollar ?? "",
-                    priceINR: data.price_inr ?? "",
-                    tags: data.tags ?? [""],
-                }));
-
+                    setFormData((prev) => ({
+                        ...prev,
+                        title: data.title ?? "",
+                        description: data.description ?? "",
+                        priceUSD: data.price_dollar ?? "",
+                        priceINR: data.price_inr ?? "",
+                        tags: data.tags?.length > 0 ? data.tags : [""],
+                    }));
+                } else {
+                    // Create mode: initialize with empty values
+                    setFormData({
+                        title: "",
+                        description: "",
+                        tags: [""],
+                        priceUSD: "",
+                        priceINR: "",
+                    });
+                }
             } catch (error) {
                 console.log("Error fetching live course:", error);
+                toast.error("Failed to load data");
+            } finally {
+                // Always stop loading after data is initialized
+                setIsLoading(false);
             }
         };
 
-        fetchData();
+        // Add a small delay to ensure skeleton is visible
+        const timer = setTimeout(() => {
+            fetchData();
+        }, 100);
+
+        return () => clearTimeout(timer);
     }, [id]);
 
     const handleSubmit = async () => {
@@ -107,13 +127,20 @@ const HyperSpecialist = () => {
         } catch (error) {
             toast.error("Something went wrong! Please try again.");
             console.log("Submission error", error);
-        } 
+        } finally {
+            setIsSubmitting(false);
+        }
     };
+
+    // Show skeleton while loading
+    if (isLoading) {
+        return <HyperSpecialistSkeleton />;
+    }
 
     return (
         <>
             <div className="space-y-6">
-                <ComponentCard title="Add Live Courses" name="">
+                <ComponentCard title={id ? "Edit Live Course" : "Add Live Courses"} name="">
                     <div className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {/* Title */}
@@ -154,8 +181,6 @@ const HyperSpecialist = () => {
                                             name="priceUSD"
                                             value={String(formData.priceUSD)}
                                             onChange={handleChange}
-
-                                        //   error={!!errors?.priceUSD}
                                         />
                                     </div>
                                 </div>
@@ -175,7 +200,6 @@ const HyperSpecialist = () => {
                                             name="priceINR"
                                             value={String(formData.priceINR)}
                                             onChange={handleChange}
-                                        //   error={!!errors?.priceINR}
                                         />
                                     </div>
                                 </div>
@@ -227,10 +251,19 @@ const HyperSpecialist = () => {
                 </ComponentCard>
             </div>
             <div className="flex items-center gap-5 mt-5">
-                <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
-                    {isSubmitting ? "Saving..." : "Save"}
+                <Button 
+                    size="sm" 
+                    variant="primary" 
+                    onClick={handleSubmit} 
+                    disabled={isSubmitting}
+                >
+                    {isSubmitting ? "Saving..." : (id ? "Update" : "Save")}
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => router.push("/hyperSpecialist")}>
+                <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => router.push("/hyperSpecialist")}
+                >
                     Cancel
                 </Button>
             </div>

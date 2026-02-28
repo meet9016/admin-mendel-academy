@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback } from "react";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import ComponentCard from "@/components/common/ComponentCard";
-// import { PlusIcon } from "@/icons";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 const PrimeReactTable = dynamic(() => import("@/components/tables/PrimeReactTable"), { ssr: false });
@@ -22,7 +21,7 @@ type PreRecordType = {
 export default function Page() {
   const router = useRouter();
   const [data, setData] = useState<PreRecordType[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<PreRecordType | null>(null);
   const [page, setPage] = useState<number>(1);
@@ -67,44 +66,39 @@ export default function Page() {
   useEffect(() => {
     getPreRecordData();
   }, [getPreRecordData]);
-  return (
 
+  return (
     <div className="space-y-6">
       <ComponentCard
-        title="Upcomeing Program"
+        title="Upcoming Program"
         Plusicon={<PlusIcon />}
         name="Add Prerecord"
         onAddProductClick="/upcomingProgram/add"
       >
         <div className="card">
-           {
-          loading ? (
+          {loading ? (
             renderSkeletonRows()
           ) : (
-          <PrimeReactTable
-            data={data}
-            loading={loading}
-            totalRecords={totalRecords}
-            rows={rows}
-            onPageChange={(newPage: number, newRows:number) => {
-              setPage(newPage);
-              setRows(newRows);
-            }}
-            columns={[
-              { field: "title", header: "Title" },
-              { field: "waitlistCount", header: "WaitlistCount" },
-              { field: "course_types", header: "Course Type" }
-            ]}
-            onEdit={(row) => router.push(`/upcomingProgram/add?id=${row._id}`)}
-            onDelete={handleDeleteClick}
-          />
+            <PrimeReactTable
+              data={data}
+              loading={false}
+              totalRecords={totalRecords}
+              rows={rows}
+              onPageChange={(newPage: number, newRows:number) => {
+                setPage(newPage);
+                setRows(newRows);
+              }}
+              columns={[
+                { field: "title", header: "Title" },
+                { field: "waitlistCount", header: "WaitlistCount" },
+                { field: "course_types", header: "Course Type" }
+              ]}
+              onEdit={(row) => router.push(`/upcomingProgram/add?id=${row._id}`)}
+              onDelete={handleDeleteClick}
+            />
           )}
         </div>
-        {/* <ConfirmationModal
-          isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-          onConfirm={confirmDelete}
-        /> */}
+
         <CommonDialog
           visible={isDeleteModalOpen}
           header="Confirm Delete"
@@ -123,7 +117,6 @@ export default function Page() {
         </CommonDialog>
       </ComponentCard>
     </div>
-
   );
 }
 
@@ -134,9 +127,9 @@ const renderSkeletonRows = () => (
         <Skeleton size="1.5rem" className="mr-3" />
         <Skeleton width="25rem" height="2.2rem" className="mr-4" />
         <Skeleton width="20rem" height="2.2rem" className="mr-4" />
-        <Skeleton width="20rem" height="2.2rem" className="mr-4" />
-        <Skeleton width="20rem" height="2.2rem" className="mr-4" />
-        {/* <Skeleton width="10rem" height="2.2rem" className="mr-4" /> */}
+        <Skeleton width="15rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="8rem" height="2.2rem" className="mr-4" />
+        <Skeleton width="8rem" height="2.2rem" className="mr-4" />
         <Skeleton shape="circle" size="2rem" className="mr-2" />
         <Skeleton shape="circle" size="2rem" />
       </div>

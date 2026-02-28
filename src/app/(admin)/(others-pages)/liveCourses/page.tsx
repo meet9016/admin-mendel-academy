@@ -9,6 +9,7 @@ import PrimeReactTreeTable from "@/components/tables/PrimeReactTreeTable";
 import CommonDialog from "@/components/tables/CommonDialog";
 import { PlusIcon } from "@/icons";
 import { Skeleton } from "primereact/skeleton";
+import { toast } from "react-toastify";
 
 // ---------------------- TYPES ----------------------
 type LiveCourseChild = {
@@ -34,10 +35,12 @@ export default function Page() {
   const [data, setData] = useState<FormattedTreeData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isConvertModalOpen, setIsConvertModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<FormattedTreeData | null>(null);
   const [page, setPage] = useState<number>(1);
   const [rows, setRows] = useState<number>(10);
   const [totalRecords, setTotalRecords] = useState<number>(0);
+  const [isConverting, setIsConverting] = useState(false);
 
   // ---------------------- DELETE HANDLER ----------------------
   const handleDeleteClick = (row: FormattedTreeData) => {
@@ -52,13 +55,40 @@ export default function Page() {
       console.log('🗑️ Deleting course ID:', selectedRow.id); // Debug log
       const res = await api.delete(`${endPointApi.deleteLiveCourses}/${selectedRow.id}`);
       if (res?.data?.message || res?.data?.success) {
-        console.log('✅ Delete successful');
+        toast.success(res.data.message || "Course deleted successfully");
         getLiveCoursesData();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Delete error:", error);
+      toast.error(error.response?.data?.message || "Failed to delete course");
     } finally {
       setIsDeleteModalOpen(false);
+      setSelectedRow(null);
+    }
+  };
+
+  // ---------------------- CONVERT HANDLER ----------------------
+  const handleConvertClick = (row: FormattedTreeData) => {
+    console.log('🔄 Convert clicked for:', row);
+    setSelectedRow(row);
+    setIsConvertModalOpen(true);
+  };
+
+  const confirmConvert = async () => {
+    if (!selectedRow) return;
+    setIsConverting(true);
+    try {
+      const res = await api.post(`${endPointApi.convertLiveToPreRecord}/${selectedRow.id}`);
+      if (res?.data?.success) {
+        toast.success(res.data.message || "Converted successfully!");
+        router.push("/prerecord"); // Redirect to prerecord list
+      }
+    } catch (error: any) {
+      console.error("❌ Conversion error:", error);
+      toast.error(error.response?.data?.message || "Failed to convert course");
+    } finally {
+      setIsConverting(false);
+      setIsConvertModalOpen(false);
       setSelectedRow(null);
     }
   };
@@ -158,11 +188,13 @@ export default function Page() {
               router.push(`/liveCourses/add?id=${row.id}`);
             }}
             onDelete={handleDeleteClick}
+            onConvert={handleConvertClick}
           />
           )}
         </div>
       </ComponentCard>
 
+      {/* Delete Confirmation Modal */}
       <CommonDialog
         visible={isDeleteModalOpen}
         header="Confirm Delete"
@@ -177,6 +209,30 @@ export default function Page() {
               Are you sure you want to delete <b>{selectedRow.course_title}</b>?
             </span>
           )}
+        </div>
+      </CommonDialog>
+
+      {/* Convert Confirmation Modal */}
+      <CommonDialog
+        visible={isConvertModalOpen}
+        header="Convert to Pre-recorded"
+        footerType="confirm-save"
+        onHide={() => !isConverting && setIsConvertModalOpen(false)}
+        onSave={confirmConvert}
+        saveLabel={isConverting ? "Converting..." : "Convert Now"}
+      >
+        <div className="confirmation-content flex flex-col gap-4">
+          <div className="flex items-center gap-3">
+            <i className="pi pi-sync text-3xl text-blue-500" />
+            {selectedRow && (
+              <span>
+                Are you sure you want to convert <b>{selectedRow.course_title}</b> to a pre-recorded course?
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-gray-500 bg-blue-50 p-3 rounded-lg border border-blue-100">
+            Note: The Vimeo video ID will be set to a placeholder. You will need to update it manually in the Pre-recorded courses section.
+          </p>
         </div>
       </CommonDialog>
     </div>

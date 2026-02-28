@@ -1,18 +1,44 @@
 "use client";
-// import Chart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
-
 import dynamic from "next/dynamic";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { MoreDotIcon } from "@/icons";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
-// Dynamically import the ReactApexChart component
+import { MonthlyTargetSkeleton } from "../skeltons/Skeltons";
+
+// Dynamically import the ReactApexChart component with loading skeleton
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
+  loading: () => (
+    <div className="h-[330px] w-full flex items-center justify-center">
+      <div className="h-[140px] w-[280px] overflow-hidden relative">
+        {/* Semi-circle skeleton */}
+        <div className="h-[140px] w-[280px] bg-gray-200 animate-pulse rounded-tl-[140px] rounded-tr-[140px] border-t border-l border-r border-gray-300">
+          {/* Inner hollow circle for radial bar effect */}
+          <div className="absolute inset-0 m-auto h-[112px] w-[224px] bg-white dark:bg-gray-900 rounded-tl-[112px] rounded-tr-[112px] border-t border-l border-r border-gray-300"></div>
+        </div>
+      </div>
+    </div>
+  ),
 });
 
 export default function MonthlyTarget() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    
+    // Simulate data loading delay
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const series = [75.55];
   const options: ApexOptions = {
     colors: ["#465FFF"],
@@ -27,14 +53,14 @@ export default function MonthlyTarget() {
     plotOptions: {
       radialBar: {
         startAngle: -85,
-        endAngle: 85,
+        endAngle: 85, // यह 170 degree का arc बनाता है (-85 से +85 = 170)
         hollow: {
           size: "80%",
         },
         track: {
           background: "#E4E7EC",
           strokeWidth: "100%",
-          margin: 5, // margin is in pixels
+          margin: 5,
         },
         dataLabels: {
           name: {
@@ -62,14 +88,17 @@ export default function MonthlyTarget() {
     labels: ["Progress"],
   };
 
-  const [isOpen, setIsOpen] = useState(false);
-
   function toggleDropdown() {
     setIsOpen(!isOpen);
   }
 
   function closeDropdown() {
     setIsOpen(false);
+  }
+
+  // Show skeleton while loading
+  if (isLoading || !isClient) {
+    return <MonthlyTargetSkeleton />;
   }
 
   return (
@@ -81,7 +110,7 @@ export default function MonthlyTarget() {
               Monthly Target
             </h3>
             <p className="mt-1 font-normal text-gray-500 text-theme-sm dark:text-gray-400">
-              Target you’ve set for each month
+              Target you've set for each month
             </p>
           </div>
           <div className="relative inline-block">
@@ -125,7 +154,7 @@ export default function MonthlyTarget() {
           </span>
         </div>
         <p className="mx-auto mt-10 w-full max-w-[380px] text-center text-sm text-gray-500 sm:text-base">
-          You earn $3287 today, it&apos;s higher than last month. Keep up your
+          You earn $3287 today, it's higher than last month. Keep up your
           good work!
         </p>
       </div>

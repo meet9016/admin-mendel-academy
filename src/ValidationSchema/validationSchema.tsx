@@ -3,6 +3,7 @@ import * as Yup from 'yup';
 export const blogSchema = Yup.object().shape({
     examName: Yup.string().required("Exam name is required"),
     title: Yup.string().required("Title is required"),
+    slug: Yup.string().required("Slug is required"),
     date: Yup.string().required("Date is required"),
     shortDescription: Yup.string().required("Short description is required."),
     description: Yup.string().required("Description is required."),
@@ -57,6 +58,7 @@ export const livecourseSchema = Yup.object().shape({
 export const examListSchema = Yup.object().shape({
     category: Yup.string().required("Course category is required"),
     examName: Yup.string().required("Exam name is required"),
+    slug: Yup.string().required("Slug is required"),
     country: Yup.string().required("Country is required"),
     title: Yup.string().required("Title is required"),
     examSteps: Yup.array()

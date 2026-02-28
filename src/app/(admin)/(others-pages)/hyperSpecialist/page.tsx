@@ -71,8 +71,8 @@ console.log(":==",res);
       const formattedData: FormattedTreeData[] = apiData.map((item: any) => {
         return {
           id: String(item.id),
-          title: item.course_title ?? "-",
-          description: item.instructor_name ?? "-",
+          title: item.title ?? "-",
+          // description: item.description ?? "-",
           price_dollar: item.price_dollar ?? "-",
           price_inr: item.price_inr ?? "-",
         };
@@ -123,7 +123,7 @@ console.log(":==",res);
             }}
             columns={[
               { field: "title", header: "Title" },
-              { field: "description", header: "Description" },
+              // { field: "description", header: "Description" },
               {
                 field: "price_dollar",
                 header: "Price Dollar($)",

@@ -13,10 +13,12 @@ import endPointApi from '@/utils/endPointApi';
 import { decodeHtml } from '@/utils/helper';
 import { faqSchema } from '@/ValidationSchema/validationSchema';
 import { toast } from 'react-toastify';
+import { FaqSkeleton } from '../skeltons/Skeltons';
 
 const Faq = () => {
     const router = useRouter();
     const [id, setId] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -24,9 +26,9 @@ const Faq = () => {
             setId(params.get("id"));
         }
     }, []);
+
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
 
     const [formData, setFormData] = useState({
         title: "",
@@ -40,7 +42,6 @@ const Faq = () => {
         setErrors((prev) => ({ ...prev, [name]: "" }));
     };
 
-
     // Handle Editor text change
     const handleEditorChange = (e: EditorTextChangeEvent) => {
         setFormData((prev) => ({
@@ -53,16 +54,30 @@ const Faq = () => {
     useEffect(() => {
         const fetchById = async () => {
             try {
-                if (!id) return;
-                const res = await api.get(`${endPointApi.getByIdFaq}/${id}`);
-                const data = res.data || {};
-                const decodedDescription = decodeHtml(data.description ?? "");
-                setFormData({
-                    title: data.title ?? "",
-                    description: decodedDescription,
-                });
+                if (id) {
+                    const res = await api.get(`${endPointApi.getByIdFaq}/${id}`);
+                    const data = res.data || {};
+                    const decodedDescription = decodeHtml(data.description ?? "");
+                    
+                    setFormData({
+                        title: data.title ?? "",
+                        description: decodedDescription,
+                    });
+                } else {
+                    // Create mode - set empty form
+                    setFormData({
+                        title: "",
+                        description: ""
+                    });
+                }
             } catch (err) {
                 console.error("Error fetching data by ID:", err);
+                toast.error("Failed to load data");
+            } finally {
+                // Minimum loading time for better UX
+                setTimeout(() => {
+                    setIsLoading(false);
+                }, 300);
             }
         };
 
@@ -83,7 +98,6 @@ const Faq = () => {
             return false;
         }
     };
-
 
     const handleSubmit = async () => {
         const isValid = await validate();
@@ -110,9 +124,14 @@ const Faq = () => {
         }
     }
 
+    // Show skeleton while loading
+    if (isLoading) {
+        return <FaqSkeleton />;
+    }
+
     return (
         <div className="space-y-6">
-            <ComponentCard title="Add FAQ" name="">
+            <ComponentCard title={id ? "Edit FAQ" : "Add FAQ"} name="">
 
                 <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                     <div>
@@ -144,9 +163,9 @@ const Faq = () => {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-5">
-                    <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting} >
-                        {isSubmitting ? "Saving..." : "Save"}
+                <div className="flex items-center gap-5 mt-6">
+                    <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
+                        {isSubmitting ? "Saving..." : (id ? "Update" : "Save")}
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => router.push("/faq")}>
                         Cancel
