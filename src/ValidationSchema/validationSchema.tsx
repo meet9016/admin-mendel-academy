@@ -112,7 +112,23 @@ export const examListSchema = Yup.object().shape({
             priceUSD: Yup.string(),
             priceINR: Yup.string(),
         })
-    )
+    ),
+    // ELITE MENTORSHIP SECTION
+    eliteMentorship: Yup.array().of(
+        Yup.object().shape({
+            name: Yup.string(),
+            priceUSD: Yup.string(),
+            priceINR: Yup.string(),
+        })
+    ),
+    // TSUNAMI SECTION
+    tsunami: Yup.object().shape({
+        name: Yup.string(),
+        includedServicePriceUSD: Yup.string(),
+        includedServicePriceINR: Yup.string(),
+        includedServices: Yup.string(),
+        description: Yup.string(),
+    })
 })
 
 export const faqSchema = Yup.object().shape({

@@ -37,6 +37,21 @@ interface RapidLearningTool {
     priceINR: number | string;
 }
 
+interface EliteMentorshipService {
+    id: number | string;
+    name: string;
+    priceUSD: number | string;
+    priceINR: number | string;
+}
+
+interface TsunamiData {
+    name: string;
+    includedServicePriceUSD: number | string;
+    includedServicePriceINR: number | string;
+    includedServices: string;
+    description: string;
+}
+
 interface FormData {
     country: string;
     status: string;
@@ -46,8 +61,14 @@ interface FormData {
     title: string;
     examSteps: string[];
     description: string;
+    mainTitle: string;
+    planSectionTitle: string;
+    mentorshipTsunamiSectionTitle: string;
+    rapidToolsSectionTitle: string;
     plans: PlanData[];
     rapidLearningTools: RapidLearningTool[];
+    eliteMentorship: EliteMentorshipService[];
+    tsunami: TsunamiData;
 }
 
 const MedicalExam = () => {
@@ -88,10 +109,22 @@ const MedicalExam = () => {
         title: "",
         examSteps: [""],
         description: "",
+        mainTitle: "",
+        planSectionTitle: "",
+        mentorshipTsunamiSectionTitle: "",
+        rapidToolsSectionTitle: "",
         plans: [
             { id: "", planMonth: "", planPriceUSD: "", planPriceINR: "", planType: "", planSubtitles: [""], isPopular: false },
         ],
         rapidLearningTools: [],
+        eliteMentorship: [],
+        tsunami: {
+            name: "",
+            includedServicePriceUSD: "",
+            includedServicePriceINR: "",
+            includedServices: "",
+            description: "",
+        },
     });
 
     const [enrollData, setEnrollData] = useState({
@@ -99,7 +132,7 @@ const MedicalExam = () => {
         description: "",
         image: null as File | null,
     });
-    
+
     const [enrollPreview, setEnrollPreview] = useState<string | null>(null);
     const [mainImage, setMainImage] = useState<File | null>(null);
     const descriptionRef = useRef<string>("");
@@ -116,14 +149,14 @@ const MedicalExam = () => {
     const handleChange = useCallback(<K extends keyof FormData>(field: K, value: FormData[K]) => {
         setFormData((prev) => {
             if (prev[field] === value) return prev;
-            
+
             const newData = { ...prev, [field]: value };
-            
+
             // Auto-generate slug from examName if in create mode or slug is empty
             if (field === "examName" && (!id || !prev.slug)) {
                 newData.slug = generateSlug(value as string);
             }
-            
+
             return newData;
         });
         setErrors((prev) => ({ ...prev, [field]: "" }));
@@ -211,6 +244,41 @@ const MedicalExam = () => {
         }));
     };
 
+    const addEliteMentorshipService = () => {
+        if (formData.eliteMentorship.length < 10) {
+            const newService: EliteMentorshipService = {
+                id: "",
+                name: "",
+                priceUSD: "",
+                priceINR: ""
+            };
+            handleChange("eliteMentorship", [...formData.eliteMentorship, newService]);
+        }
+    };
+
+    const removeEliteMentorshipService = (index: number) => {
+        const updatedServices = formData.eliteMentorship.filter((_, i) => i !== index);
+        handleChange("eliteMentorship", updatedServices);
+    };
+
+    const handleEliteMentorshipChange = (index: number, field: keyof EliteMentorshipService, value: string | number) => {
+        const updatedServices = [...formData.eliteMentorship];
+        updatedServices[index] = { ...updatedServices[index], [field]: value };
+        handleChange("eliteMentorship", updatedServices);
+        setErrors((prev) => ({
+            ...prev,
+            [`eliteMentorship[${index}].${field}`]: "",
+        }));
+    };
+
+    const handleTsunamiChange = (field: keyof TsunamiData, value: string | number) => {
+        handleChange("tsunami", { ...formData.tsunami, [field]: value });
+        setErrors((prev) => ({
+            ...prev,
+            [`tsunami.${field}`]: "",
+        }));
+    };
+
     const handleRadioChange = (value: string) => {
         setFormData((prev) => ({ ...prev, status: value }));
     };
@@ -220,6 +288,9 @@ const MedicalExam = () => {
             const finalData = {
                 ...formData,
                 enrollData: enrollData,
+                mainTitle: formData.mainTitle,
+                eliteMentorship: formData.eliteMentorship,
+                tsunami: formData.tsunami,
             };
             await examListSchema.validate(finalData, { abortEarly: false });
             setErrors({});
@@ -251,14 +322,17 @@ const MedicalExam = () => {
                         category: data?.category_name ?? "",
                         country: data.exams[0].country ?? "",
                         status: data.exams[0].status ?? "Active",
-                    examName: data.exams[0].exam_name ?? "",
-                    slug: data.exams[0].slug ?? "",
-                    title: data.exams[0].title ?? "",
+                        examName: data.exams[0].exam_name ?? "",
+                        slug: data.exams[0].slug ?? "",
+                        title: data.exams[0].title ?? "",
                         examSteps:
                             data.exams[0].sub_titles && data.exams[0].sub_titles.length > 0
                                 ? data.exams[0].sub_titles
                                 : [""],
                         description: decodedDescription,
+                        planSectionTitle: data?.plan_section_title ?? "",
+                        mentorshipTsunamiSectionTitle: data?.mentorship_tsunami_section_title ?? "",
+                        rapidToolsSectionTitle: data?.rapid_tools_section_title ?? "",
                         plans: (() => {
                             const existingPlans =
                                 data.choose_plan_list && data.choose_plan_list.length > 0
@@ -299,6 +373,28 @@ const MedicalExam = () => {
                                     : [];
                             return existingTools;
                         })(),
+                        eliteMentorship: (() => {
+                            const existingServices =
+                                data.elite_mentorship && data.elite_mentorship.length > 0
+                                    ? data.elite_mentorship.map((service: any) => ({
+                                        id: service._id,
+                                        name: service.name ?? "",
+                                        priceUSD: service.price_usd ?? "",
+                                        priceINR: service.price_inr ?? ""
+                                    }))
+                                    : [];
+                            return existingServices;
+                        })(),
+                        tsunami: (() => {
+                            const existingTsunami = data.tsunami || {};
+                            return {
+                                name: existingTsunami.name ?? "",
+                                includedServicePriceUSD: existingTsunami.included_service_price_usd ?? "",
+                                includedServicePriceINR: existingTsunami.included_service_price_inr ?? "",
+                                includedServices: existingTsunami.included_services ?? "",
+                                description: existingTsunami.description ?? "",
+                            };
+                        })(),
                     });
 
                     setPreview(data?.exams[0]?.image)
@@ -307,7 +403,7 @@ const MedicalExam = () => {
                         description: enrollDesc,
                         image: null,
                     });
-                    
+
                     if (data?.who_can_enroll_image) {
                         setEnrollPreview(data.who_can_enroll_image);
                     }
@@ -321,12 +417,24 @@ const MedicalExam = () => {
                         title: "",
                         examSteps: [""],
                         description: "",
+                        mainTitle: "",
+                        planSectionTitle: "",
+                        mentorshipTsunamiSectionTitle: "",
+                        rapidToolsSectionTitle: "",
                         plans: [
                             { id: "", planMonth: "", planPriceUSD: "", planPriceINR: "", planType: "", planSubtitles: [""], isPopular: false },
                         ],
                         rapidLearningTools: [],
+                        eliteMentorship: [],
+                        tsunami: {
+                            name: "",
+                            includedServicePriceUSD: "",
+                            includedServicePriceINR: "",
+                            includedServices: "",
+                            description: "",
+                        },
                     });
-                    
+
                     setEnrollData({
                         title: "",
                         description: "",
@@ -350,7 +458,7 @@ const MedicalExam = () => {
     const handleSave = async () => {
         const isValid = await validate();
         if (!isValid) return;
-        
+
         try {
             const formDataToSend = new FormData();
             if (id) {
@@ -366,6 +474,10 @@ const MedicalExam = () => {
             formData.examSteps.forEach((step, i) => {
                 formDataToSend.append(`exams[0][sub_titles][${i}]`, step);
             });
+
+            formDataToSend.append("plan_section_title", formData.planSectionTitle);
+            formDataToSend.append("mentorship_tsunami_section_title", formData.mentorshipTsunamiSectionTitle);
+            formDataToSend.append("rapid_tools_section_title", formData.rapidToolsSectionTitle);
 
             formData.plans.forEach((plan, i) => {
                 if ((plan.planMonth && plan.planType) || plan.planMonth === "Custom") {
@@ -384,10 +496,10 @@ const MedicalExam = () => {
                 }
             });
 
-            const hasValidTools = formData.rapidLearningTools.some(tool => 
+            const hasValidTools = formData.rapidLearningTools.some(tool =>
                 tool.toolType && (tool.priceUSD || tool.priceINR)
             );
-            
+
             if (hasValidTools) {
                 formData.rapidLearningTools.forEach((tool, i) => {
                     if (tool.toolType && (tool.priceUSD || tool.priceINR)) {
@@ -403,6 +515,35 @@ const MedicalExam = () => {
                 formDataToSend.append('rapid_learning_tools', JSON.stringify([]));
             }
 
+            const hasValidMentorship = formData.eliteMentorship.some(service =>
+                service.name && (service.priceUSD || service.priceINR)
+            );
+
+            if (hasValidMentorship) {
+                formData.eliteMentorship.forEach((service, i) => {
+                    if (service.name && (service.priceUSD || service.priceINR)) {
+                        if (service?.id !== undefined && service?.id !== null && service.id !== "" && id) {
+                            formDataToSend.append(`elite_mentorship[${i}][_id]`, String(service.id));
+                        }
+                        formDataToSend.append(`elite_mentorship[${i}][name]`, service.name);
+                        formDataToSend.append(`elite_mentorship[${i}][price_usd]`, String(service.priceUSD));
+                        formDataToSend.append(`elite_mentorship[${i}][price_inr]`, String(service.priceINR));
+                    }
+                });
+            } else if (id) {
+                formDataToSend.append('elite_mentorship', JSON.stringify([]));
+            }
+
+            const hasValidTsunami = formData.tsunami.name || formData.tsunami.includedServicePriceUSD || formData.tsunami.includedServicePriceINR || formData.tsunami.includedServices || formData.tsunami.description;
+
+            if (hasValidTsunami) {
+                formDataToSend.append(`tsunami[name]`, formData.tsunami.name);
+                formDataToSend.append(`tsunami[included_service_price_usd]`, String(formData.tsunami.includedServicePriceUSD));
+                formDataToSend.append(`tsunami[included_service_price_inr]`, String(formData.tsunami.includedServicePriceINR));
+                formDataToSend.append(`tsunami[included_services]`, formData.tsunami.includedServices);
+                formDataToSend.append(`tsunami[description]`, formData.tsunami.description);
+            }
+
             formDataToSend.append("who_can_enroll_title", enrollData.title);
             formDataToSend.append("who_can_enroll_description", enrollData.description);
             if (enrollData.image) {
@@ -412,7 +553,7 @@ const MedicalExam = () => {
             if (mainImage) {
                 formDataToSend.append("image", mainImage);
             }
-            
+
             let res;
 
             if (id) {
@@ -619,8 +760,8 @@ const MedicalExam = () => {
             </div>
 
             {/* PLAN SECTION */}
-            <ComponentCard 
-                title="Plans" 
+            <ComponentCard
+                title="Plans"
                 name=""
                 action={
                     formData.plans.length < 8 ? (
@@ -634,16 +775,27 @@ const MedicalExam = () => {
                     ) : undefined
                 }
             >
+                <div className="mb-6">
+                    <Label>Plan Section Title</Label>
+                    <Input
+                        type="text"
+                        placeholder="Enter custom title for plans section"
+                        value={formData.planSectionTitle}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            handleChange("planSectionTitle", e.target.value)
+                        }
+                    />
+                </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {formData.plans.map((plan, index) => {
                         const selectedDays = formData.plans
                             .filter((_, i) => i !== index)
                             .map(p => String(p.planMonth));
-                        
+
                         const selectedTypes = formData.plans
                             .filter((_, i) => i !== index)
                             .map(p => p.planType);
-                        
+
                         return (
                             <div key={index} className="relative">
                                 <PlanSection
@@ -679,9 +831,210 @@ const MedicalExam = () => {
                 </div>
             </ComponentCard>
 
+            {/* ELITE MENTORSHIP SECTION */}
+            <ComponentCard
+                title="Elite Mentorship"
+                name=""
+                action={
+                    formData.eliteMentorship.length < 10 ? (
+                        <button
+                            type="button"
+                            onClick={addEliteMentorshipService}
+                            className="bg-[#ffcb07] text-black px-4 py-2 flex items-center gap-2 rounded-md hover:bg-[#ffcb07] transition-colors duration-200"
+                        >
+                            <FaPlus /> Add Service
+                        </button>
+                    ) : undefined
+                }
+            >
+                <div className="mb-6">
+                    <Label>Mentorship & Tsunami Section Title</Label>
+                    <Input
+                        type="text"
+                        placeholder="Enter custom title for mentorship & tsunami section"
+                        value={formData.mentorshipTsunamiSectionTitle}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            handleChange("mentorshipTsunamiSectionTitle", e.target.value)
+                        }
+                    />
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {formData.eliteMentorship.map((service, index) => (
+                        <div key={index} className="relative border border-gray-200 rounded-lg p-4">
+                            <div className="space-y-4">
+                                <div>
+                                    <Label>Course Name</Label>
+                                    <Input
+                                        type="text"
+                                        placeholder="Enter course name"
+                                        value={service.name}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                            handleEliteMentorshipChange(index, 'name', e.target.value)
+                                        }
+                                        error={!!errors?.[`eliteMentorship[${index}].name`]}
+                                    />
+                                    {errors[`eliteMentorship[${index}].name`] && (
+                                        <p className="text-sm text-error-500 mt-1">
+                                            {errors[`eliteMentorship[${index}].name`]}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <Label>Price (USD) $</Label>
+                                        <Input
+                                            type="number"
+                                            placeholder="Enter USD price"
+                                            value={service.priceUSD}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                                handleEliteMentorshipChange(index, 'priceUSD', e.target.value)
+                                            }
+                                            error={!!errors?.[`eliteMentorship[${index}].priceUSD`]}
+                                        />
+                                        {errors[`eliteMentorship[${index}].priceUSD`] && (
+                                            <p className="text-sm text-error-500 mt-1">
+                                                {errors[`eliteMentorship[${index}].priceUSD`]}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <Label>Price (INR) ₹</Label>
+                                        <Input
+                                            type="number"
+                                            placeholder="Enter INR price"
+                                            value={service.priceINR}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                                handleEliteMentorshipChange(index, 'priceINR', e.target.value)
+                                            }
+                                            error={!!errors?.[`eliteMentorship[${index}].priceINR`]}
+                                        />
+                                        {errors[`eliteMentorship[${index}].priceINR`] && (
+                                            <p className="text-sm text-error-500 mt-1">
+                                                {errors[`eliteMentorship[${index}].priceINR`]}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() => removeEliteMentorshipService(index)}
+                                className="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
+                            >
+                                <FaMinus />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            </ComponentCard>
+
+            {/* TSUNAMI SECTION */}
+            <ComponentCard title="Tsunami" name="">
+                <div className="space-y-6">
+                    <div>
+                        <Label>Bundle Name</Label>
+                        <Input
+                            type="text"
+                            placeholder="Enter bundle name"
+                            value={formData.tsunami.name}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                handleTsunamiChange('name', e.target.value)
+                            }
+                            error={!!errors?.['tsunami.name']}
+                        />
+                        {errors['tsunami.name'] && (
+                            <p className="text-sm text-error-500 mt-1">
+                                {errors['tsunami.name']}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Label>Included Service Price (USD) $</Label>
+                            <Input
+                                type="number"
+                                placeholder="Enter USD price"
+                                value={formData.tsunami.includedServicePriceUSD}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                    handleTsunamiChange('includedServicePriceUSD', e.target.value)
+                                }
+                                error={!!errors?.['tsunami.includedServicePriceUSD']}
+                            />
+                            {errors['tsunami.includedServicePriceUSD'] && (
+                                <p className="text-sm text-error-500 mt-1">
+                                    {errors['tsunami.includedServicePriceUSD']}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <Label>Included Service Price (INR) ₹</Label>
+                            <Input
+                                type="number"
+                                placeholder="Enter INR price"
+                                value={formData.tsunami.includedServicePriceINR}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                    handleTsunamiChange('includedServicePriceINR', e.target.value)
+                                }
+                                error={!!errors?.['tsunami.includedServicePriceINR']}
+                            />
+                            {errors['tsunami.includedServicePriceINR'] && (
+                                <p className="text-sm text-error-500 mt-1">
+                                    {errors['tsunami.includedServicePriceINR']}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    <div>
+                        <Label>Included Services</Label>
+                        <Input
+
+                            type="text"
+                            placeholder="Enter included services"
+                            value={formData.tsunami.includedServices}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                handleTsunamiChange('includedServices', e.target.value)
+                            }
+                            error={!!errors?.['tsunami.includedServices']}
+                        />
+                        {errors['tsunami.includedServices'] && (
+                            <p className="text-sm text-error-500 mt-1">
+                                {errors['tsunami.includedServices']}
+                            </p>
+                        )}
+                    </div>
+
+                    <div>
+                        <Label>Tsunami Outcome</Label>
+                        <textarea
+                            className={`w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 ${errors?.['tsunami.description']
+                                    ? "text-error-800 border-error-500 focus:ring-3 focus:ring-error-500/10 dark:text-error-400 dark:border-error-500"
+                                    : "bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
+                                }`}
+                            rows={3}
+                            placeholder="Enter description"
+                            value={formData.tsunami.description}
+                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                                handleTsunamiChange('description', e.target.value)
+                            }
+                        />
+                        {errors['tsunami.description'] && (
+                            <p className="mt-1.5 text-xs text-error-500">
+                                {errors['tsunami.description']}
+                            </p>
+                        )}
+                    </div>
+                </div>
+            </ComponentCard>
+
             {/* RAPID LEARNING TOOLS SECTION */}
-            <ComponentCard 
-                title="Rapid Learning Tools" 
+            <ComponentCard
+                title="Rapid Learning Tools"
                 name=""
                 action={
                     formData.rapidLearningTools.length < 5 ? (
@@ -695,16 +1048,27 @@ const MedicalExam = () => {
                     ) : undefined
                 }
             >
+                <div className="mb-6">
+                    <Label>Rapid Tools Section Title</Label>
+                    <Input
+                        type="text"
+                        placeholder="Enter custom title for rapid learning tools section"
+                        value={formData.rapidToolsSectionTitle}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            handleChange("rapidToolsSectionTitle", e.target.value)
+                        }
+                    />
+                </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {formData.rapidLearningTools.map((tool, index) => {
                         const selectedToolTypes = formData.rapidLearningTools
                             .filter((_, i) => i !== index)
                             .map(t => t.toolType);
-                        
+
                         const availableToolOptions = rapidLearningToolOptions.filter(
                             option => !selectedToolTypes.includes(option.value) || option.value === tool.toolType
                         );
-                        
+
                         return (
                             <div key={index} className="relative border border-gray-200 rounded-lg p-4">
                                 <div className="space-y-4">
@@ -723,7 +1087,7 @@ const MedicalExam = () => {
                                             </p>
                                         )}
                                     </div>
-                                    
+
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <Label>Plan Price (USD) $</Label>
@@ -742,7 +1106,7 @@ const MedicalExam = () => {
                                                 </p>
                                             )}
                                         </div>
-                                        
+
                                         <div>
                                             <Label>Plan Price (INR) ₹</Label>
                                             <Input
@@ -762,7 +1126,7 @@ const MedicalExam = () => {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <button
                                     type="button"
                                     onClick={() => removeRapidTool(index)}
