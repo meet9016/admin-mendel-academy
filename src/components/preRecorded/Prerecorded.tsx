@@ -20,6 +20,7 @@ import { toast } from "react-toastify";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import { FaMinus } from "react-icons/fa6";
 import { PrerecordedSkeleton } from "../skeltons/Skeltons";
+import DropzoneComponent from "../blogs/DropZone";
 
 const categoryOptions = [
   { value: "3", label: "3 Month" },
@@ -266,6 +267,8 @@ const Prerecorded = () => {
   const [errors, setErrors] = useState<Partial<Record<keyof FormDataType, string>>>({});
   const [optionErrors, setOptionErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [mainImage, setMainImage] = useState<File | null>(null);
 
   // Initialize options with all three types
   const [optionsData, setOptionsData] = useState<OptionType[]>(
@@ -303,6 +306,10 @@ const Prerecorded = () => {
             status: data.status == "Active" ? "Active" : "Inactive",
             options: data.options || [],
           });
+
+          if (data.image) {
+            setPreview(data.image);
+          }
 
           // Populate options data for editing
           if (data.options && data.options.length > 0) {
@@ -518,26 +525,28 @@ const Prerecorded = () => {
         features: opt.features.filter((f) => f.trim()),
       }));
 
-    const body = {
-      title: formData.title,
-      category: formData.category,
-      total_reviews: formData.total_reviews,
-      subtitle: formData.subtitle,
-      rating: formData.rating,
-      vimeo_video_id: formData.vimeo_video_id,
-      duration: formData.duration,
-      description: formData.description,
-      date: formData.date,
-      status: formData.status,
-      options: cleanedOptions,
-    };
+    const form = new FormData();
+    form.append("title", formData.title);
+    form.append("category", formData.category || "");
+    form.append("total_reviews", formData.total_reviews || "");
+    form.append("subtitle", formData.subtitle || "");
+    form.append("rating", formData.rating || "");
+    form.append("vimeo_video_id", formData.vimeo_video_id);
+    form.append("duration", formData.duration);
+    form.append("description", formData.description);
+    form.append("date", formData.date);
+    form.append("status", formData.status);
+    form.append("options", JSON.stringify(cleanedOptions));
+    if (mainImage) {
+      form.append("image", mainImage);
+    }
 
     try {
       if (id) {
-        const res = await api.put(`${endPointApi.updatePreRecorded}/${id}`, body);
+        const res = await api.put(`${endPointApi.updatePreRecorded}/${id}`, form);
         toast.success(res.data?.message || "Updated successfully");
       } else {
-        const res = await api.post(`${endPointApi.createPreRecorded}`, body);
+        const res = await api.post(`${endPointApi.createPreRecorded}`, form);
         toast.success(res.data?.message || "Created successfully");
       }
 
@@ -694,17 +703,28 @@ const Prerecorded = () => {
             />
           </div>
 
-          <div>
-            <Label>Description *</Label>
-            <Editor
-              value={formData.description}
-              style={{ height: "320px" }}
-              onTextChange={handleEditorChange}
-              className={`${errors.description ? "border border-error-500" : "border border-gray-100"}`}
-            />
-            {errors.description && (
-              <p className="text-sm text-error-500 mt-1">{errors.description}</p>
-            )}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Description *</Label>
+              <Editor
+                value={formData.description}
+                style={{ height: "320px" }}
+                onTextChange={handleEditorChange}
+                className={`${errors.description ? "border border-error-500" : "border border-gray-100"}`}
+              />
+              {errors.description && (
+                <p className="text-sm text-error-500 mt-1">{errors.description}</p>
+              )}
+            </div>
+
+            <div>
+              <Label>Select Image</Label>
+              <DropzoneComponent
+                preview={preview}
+                setPreview={setPreview}
+                onFileSelect={(file: File) => setMainImage(file)}
+              />
+            </div>
           </div>
         </div>
 
