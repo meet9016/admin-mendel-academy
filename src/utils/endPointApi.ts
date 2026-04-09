@@ -75,6 +75,13 @@ export interface EndPointApi {
     getByIdHyperSpecialist?: string;
     updateHyperSpecialist?: string;
 
+    //Subject-Info
+    createSubjectInfo?: string;
+    getAllSubjectInfo?: string;
+    deleteSubjectInfo?: string;
+    getByIdSubjectInfo?: string;
+    updateSubjectInfo?: string;
+
     //Cart
     getAllCart?: string;
 
@@ -115,6 +122,9 @@ export interface EndPointApi {
     createDemoQuestion?: string;
     updateDemoQuestion?: string;
     deleteDemoQuestion?: string;
+
+    getAllPlans?: string;
+    getByExamIdSubjectInfo?: string;
 }
 
 // Define and export the API endpoint object
@@ -195,6 +205,13 @@ const endPointApi: EndPointApi = {
     getByIdHyperSpecialist: 'hyperSpecialist/getById',
     updateHyperSpecialist: 'hyperSpecialist/update',
 
+    //Subject-Info
+    createSubjectInfo: 'subject-info/create',
+    getAllSubjectInfo: 'subject-info/getall',
+    deleteSubjectInfo: 'subject-info/delete',
+    getByExamIdSubjectInfo: 'subject-info/getByExamId',
+    updateSubjectInfo: 'subject-info/update',
+
     //Cart
     getAllCart: 'cart/get-all-cart',
 
@@ -238,6 +255,7 @@ const endPointApi: EndPointApi = {
 
     getAllPlans: 'plans/get-all-plans',
     getActivePlans: 'plans/get-active-plans',
+    getByIdSubjectInfo: 'subject-info/getById',
     getPlanById: 'plans/get-plan-by-id',
     createPlan: 'plans/create-plan',
     updatePlan: 'plans/update-plan',

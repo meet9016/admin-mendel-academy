@@ -8,7 +8,7 @@ interface ComponentCardProps {
   name?: string;
   children: React.ReactNode;
   className?: string; // Additional custom classes for styling
-  onAddProductClick?: string; // new prop for click handler
+  onAddProductClick?: string | (() => void); // new prop for click handler - can be string URL or function
   Plusicon?: React.ReactNode;
   desc?: string; // Description text
   dates?: [Date | null, Date | null] | null;
@@ -59,7 +59,13 @@ const ComponentCard: React.FC<ComponentCardProps> = ({
 
           {name && (
             <button
-              onClick={() => router.push(onAddProductClick)}
+              onClick={() => {
+                if (typeof onAddProductClick === 'function') {
+                  onAddProductClick();
+                } else if (typeof onAddProductClick === 'string') {
+                  router.push(onAddProductClick);
+                }
+              }}
               className="bg-[#ffca00] px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2">
               {Plusicon} {name}
             </button>

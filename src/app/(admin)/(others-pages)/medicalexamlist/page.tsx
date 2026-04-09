@@ -62,9 +62,10 @@ export default function DemoPage() {
             plan_pricing: Number(plan.plan_pricing ?? 0),
             plan_popular: Boolean(plan.most_popular),
           }));
+        const itemId = item._id || item.id;
         return {
-          id: String(item.id),
-          exam_id: String(item.id ?? item.exams?.[0]?._id ?? ""),
+          id: String(itemId),
+          exam_id: String(itemId ?? item.exams?.[0]?._id ?? ""),
           category_name: item.category_name ?? "-",
           exam_name: item.exams?.[0]?.exam_name ?? "-",
           status: item.exams?.[0]?.status ?? "Inactive",
@@ -97,6 +98,18 @@ export default function DemoPage() {
   const handleDeleteClick = (row: FormattedData) => {
     setSelectedRow(row);
     setIsDeleteModalOpen(true);
+  };
+
+  const handleSubjectInfoClick = (row: FormattedData) => {
+    const examId = row.id;
+    if (!examId || examId === 'undefined') {
+      console.error('Invalid exam ID:', examId);
+      toast.error('Invalid exam ID');
+      return;
+    }
+
+    // Go to subject management page with exam_id
+    router.push(`/medicalexamlist/subject?id=${examId}`);
   };
 
   useEffect(() => {
@@ -152,6 +165,7 @@ export default function DemoPage() {
               headerNameMap={headerNameMap}
               onEdit={(row) => router.push(`/medicalexamlist/add?id=${row.id}`)}
               onDelete={handleDeleteClick}
+              onSubjectInfo={handleSubjectInfoClick}
             />
           )}
         </div>

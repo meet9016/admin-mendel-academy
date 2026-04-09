@@ -10,6 +10,7 @@ import { Button } from "primereact/button";
 import { GoPencil } from "react-icons/go";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { MdOutlineSwapHorizontalCircle } from "react-icons/md";
+import { FaInfoCircle } from "react-icons/fa";
 
 type ColumnType<T> = {
     field?: keyof T;
@@ -28,6 +29,7 @@ interface PrimeReactTreeTableProps<T> {
     onEdit?: (row: T) => void;
     onDelete?: (row: T) => void;
     onConvert?: (row: T) => void;
+    onSubjectInfo?: (row: T) => void;
     headerNameMap?: Record<string, string>;
 }
 
@@ -42,6 +44,7 @@ export default function PrimeReactTreeTable<
     onEdit,
     onDelete,
     onConvert,
+    onSubjectInfo,
     headerNameMap = {},
 }: PrimeReactTreeTableProps<T>) {
     const [expandedRows, setExpandedRows] =
@@ -101,6 +104,18 @@ export default function PrimeReactTreeTable<
 
     const actionBodyTemplate = (rowData: T) => (
         <div className="flex gap-3">
+            {onSubjectInfo && (
+                <Button
+                    icon={<FaInfoCircle size={16} />}
+                    rounded
+                    outlined
+                    severity="info"
+                    onClick={() => onSubjectInfo(rowData)}
+                    className="p-0"
+                    title="Subject Info"
+                    style={{ width: "2rem", height: "2rem" }}
+                />
+            )}
             {/* {onConvert && (
                 <Button
                     icon={<MdOutlineSwapHorizontalCircle size={18} />}
