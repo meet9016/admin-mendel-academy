@@ -142,24 +142,24 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
       chapters: prev.chapters.map((ch, i) =>
         i === chapterIndex
           ? {
-              ...ch,
-              topics: [
-                ...ch.topics,
-                {
-                  title: "",
-                  lessons: [
-                    {
-                      name: "",
-                      video_link: "",
-                      image: "",
-                      tags: [],
-                      full_title: "",
-                      description: "",
-                    },
-                  ],
-                },
-              ],
-            }
+            ...ch,
+            topics: [
+              ...ch.topics,
+              {
+                title: "",
+                lessons: [
+                  {
+                    name: "",
+                    video_link: "",
+                    image: "",
+                    tags: [],
+                    full_title: "",
+                    description: "",
+                  },
+                ],
+              },
+            ],
+          }
           : ch
       ),
     }));
@@ -200,11 +200,11 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
       chapters: prev.chapters.map((ch, i) =>
         i === chapterIndex
           ? {
-              ...ch,
-              topics: ch.topics.map((t, j) =>
-                j === topicIndex ? { ...t, [field]: value } : t
-              ),
-            }
+            ...ch,
+            topics: ch.topics.map((t, j) =>
+              j === topicIndex ? { ...t, [field]: value } : t
+            ),
+          }
           : ch
       ),
     }));
@@ -232,18 +232,18 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
       chapters: prev.chapters.map((ch, i) =>
         i === chapterIndex
           ? {
-              ...ch,
-              topics: ch.topics.map((t, j) =>
-                j === topicIndex
-                  ? {
-                      ...t,
-                      lessons: t.lessons.map((l, k) =>
-                        k === lessonIndex ? { ...l, imageFile: file } : l
-                      ),
-                    }
-                  : t
-              ),
-            }
+            ...ch,
+            topics: ch.topics.map((t, j) =>
+              j === topicIndex
+                ? {
+                  ...t,
+                  lessons: t.lessons.map((l, k) =>
+                    k === lessonIndex ? { ...l, imageFile: file } : l
+                  ),
+                }
+                : t
+            ),
+          }
           : ch
       ),
     }));
@@ -263,26 +263,26 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
       chapters: prev.chapters.map((ch, i) =>
         i === chapterIndex
           ? {
-              ...ch,
-              topics: ch.topics.map((t, j) =>
-                j === topicIndex
-                  ? {
-                      ...t,
-                      lessons: [
-                        ...t.lessons,
-                        {
-                          name: "",
-                          video_link: "",
-                          image: "",
-                          tags: [],
-                          full_title: "",
-                          description: "",
-                        },
-                      ],
-                    }
-                  : t
-              ),
-            }
+            ...ch,
+            topics: ch.topics.map((t, j) =>
+              j === topicIndex
+                ? {
+                  ...t,
+                  lessons: [
+                    ...t.lessons,
+                    {
+                      name: "",
+                      video_link: "",
+                      image: "",
+                      tags: [],
+                      full_title: "",
+                      description: "",
+                    },
+                  ],
+                }
+                : t
+            ),
+          }
           : ch
       ),
     }));
@@ -301,13 +301,13 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
       chapters: prev.chapters.map((ch, i) =>
         i === chapterIndex
           ? {
-              ...ch,
-              topics: ch.topics.map((t, j) =>
-                j === topicIndex
-                  ? { ...t, lessons: t.lessons.filter((_, k) => k !== lessonIndex) }
-                  : t
-              ),
-            }
+            ...ch,
+            topics: ch.topics.map((t, j) =>
+              j === topicIndex
+                ? { ...t, lessons: t.lessons.filter((_, k) => k !== lessonIndex) }
+                : t
+            ),
+          }
           : ch
       ),
     }));
@@ -333,18 +333,18 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
       chapters: prev.chapters.map((ch, i) =>
         i === chapterIndex
           ? {
-              ...ch,
-              topics: ch.topics.map((t, j) =>
-                j === topicIndex
-                  ? {
-                      ...t,
-                      lessons: t.lessons.map((l, k) =>
-                        k === lessonIndex ? updatedLesson : l
-                      ),
-                    }
-                  : t
-              ),
-            }
+            ...ch,
+            topics: ch.topics.map((t, j) =>
+              j === topicIndex
+                ? {
+                  ...t,
+                  lessons: t.lessons.map((l, k) =>
+                    k === lessonIndex ? updatedLesson : l
+                  ),
+                }
+                : t
+            ),
+          }
           : ch
       ),
     }));
@@ -436,7 +436,10 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
     setIsSubmitting(true);
     try {
       const form = new FormData();
-      form.append("exam_id", formData.exam_id);
+
+      if (typeof formData.exam_id === "object") {
+        form.append("exam_id", formData.exam_id?.id);
+      }
       form.append("name", formData.name);
       form.append("sku", formData.sku);
       form.append("title", formData.title);
@@ -560,9 +563,8 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
                 value={formData.description}
                 onTextChange={handleEditorChange}
                 style={{ height: "200px" }}
-                className={`${
-                  errors.description ? "border border-error-500" : "border border-gray-100"
-                }`}
+                className={`${errors.description ? "border border-error-500" : "border border-gray-100"
+                  }`}
               />
               {errors.description && (
                 <p className="text-sm text-error-500 mt-1">{errors.description}</p>
@@ -680,6 +682,45 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
                             updateTopic(chapterIndex, topicIndex, "title", e.target.value)
                           }
                         />
+                      </div>
+
+                      {/* Sub-Topics (Lessons) Section */}
+                      <div className="mt-4 bg-gray-50 border border-gray-100 rounded p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <Label className="text-sm font-medium">Sub Topics (Lessons)</Label>
+                          <button
+                            type="button"
+                            onClick={() => addLesson(chapterIndex, topicIndex)}
+                            className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs hover:bg-blue-200 flex items-center gap-1"
+                          >
+                            <FiPlus size={12} /> Add Sub Topic
+                          </button>
+                        </div>
+                        {topic.lessons.map((lesson, lessonIndex) => (
+                          <div key={lessonIndex} className="bg-white border border-gray-200 rounded p-3 mb-3">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs font-medium text-gray-500">Sub Topic {lessonIndex + 1}</span>
+                              <button
+                                type="button"
+                                onClick={() => removeLesson(chapterIndex, topicIndex, lessonIndex)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <FiTrash2 size={14} />
+                              </button>
+                            </div>
+                            <div className="space-y-3">
+                              <div>
+                                <Label className="text-xs">Name</Label>
+                                <Input
+                                  type="text"
+                                  placeholder="Sub topic name"
+                                  value={lesson.name}
+                                  onChange={(e) => updateLesson(chapterIndex, topicIndex, lessonIndex, { ...lesson, name: e.target.value })}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   ))}
