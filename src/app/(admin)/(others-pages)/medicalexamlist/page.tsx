@@ -166,6 +166,11 @@ export default function DemoPage() {
               onEdit={(row) => router.push(`/medicalexamlist/add?id=${row.id}`)}
               onDelete={handleDeleteClick}
               onSubjectInfo={handleSubjectInfoClick}
+              isSubjectInfoVisible={(row) => 
+                row.exam_name === "USMLE STEP 1" || 
+                row.exam_name === "USMLE STEP 2 CK" || 
+                row.exam_name === "USMLE STEP 2 CE"
+              }
             />
           )}
         </div>

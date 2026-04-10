@@ -30,6 +30,7 @@ interface PrimeReactTreeTableProps<T> {
     onDelete?: (row: T) => void;
     onConvert?: (row: T) => void;
     onSubjectInfo?: (row: T) => void;
+    isSubjectInfoVisible?: (row: T) => boolean;
     headerNameMap?: Record<string, string>;
 }
 
@@ -45,6 +46,7 @@ export default function PrimeReactTreeTable<
     onDelete,
     onConvert,
     onSubjectInfo,
+    isSubjectInfoVisible,
     headerNameMap = {},
 }: PrimeReactTreeTableProps<T>) {
     const [expandedRows, setExpandedRows] =
@@ -104,7 +106,7 @@ export default function PrimeReactTreeTable<
 
     const actionBodyTemplate = (rowData: T) => (
         <div className="flex gap-3">
-            {onSubjectInfo && (
+            {onSubjectInfo && (!isSubjectInfoVisible || isSubjectInfoVisible(rowData)) ? (
                 <Button
                     icon={<FaInfoCircle size={16} />}
                     rounded
@@ -115,7 +117,7 @@ export default function PrimeReactTreeTable<
                     title="Subject Info"
                     style={{ width: "2rem", height: "2rem" }}
                 />
-            )}
+            ) : null}
             {/* {onConvert && (
                 <Button
                     icon={<MdOutlineSwapHorizontalCircle size={18} />}
