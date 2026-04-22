@@ -26,6 +26,7 @@ interface PlanData {
     planPriceUSD: number | string;
     planPriceINR: number | string;
     planType: string;
+    planTitle: string;
     planSubtitles: string[];
     isPopular: boolean;
 }
@@ -40,6 +41,7 @@ interface RapidLearningTool {
 interface EliteMentorshipService {
     id: number | string;
     name: string;
+    subtitle: string;
     priceUSD: number | string;
     priceINR: number | string;
 }
@@ -65,6 +67,8 @@ interface FormData {
     planSectionTitle: string;
     mentorshipTsunamiSectionTitle: string;
     rapidToolsSectionTitle: string;
+    isPlanVisible: boolean;
+    isRapidToolsVisible: boolean;
     plans: PlanData[];
     rapidLearningTools: RapidLearningTool[];
     eliteMentorship: EliteMentorshipService[];
@@ -113,8 +117,10 @@ const MedicalExam = () => {
         planSectionTitle: "",
         mentorshipTsunamiSectionTitle: "",
         rapidToolsSectionTitle: "",
+        isPlanVisible: true,
+        isRapidToolsVisible: true,
         plans: [
-            { id: "", planMonth: "", planPriceUSD: "", planPriceINR: "", planType: "", planSubtitles: [""], isPopular: false },
+            { id: "", planMonth: "", planPriceUSD: "", planPriceINR: "", planType: "", planTitle: "", planSubtitles: [""], isPopular: false },
         ],
         rapidLearningTools: [],
         eliteMentorship: [],
@@ -189,6 +195,7 @@ const MedicalExam = () => {
                 planPriceUSD: "",
                 planPriceINR: "",
                 planType: "",
+                planTitle: "",
                 planSubtitles: [""],
                 isPopular: false
             };
@@ -249,6 +256,7 @@ const MedicalExam = () => {
             const newService: EliteMentorshipService = {
                 id: "",
                 name: "",
+                subtitle: "",
                 priceUSD: "",
                 priceINR: ""
             };
@@ -330,9 +338,12 @@ const MedicalExam = () => {
                                 ? data.exams[0].sub_titles
                                 : [""],
                         description: decodedDescription,
+                        mainTitle: data.exams[0].main_title ?? "",
                         planSectionTitle: data?.plan_section_title ?? "",
                         mentorshipTsunamiSectionTitle: data?.mentorship_tsunami_section_title ?? "",
                         rapidToolsSectionTitle: data?.rapid_tools_section_title ?? "",
+                        isPlanVisible: data?.is_plan_visible ?? true,
+                        isRapidToolsVisible: data?.is_rapid_tools_visible ?? true,
                         plans: (() => {
                             const existingPlans =
                                 data.choose_plan_list && data.choose_plan_list.length > 0
@@ -341,6 +352,7 @@ const MedicalExam = () => {
                                         planPriceUSD: plan.plan_pricing_dollar ?? "",
                                         planPriceINR: plan.plan_pricing_inr ?? "",
                                         planType: plan.plan_type ?? "",
+                                        planTitle: plan.plan_title ?? "",
                                         planSubtitles:
                                             plan.plan_sub_title && plan.plan_sub_title.length > 0
                                                 ? plan.plan_sub_title
@@ -355,6 +367,7 @@ const MedicalExam = () => {
                                         planPriceUSD: "",
                                         planPriceINR: "",
                                         planType: "",
+                                        planTitle: "",
                                         planSubtitles: [""],
                                         isPopular: false,
                                     }];
@@ -379,6 +392,7 @@ const MedicalExam = () => {
                                     ? data.elite_mentorship.map((service: any) => ({
                                         id: service._id,
                                         name: service.name ?? "",
+                                        subtitle: service.subtitle ?? "",
                                         priceUSD: service.price_usd ?? "",
                                         priceINR: service.price_inr ?? ""
                                     }))
@@ -414,6 +428,7 @@ const MedicalExam = () => {
                         status: "Active",
                         category: "",
                         examName: "",
+                        slug: "",
                         title: "",
                         examSteps: [""],
                         description: "",
@@ -421,8 +436,10 @@ const MedicalExam = () => {
                         planSectionTitle: "",
                         mentorshipTsunamiSectionTitle: "",
                         rapidToolsSectionTitle: "",
+                        isPlanVisible: true,
+                        isRapidToolsVisible: true,
                         plans: [
-                            { id: "", planMonth: "", planPriceUSD: "", planPriceINR: "", planType: "", planSubtitles: [""], isPopular: false },
+                            { id: "", planMonth: "", planPriceUSD: "", planPriceINR: "", planType: "", planTitle: "", planSubtitles: [""], isPopular: false },
                         ],
                         rapidLearningTools: [],
                         eliteMentorship: [],
@@ -489,6 +506,7 @@ const MedicalExam = () => {
                     formDataToSend.append(`choose_plan_list[${i}][plan_pricing_inr]`, plan.planPriceINR);
                     formDataToSend.append(`choose_plan_list[${i}][plan_month]`, plan.planMonth.toString());
                     formDataToSend.append(`choose_plan_list[${i}][plan_type]`, plan.planType);
+                    formDataToSend.append(`choose_plan_list[${i}][plan_title]`, plan.planTitle ?? "");
                     plan.planSubtitles.forEach((sub, j) => {
                         formDataToSend.append(`choose_plan_list[${i}][plan_sub_title][${j}]`, sub);
                     });
@@ -526,6 +544,7 @@ const MedicalExam = () => {
                             formDataToSend.append(`elite_mentorship[${i}][_id]`, String(service.id));
                         }
                         formDataToSend.append(`elite_mentorship[${i}][name]`, service.name);
+                        formDataToSend.append(`elite_mentorship[${i}][subtitle]`, service.subtitle ?? "");
                         formDataToSend.append(`elite_mentorship[${i}][price_usd]`, String(service.priceUSD));
                         formDataToSend.append(`elite_mentorship[${i}][price_inr]`, String(service.priceINR));
                     }
@@ -549,6 +568,10 @@ const MedicalExam = () => {
             if (enrollData.image) {
                 formDataToSend.append("who_can_enroll_image", enrollData.image);
             }
+
+            // Add visibility flags
+            formDataToSend.append("is_plan_visible", String(formData.isPlanVisible));
+            formDataToSend.append("is_rapid_tools_visible", String(formData.isRapidToolsVisible));
 
             if (mainImage) {
                 formDataToSend.append("image", mainImage);
@@ -764,15 +787,35 @@ const MedicalExam = () => {
                 title="Plans"
                 name=""
                 action={
-                    formData.plans.length < 8 ? (
-                        <button
-                            type="button"
-                            onClick={addPlan}
-                            className="bg-[#ffcb07] text-black px-4 py-2 flex items-center gap-2 rounded-md hover:bg-[#ffcb07] transition-colors duration-200"
-                        >
-                            <FaPlus /> Add Plan
-                        </button>
-                    ) : undefined
+                    <div className="flex items-center gap-4">
+                        {/* Toggle Switch for Plan Visibility */}
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600">{formData.isPlanVisible ? 'Visible' : 'Hidden'}</span>
+                            <button
+                                type="button"
+                                onClick={() => handleChange('isPlanVisible', !formData.isPlanVisible)}
+                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                                    formData.isPlanVisible ? 'bg-[#ffcb07]' : 'bg-gray-300'
+                                }`}
+                            >
+                                <span
+                                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                        formData.isPlanVisible ? 'translate-x-6' : 'translate-x-1'
+                                    }`}
+                                />
+                            </button>
+                        </div>
+                        
+                        {formData.plans.length < 8 ? (
+                            <button
+                                type="button"
+                                onClick={addPlan}
+                                className="bg-[#ffcb07] text-black px-4 py-2 flex items-center gap-2 rounded-md hover:bg-[#ffcb07] transition-colors duration-200"
+                            >
+                                <FaPlus /> Add Plan
+                            </button>
+                        ) : undefined}
+                    </div>
                 }
             >
                 <div className="mb-6">
@@ -878,6 +921,18 @@ const MedicalExam = () => {
                                             {errors[`eliteMentorship[${index}].name`]}
                                         </p>
                                     )}
+                                </div>
+
+                                <div>
+                                    <Label>Subtitle</Label>
+                                    <Input
+                                        type="text"
+                                        placeholder="Enter subtitle"
+                                        value={service.subtitle}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                            handleEliteMentorshipChange(index, 'subtitle', e.target.value)
+                                        }
+                                    />
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
@@ -1037,15 +1092,35 @@ const MedicalExam = () => {
                 title="Rapid Learning Tools"
                 name=""
                 action={
-                    formData.rapidLearningTools.length < 5 ? (
-                        <button
-                            type="button"
-                            onClick={addRapidTool}
-                            className="bg-[#ffcb07] text-black px-4 py-2 flex items-center gap-2 rounded-md hover:bg-[#ffcb07] transition-colors duration-200"
-                        >
-                            <FaPlus /> Add Tool
-                        </button>
-                    ) : undefined
+                    <div className="flex items-center gap-4">
+                        {/* Toggle Switch for Rapid Tools Visibility */}
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600">{formData.isRapidToolsVisible ? 'Visible' : 'Hidden'}</span>
+                            <button
+                                type="button"
+                                onClick={() => handleChange('isRapidToolsVisible', !formData.isRapidToolsVisible)}
+                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                                    formData.isRapidToolsVisible ? 'bg-[#ffcb07]' : 'bg-gray-300'
+                                }`}
+                            >
+                                <span
+                                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                        formData.isRapidToolsVisible ? 'translate-x-6' : 'translate-x-1'
+                                    }`}
+                                />
+                            </button>
+                        </div>
+                        
+                        {formData.rapidLearningTools.length < 5 ? (
+                            <button
+                                type="button"
+                                onClick={addRapidTool}
+                                className="bg-[#ffcb07] text-black px-4 py-2 flex items-center gap-2 rounded-md hover:bg-[#ffcb07] transition-colors duration-200"
+                            >
+                                <FaPlus /> Add Tool
+                            </button>
+                        ) : undefined}
+                    </div>
                 }
             >
                 <div className="mb-6">

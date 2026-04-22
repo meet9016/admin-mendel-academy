@@ -159,12 +159,12 @@ const page = () => {
             </div>
             <h3 className="text-lg font-bold text-gray-900">No subjects yet</h3>
             <p className="text-gray-500 mb-6 max-w-xs mx-auto">Start by adding your first subject to the curriculum.</p>
-            <button
+            {/* <button
               onClick={handleAddNewSubject}
               className="bg-[#ffcb07] text-black font-bold px-8 py-3 rounded-xl hover:bg-[#e6b800] transition-all"
             >
               Add First Subject
-            </button>
+            </button> */}
           </div>
         ) : (
           subjects.map((subject) => (

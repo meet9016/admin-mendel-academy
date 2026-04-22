@@ -13,6 +13,7 @@ export interface PlanData {
   planMonth: number | string;
   planPrice: string;
   planType: string;
+  planTitle: string;
   planSubtitles: string[];
   isPopular: boolean;
   planPriceUSD: number,
@@ -198,6 +199,17 @@ const PlanSection: React.FC<PlanSectionProps> = ({
       </div>
 
       <div className="grid grid-cols-1 gap-6 mt-6">
+        <div>
+          <Label>Plan Title</Label>
+          <Input
+            type="text"
+            placeholder="Enter plan title"
+            value={data.planTitle}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              handleChange('planTitle', e.target.value)
+            }
+          />
+        </div>
         <div>
           <div className="flex items-center justify-between mb-2">
             <Label>Plan Sub Title</Label>
