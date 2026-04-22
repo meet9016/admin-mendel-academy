@@ -437,9 +437,13 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
     try {
       const form = new FormData();
 
-      if (typeof formData.exam_id === "object") {
-        form.append("exam_id", formData.exam_id?.id);
+      // FIX 1: Properly handle exam_id - extract string value if it's an object
+      let examIdValue = formData.exam_id;
+      if (typeof formData.exam_id === "object" && formData.exam_id !== null) {
+        examIdValue = (formData.exam_id as any).id || (formData.exam_id as any)._id || "";
       }
+      form.append("exam_id", examIdValue as string);
+      
       form.append("name", formData.name);
       form.append("sku", formData.sku);
       form.append("title", formData.title);
@@ -473,12 +477,17 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
         });
       });
 
-      if (isEditMode) form.append("id", existingSubjectId!);
+      // FIX 2: Only append id for update, not for create
+      if (isEditMode && existingSubjectId) {
+        form.append("id", existingSubjectId);
+      }
 
       let res;
       if (isEditMode) {
+        // UPDATE: Use PUT endpoint
         res = await api.put(`${endPointApi.updateSubjectInfo}`, form);
       } else {
+        // CREATE: Use POST endpoint
         res = await api.post(`${endPointApi.createSubjectInfo}`, form);
       }
 
@@ -488,9 +497,11 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
       } else {
         router.push("/medicalexamlist");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting subject info:", error);
-      toast.error("Something went wrong! Please try again.");
+      // Show detailed error message from backend
+      const errorMessage = error.response?.data?.message || "Something went wrong! Please try again.";
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -556,15 +567,14 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 items-start">
             <div>
               <Label>Description</Label>
               <Editor
                 value={formData.description}
                 onTextChange={handleEditorChange}
-                style={{ height: "200px" }}
-                className={`${errors.description ? "border border-error-500" : "border border-gray-100"
-                  }`}
+                style={{ height: "315px" }}
+                className={`${errors.description ? "border border-error-500" : "border border-gray-100"}`}
               />
               {errors.description && (
                 <p className="text-sm text-error-500 mt-1">{errors.description}</p>
@@ -576,6 +586,7 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
                 preview={preview}
                 setPreview={setPreview}
                 onFileSelect={(file: File) => setMainImage(file)}
+                // height={358}
               />
             </div>
           </div>
@@ -646,8 +657,8 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
 
                 {/* Topics Section */}
                 <div className="border-t pt-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <Label className="text-sm font-medium">Topics</Label>
+                  <div className="flex items-center justify-between mb-3">
+                    <Label className="text-sm font-semibold">Topics</Label>
                     <button
                       type="button"
                       onClick={() => addTopic(chapterIndex)}
@@ -658,22 +669,28 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
                     </button>
                   </div>
 
+                  {/* Topics — 1 per row, full width */}
+                  <div>
+                <div className="flex flex-col gap-4">
                   {chapter.topics.map((topic, topicIndex) => (
                     <div
                       key={topicIndex}
-                      className="bg-white border border-gray-200 rounded-lg p-4 mb-4"
+                      className="bg-white border border-gray-200 rounded-lg p-4 flex flex-col"
                     >
+                      {/* Topic header */}
                       <div className="flex items-center justify-between mb-2">
-                        <h5 className="font-medium">Topic {topicIndex + 1}</h5>
+                        <span className="text-sm font-semibold text-gray-700">Topic {topicIndex + 1}</span>
                         <button
                           type="button"
                           onClick={() => removeTopic(chapterIndex, topicIndex)}
-                          className="text-red-600 hover:text-red-800"
+                          className="text-red-500 hover:text-red-700"
                         >
-                          <FiTrash2 size={16} />
+                          <FiTrash2 size={15} />
                         </button>
                       </div>
-                      <div className="mb-4">
+
+                      {/* Topic title input */}
+                      <div className="mb-3">
                         <Input
                           type="text"
                           placeholder="Enter topic title"
@@ -684,46 +701,57 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
                         />
                       </div>
 
-                      {/* Sub-Topics (Lessons) Section */}
-                      <div className="mt-4 bg-gray-50 border border-gray-100 rounded p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <Label className="text-sm font-medium">Sub Topics (Lessons)</Label>
-                          <button
-                            type="button"
-                            onClick={() => addLesson(chapterIndex, topicIndex)}
-                            className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs hover:bg-blue-200 flex items-center gap-1"
-                          >
-                            <FiPlus size={12} /> Add Sub Topic
-                          </button>
-                        </div>
-                        {topic.lessons.map((lesson, lessonIndex) => (
-                          <div key={lessonIndex} className="bg-white border border-gray-200 rounded p-3 mb-3">
+                      {/* Sub Topics */}
+                      <div className="bg-gray-50 border border-gray-100 rounded p-3 flex flex-col flex-1">
                             <div className="flex items-center justify-between mb-2">
-                              <span className="text-xs font-medium text-gray-500">Sub Topic {lessonIndex + 1}</span>
+                              <span className="text-xs font-semibold text-gray-600">Sub Topics</span>
                               <button
                                 type="button"
-                                onClick={() => removeLesson(chapterIndex, topicIndex, lessonIndex)}
-                                className="text-red-500 hover:text-red-700"
+                                onClick={() => addLesson(chapterIndex, topicIndex)}
+                                className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs hover:bg-blue-200 flex items-center gap-1"
                               >
-                                <FiTrash2 size={14} />
+                                <FiPlus size={11} /> Add Sub Topic
                               </button>
                             </div>
-                            <div className="space-y-3">
-                              <div>
-                                <Label className="text-xs">Name</Label>
-                                <Input
-                                  type="text"
-                                  placeholder="Sub topic name"
-                                  value={lesson.name}
-                                  onChange={(e) => updateLesson(chapterIndex, topicIndex, lessonIndex, { ...lesson, name: e.target.value })}
-                                />
+
+                            {/* Sub topics grid — 2 columns */}
+                            <div>
+                              <div className="grid grid-cols-2 gap-2">
+                                {topic.lessons.map((lesson, lessonIndex) => (
+                                  <div
+                                    key={lessonIndex}
+                                    className="bg-white border border-gray-200 rounded p-2"
+                                  >
+                                    <div className="flex items-center justify-between mb-1">
+                                      <span className="text-[10px] font-medium text-gray-400">#{lessonIndex + 1}</span>
+                                      <button
+                                        type="button"
+                                        onClick={() => removeLesson(chapterIndex, topicIndex, lessonIndex)}
+                                        className="text-red-400 hover:text-red-600"
+                                      >
+                                        <FiTrash2 size={12} />
+                                      </button>
+                                    </div>
+                                    <Input
+                                      type="text"
+                                      placeholder="Sub topic name"
+                                      value={lesson.name}
+                                      onChange={(e) =>
+                                        updateLesson(chapterIndex, topicIndex, lessonIndex, {
+                                          ...lesson,
+                                          name: e.target.value,
+                                        })
+                                      }
+                                    />
+                                  </div>
+                                ))}
                               </div>
                             </div>
                           </div>
-                        ))}
-                      </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
               </div>
             ))}

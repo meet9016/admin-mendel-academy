@@ -32,6 +32,7 @@ const page = () => {
 
   const [activeSubjectId, setActiveSubjectId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [formKey, setFormKey] = useState(0);
 
   const fetchSubjects = async () => {
     if (!examId) return;
@@ -55,6 +56,7 @@ const page = () => {
   }, [examId]);
 
   const handleEditSubject = (subject: SubjectData) => {
+    setFormKey((k) => k + 1);
     setActiveSubjectId(subject.id);
     setShowForm(true);
     setTimeout(() => {
@@ -63,6 +65,7 @@ const page = () => {
   };
 
   const handleAddNewSubject = () => {
+    setFormKey((k) => k + 1);
     setActiveSubjectId(null);
     setShowForm(true);
     setTimeout(() => {
@@ -114,17 +117,17 @@ const page = () => {
         </div>
         <button
           onClick={handleAddNewSubject}
-          className="bg-primary hover:bg-secondary text-black px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2">
+          className="bg-[#ffcb07] hover:bg-[#e6b800] text-black px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2">
           <PlusIcon /> Add New Subject
         </button>
       </div>
 
       {/* Accordion Form Area */}
       <div
-        className={`overflow-hidden transition-all duration-500 ease-in-out ${showForm ? "max-h-[2000px] opacity-100 mb-8" : "max-h-0 opacity-0 mb-0"
+        className={`transition-all duration-300 ease-in-out ${showForm ? "opacity-100 mb-8" : "max-h-0 overflow-hidden opacity-0 mb-0"
           }`}
       >
-        <div id="subject-form-section" className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+        <div id="subject-form-section" className="bg-white rounded-2xl border border-gray-200">
           <div className="bg-primary/10 p-4 border-b border-gray-200 flex justify-between items-center">
             <h2 className="font-bold text-lg text-black">
               {activeSubjectId ? "Edit Subject" : "Create New Subject"}
@@ -138,7 +141,7 @@ const page = () => {
           </div>
           <div className="p-6">
             <SubjectInfoForm
-              key={activeSubjectId ?? 'new'}
+              key={formKey}
               examId={examId!}
               existingSubjectId={activeSubjectId}
               onSuccess={handleFormSuccess}
@@ -158,7 +161,7 @@ const page = () => {
             <p className="text-gray-500 mb-6 max-w-xs mx-auto">Start by adding your first subject to the curriculum.</p>
             <button
               onClick={handleAddNewSubject}
-              className="bg-primary text-black font-bold px-8 py-3 rounded-xl hover:bg-secondary transition-all"
+              className="bg-[#ffcb07] text-black font-bold px-8 py-3 rounded-xl hover:bg-[#e6b800] transition-all"
             >
               Add First Subject
             </button>
