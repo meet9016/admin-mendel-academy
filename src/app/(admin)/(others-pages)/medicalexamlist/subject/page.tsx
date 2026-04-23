@@ -10,6 +10,7 @@ import { GoPencil } from "react-icons/go";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import CommonDialog from '@/components/tables/CommonDialog';
 import { Button } from 'primereact/button';
+import BackButton from '@/components/common/BackButton';
 
 interface SubjectData {
   id: string;
@@ -110,10 +111,10 @@ const page = () => {
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-200">
-        <div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-gray-200">
+        <div className="flex items-center gap-3">
+          <BackButton />
           <h1 className="text-2xl font-bold text-gray-900">Subject Management</h1>
-          <p className="text-gray-500 text-sm mt-1">Manage curriculum subjects, chapters, and topics</p>
         </div>
         <button
           onClick={handleAddNewSubject}
@@ -198,7 +199,7 @@ const page = () => {
                         <p className="text-gray-500 text-sm truncate">{subject.title}</p>
                       )}
                       {subject.slogan && (
-                        <div className="inline-block bg-primary/10 text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-full mt-1">
+                        <div className="inline-block bg-primary/10 text-primary-foreground text-[12px] font-bold px-2 py-0.5 rounded-full mt-1">
                           {subject.slogan}
                         </div>
                       )}
@@ -216,7 +217,7 @@ const page = () => {
                       className="p-0"
                       style={{ width: "2rem", height: "2rem" }}
                       tooltip="Edit Subject"
-                      tooltipOptions={{ position: "bottom" }}
+                      tooltipOptions={{ position: "bottom", className: "small-tooltip" }}
                     />
                     <Button
                       icon={<RiDeleteBin5Line size={16} />}
@@ -227,7 +228,7 @@ const page = () => {
                       className="p-0"
                       style={{ width: "2rem", height: "2rem" }}
                       tooltip="Delete Subject"
-                      tooltipOptions={{ position: "bottom" }}
+                      tooltipOptions={{ position: "bottom", className: "small-tooltip" }}
                     />
                   </div>
                 </div>

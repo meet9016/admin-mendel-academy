@@ -702,7 +702,7 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
                       </div>
 
                       {/* Sub Topics */}
-                      <div className="bg-gray-50 border border-gray-100 rounded p-3 flex flex-col flex-1">
+                      <div className="rounded flex flex-col flex-1">
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-xs font-semibold text-gray-600">Sub Topics</span>
                               <button
@@ -714,38 +714,29 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
                               </button>
                             </div>
 
-                            {/* Sub topics grid — 2 columns */}
-                            <div>
-                              <div className="grid grid-cols-2 gap-2">
-                                {topic.lessons.map((lesson, lessonIndex) => (
-                                  <div
-                                    key={lessonIndex}
-                                    className="bg-white border border-gray-200 rounded p-2"
+                            <div className="bg-white  rounded  grid grid-cols-2 gap-2">
+                              {topic.lessons.map((lesson, lessonIndex) => (
+                                <div key={lessonIndex} className="relative">
+                                  <Input
+                                    type="text"
+                                    placeholder="Sub topic name"
+                                    value={lesson.name}
+                                    onChange={(e) =>
+                                      updateLesson(chapterIndex, topicIndex, lessonIndex, {
+                                        ...lesson,
+                                        name: e.target.value,
+                                      })
+                                    }
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => removeLesson(chapterIndex, topicIndex, lessonIndex)}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-red-400 hover:text-red-600"
                                   >
-                                    <div className="flex items-center justify-between mb-1">
-                                      <span className="text-[10px] font-medium text-gray-400">#{lessonIndex + 1}</span>
-                                      <button
-                                        type="button"
-                                        onClick={() => removeLesson(chapterIndex, topicIndex, lessonIndex)}
-                                        className="text-red-400 hover:text-red-600"
-                                      >
-                                        <FiTrash2 size={12} />
-                                      </button>
-                                    </div>
-                                    <Input
-                                      type="text"
-                                      placeholder="Sub topic name"
-                                      value={lesson.name}
-                                      onChange={(e) =>
-                                        updateLesson(chapterIndex, topicIndex, lessonIndex, {
-                                          ...lesson,
-                                          name: e.target.value,
-                                        })
-                                      }
-                                    />
-                                  </div>
-                                ))}
-                              </div>
+                                    <FiTrash2 size={14} />
+                                  </button>
+                                </div>
+                              ))}
                             </div>
                           </div>
                         </div>

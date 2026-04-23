@@ -4,6 +4,7 @@ import Label from "../form/Label";
 import ComponentCard from "../common/ComponentCard";
 import Input from "../form/input/InputField";
 import { FaPlus, FaMinus } from "react-icons/fa6";
+import { IoClose } from "react-icons/io5";
 import dynamic from "next/dynamic";
 const Editor = dynamic(() => import("primereact/editor").then((m) => m.Editor), { ssr: false });
 import Select from "../form/Select";
@@ -863,9 +864,9 @@ const MedicalExam = () => {
                                     <button
                                         type="button"
                                         onClick={() => removePlan(index)}
-                                        className="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
+                                        className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
                                     >
-                                        <FaMinus />
+                                        <IoClose size={14} />
                                     </button>
                                 )}
                             </div>
@@ -977,9 +978,9 @@ const MedicalExam = () => {
                             <button
                                 type="button"
                                 onClick={() => removeEliteMentorshipService(index)}
-                                className="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
+                                className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
                             >
-                                <FaMinus />
+                                <IoClose size={14} />
                             </button>
                         </div>
                     ))}
@@ -1205,9 +1206,9 @@ const MedicalExam = () => {
                                 <button
                                     type="button"
                                     onClick={() => removeRapidTool(index)}
-                                    className="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
+                                    className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
                                 >
-                                    <FaMinus />
+                                    <IoClose size={14} />
                                 </button>
                             </div>
                         );

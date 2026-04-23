@@ -849,7 +849,7 @@ tr.selected-row {
 }
 
 .small-tooltip .p-tooltip-text {
-  font-size: 11px !important;
-  padding: 4px 8px !important;
+  font-size: 12px !important;
+  padding: 5px 9px !important;
   line-height: 1.2 !important;
 }
