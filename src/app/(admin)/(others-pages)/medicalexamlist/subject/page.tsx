@@ -3,14 +3,13 @@
 import SubjectInfoForm from '@/components/subjectInfo/SubjectInfoForm';
 import { PlusIcon } from '@/icons';
 import { useSearchParams } from 'next/navigation';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { api } from '@/utils/axiosInstance';
 import endPointApi from '@/utils/endPointApi';
-import { GoPencil } from "react-icons/go";
-import { RiDeleteBin5Line } from "react-icons/ri";
 import CommonDialog from '@/components/tables/CommonDialog';
-import { Button } from 'primereact/button';
 import BackButton from '@/components/common/BackButton';
+import * as XLSX from 'xlsx';
+import SubjectTreeView from '@/components/subjectTree/SubjectTreeView';
 
 interface SubjectData {
   id: string;
@@ -34,6 +33,8 @@ const page = () => {
   const [activeSubjectId, setActiveSubjectId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [formKey, setFormKey] = useState(0);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchSubjects = async () => {
     if (!examId) return;
@@ -104,6 +105,70 @@ const page = () => {
     setActiveSubjectId(null);
   };
 
+  // Single sheet - subject/chapter/topic blank cell means "same as above"
+  const handleDownloadSample = () => {
+    const wb = XLSX.utils.book_new();
+
+    const rows = [
+      // Biology - Cell Biology - Cell Structure
+      { subject_name: 'Biology', subject_sku: 'BIO-001', subject_title: 'Biology Subject', subject_slogan: 'Life Science', chapter_title: 'Cell Biology', chapter_long_title: 'Intro to Cell Biology', topic_title: 'Cell Structure', subtopic_name: 'Nucleus' },
+      { subject_name: '',        subject_sku: '',        subject_title: '',               subject_slogan: '',            chapter_title: '',            chapter_long_title: '',                    topic_title: '',             subtopic_name: 'Mitochondria' },
+      { subject_name: '',        subject_sku: '',        subject_title: '',               subject_slogan: '',            chapter_title: '',            chapter_long_title: '',                    topic_title: '',             subtopic_name: 'Cell Membrane' },
+      // Biology - Cell Biology - Cell Division
+      { subject_name: '',        subject_sku: '',        subject_title: '',               subject_slogan: '',            chapter_title: '',            chapter_long_title: '',                    topic_title: 'Cell Division', subtopic_name: 'Mitosis' },
+      { subject_name: '',        subject_sku: '',        subject_title: '',               subject_slogan: '',            chapter_title: '',            chapter_long_title: '',                    topic_title: '',             subtopic_name: 'Meiosis' },
+      // Biology - Genetics - DNA Structure
+      { subject_name: '',        subject_sku: '',        subject_title: '',               subject_slogan: '',            chapter_title: 'Genetics',    chapter_long_title: 'Fundamentals of Genetics', topic_title: 'DNA Structure', subtopic_name: 'Double Helix' },
+      { subject_name: '',        subject_sku: '',        subject_title: '',               subject_slogan: '',            chapter_title: '',            chapter_long_title: '',                    topic_title: '',             subtopic_name: 'Base Pairing' },
+      // Biology - Genetics - Heredity
+      { subject_name: '',        subject_sku: '',        subject_title: '',               subject_slogan: '',            chapter_title: '',            chapter_long_title: '',                    topic_title: 'Heredity',     subtopic_name: 'Dominant Traits' },
+      { subject_name: '',        subject_sku: '',        subject_title: '',               subject_slogan: '',            chapter_title: '',            chapter_long_title: '',                    topic_title: '',             subtopic_name: 'Recessive Traits' },
+      // Chemistry - Atomic Structure - Subatomic Particles
+      { subject_name: 'Chemistry', subject_sku: 'CHEM-001', subject_title: 'Chemistry Subject', subject_slogan: 'Matter & Energy', chapter_title: 'Atomic Structure', chapter_long_title: 'Structure of Atom', topic_title: 'Subatomic Particles', subtopic_name: 'Proton' },
+      { subject_name: '',          subject_sku: '',          subject_title: '',                 subject_slogan: '',               chapter_title: '',                chapter_long_title: '',               topic_title: '',                   subtopic_name: 'Neutron' },
+      { subject_name: '',          subject_sku: '',          subject_title: '',                 subject_slogan: '',               chapter_title: '',                chapter_long_title: '',               topic_title: '',                   subtopic_name: 'Electron' },
+      // Chemistry - Atomic Structure - Atomic Models
+      { subject_name: '',          subject_sku: '',          subject_title: '',                 subject_slogan: '',               chapter_title: '',                chapter_long_title: '',               topic_title: 'Atomic Models',      subtopic_name: 'Bohr Model' },
+      { subject_name: '',          subject_sku: '',          subject_title: '',                 subject_slogan: '',               chapter_title: '',                chapter_long_title: '',               topic_title: '',                   subtopic_name: 'Quantum Model' },
+      // Chemistry - Chemical Bonding - Ionic Bonds
+      { subject_name: '',          subject_sku: '',          subject_title: '',                 subject_slogan: '',               chapter_title: 'Chemical Bonding', chapter_long_title: 'Types of Chemical Bonds', topic_title: 'Ionic Bonds', subtopic_name: 'Cation Formation' },
+      { subject_name: '',          subject_sku: '',          subject_title: '',                 subject_slogan: '',               chapter_title: '',                 chapter_long_title: '',               topic_title: '',            subtopic_name: 'Anion Formation' },
+      // Chemistry - Chemical Bonding - Covalent Bonds
+      { subject_name: '',          subject_sku: '',          subject_title: '',                 subject_slogan: '',               chapter_title: '',                 chapter_long_title: '',               topic_title: 'Covalent Bonds', subtopic_name: 'Single Bond' },
+      { subject_name: '',          subject_sku: '',          subject_title: '',                 subject_slogan: '',               chapter_title: '',                 chapter_long_title: '',               topic_title: '',               subtopic_name: 'Double Bond' },
+    ];
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [
+      { wch: 18 }, { wch: 14 }, { wch: 20 }, { wch: 18 },
+      { wch: 22 }, { wch: 28 }, { wch: 22 }, { wch: 22 },
+    ];
+    XLSX.utils.book_append_sheet(wb, ws, 'Subjects');
+    XLSX.writeFile(wb, 'sample_subjects.xlsx');
+  };
+
+  const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !examId) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('exam_id', examId);
+      const res = await api.post(endPointApi.bulkUploadSubjectInfo!, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      await fetchSubjects();
+      alert(res.data?.message || 'Subjects uploaded successfully!');
+    } catch (error: any) {
+      console.error('Excel upload error:', error);
+      alert(error?.response?.data?.message || 'Error uploading Excel file');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   if (loading) {
     return <div className="flex justify-center items-center h-64 text-gray-500">Loading curriculum...</div>;
   }
@@ -116,11 +181,31 @@ const page = () => {
           <BackButton />
           <h1 className="text-2xl font-bold text-gray-900">Subject Management</h1>
         </div>
-        <button
-          onClick={handleAddNewSubject}
-          className="bg-[#ffcb07] hover:bg-[#e6b800] text-black px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2">
-          <PlusIcon /> Add New Subject
-        </button>
+        <div className="flex items-center gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx,.xls"
+            className="hidden"
+            onChange={handleExcelUpload}
+          />
+          <button
+            onClick={handleDownloadSample}
+            className="border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2">
+            Sample Excel
+          </button>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="border border-[#ffcb07] hover:bg-[#ffcb07]/10 text-black px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2 disabled:opacity-50">
+            {uploading ? 'Uploading...' : 'Upload Excel'}
+          </button>
+          <button
+            onClick={handleAddNewSubject}
+            className="bg-[#ffcb07] hover:bg-[#e6b800] text-black px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2">
+            <PlusIcon /> Add New Subject
+          </button>
+        </div>
       </div>
 
       {/* Accordion Form Area */}
@@ -151,7 +236,15 @@ const page = () => {
         </div>
       </div>
 
+      {/* Subjects Tree View */}
+      <SubjectTreeView
+        subjects={subjects}
+        onEdit={handleEditSubject}
+        onDelete={handleDeleteClick}
+      />
+      
       {/* Subjects List — 2 columns for better layout */}
+      {/* Commented out - Subjects grid view
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {subjects.length === 0 ? (
           <div className="col-span-full bg-white p-12 rounded-2xl border border-gray-200 text-center">
@@ -160,12 +253,6 @@ const page = () => {
             </div>
             <h3 className="text-lg font-bold text-gray-900">No subjects yet</h3>
             <p className="text-gray-500 mb-6 max-w-xs mx-auto">Start by adding your first subject to the curriculum.</p>
-            {/* <button
-              onClick={handleAddNewSubject}
-              className="bg-[#ffcb07] text-black font-bold px-8 py-3 rounded-xl hover:bg-[#e6b800] transition-all"
-            >
-              Add First Subject
-            </button> */}
           </div>
         ) : (
           subjects.map((subject) => (
@@ -174,10 +261,10 @@ const page = () => {
               className="group bg-white rounded-2xl transition-all border border-gray-200 overflow-hidden"
             >
               <div className="p-5 pl-7">
-                {/* Top Section */}
+                {/* Top Section }
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-4 min-w-0">
-                    {/* Subject Image */}
+                    {/* Subject Image }
                     <div className="shrink-0">
                       {subject.image ? (
                         <img
@@ -192,7 +279,7 @@ const page = () => {
                       )}
                     </div>
 
-                    {/* Info */}
+                    {/* Info }
                     <div className="min-w-0">
                       <h3 className="text-lg font-bold text-gray-900 truncate">{subject.name}</h3>
                       {subject.title && (
@@ -206,7 +293,7 @@ const page = () => {
                     </div>
                   </div>
 
-                  {/* ✅ Standard PrimeReact Buttons */}
+                  {/* Standard PrimeReact Buttons }
                   <div className="flex gap-2 shrink-0">
                     <Button
                       icon={<GoPencil size={16} />}
@@ -233,7 +320,7 @@ const page = () => {
                   </div>
                 </div>
 
-                {/* Stats Row */}
+                {/* Stats Row }
                 <div className="flex items-center gap-0 mt-4 pt-4 border-t border-gray-100">
                   <div className="flex-1 text-center">
                     <div className="text-lg font-bold text-gray-900">
@@ -272,6 +359,7 @@ const page = () => {
           ))
         )}
       </div>
+      */}
 
       <CommonDialog
         visible={isDeleteModalOpen}

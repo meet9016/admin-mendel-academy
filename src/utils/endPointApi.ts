@@ -81,6 +81,7 @@ export interface EndPointApi {
     deleteSubjectInfo?: string;
     getByIdSubjectInfo?: string;
     updateSubjectInfo?: string;
+    bulkUploadSubjectInfo?: string;
 
     //Cart
     getAllCart?: string;
@@ -211,6 +212,7 @@ const endPointApi: EndPointApi = {
     deleteSubjectInfo: 'subject-info/delete',
     getByExamIdSubjectInfo: 'subject-info/getByExamId',
     updateSubjectInfo: 'subject-info/update',
+    bulkUploadSubjectInfo: 'subject-info/bulk-upload',
 
     //Cart
     getAllCart: 'cart/get-all-cart',
