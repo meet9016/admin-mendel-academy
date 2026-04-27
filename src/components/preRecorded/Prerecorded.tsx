@@ -644,7 +644,7 @@ const Prerecorded = () => {
                   value={formData.rating}
                   onChange={(e) => {
                     const value = e.target.value;
-                    if (/^\d*\.?\d?$/.test(value)) {
+                      if (/^\d*\.?\d?$/.test(value)) {
                       const num = parseFloat(value);
                       if (value === '' || value === '.' || (num >= 0 && num <= 5)) {
                         handleChange('rating', value);
