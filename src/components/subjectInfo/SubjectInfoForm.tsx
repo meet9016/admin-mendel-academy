@@ -66,7 +66,7 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
   // seedha prop se derive karo — koi stale value nahi rahegi
   const isEditMode = !!existingSubjectId;
 
-  const [isLoading, setIsLoading] = useState(false); // FIX 2: true se false — pehle true tha isliye blank form flash hoti thi
+  const [isLoading, setIsLoading] = useState(!!existingSubjectId);
   const [formData, setFormData] = useState<FormDataType>({
     exam_id: examId,
     name: "",
@@ -466,10 +466,20 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
 
       form.append("chapters", JSON.stringify(chaptersForSubmit));
 
-      if (mainImage) form.append("image", mainImage);
+      if (mainImage) {
+        form.append("image", mainImage);
+      } else if (isEditMode && formData.image) {
+        // Edit mode ma new image select na kari hoy to existing URL send karo
+        form.append("existing_image", formData.image);
+      }
 
       formData.chapters.forEach((ch, ci) => {
-        if (ch.imageFile) form.append(`chapter_image_${ci}`, ch.imageFile);
+        if (ch.imageFile) {
+          form.append(`chapter_image_${ci}`, ch.imageFile);
+        } else if (isEditMode && ch.image && !ch.imageFile) {
+          // existing chapter image URL preserve karo
+          form.append(`chapter_existing_image_${ci}`, ch.image);
+        }
         ch.topics.forEach((t, ti) => {
           t.lessons.forEach((l, li) => {
             if (l.imageFile) form.append(`lesson_image_${ci}_${ti}_${li}`, l.imageFile);
@@ -583,10 +593,15 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
             <div>
               <Label>Select Image</Label>
               <DropzoneComponent
-                preview={preview}
-                setPreview={setPreview}
-                onFileSelect={(file: File) => setMainImage(file)}
-                // height={358}
+                preview={preview || formData.image || null}
+                setPreview={(url) => {
+                  setPreview(url);
+                  setMainImage(null);
+                }}
+                onFileSelect={(file: File) => {
+                  setMainImage(file);
+                  setPreview(URL.createObjectURL(file));
+                }}
               />
             </div>
           </div>
@@ -644,15 +659,35 @@ const SubjectInfoForm: React.FC<SubjectInfoFormProps> = ({
 
                 <div className="mb-4">
                   <Label>Chapter Image</Label>
-                  <DropzoneComponent
-                    preview={chapterPreviews[chapterIndex] || null}
-                    setPreview={(url) => {
-                      setChapterPreviews((prev) =>
-                        prev.map((p, i) => (i === chapterIndex ? url : p))
-                      );
-                    }}
-                    onFileSelect={(file: File) => handleChapterImageSelect(chapterIndex, file)}
-                  />
+                  {chapter.image && !chapterPreviews[chapterIndex] ? (
+                    <div className="relative">
+                      <img
+                        src={chapter.image}
+                        alt="chapter"
+                        className="w-full h-40 object-cover rounded-xl border border-gray-200 mb-2"
+                      />
+                      <p className="text-xs text-gray-400 text-center">Click below to change image</p>
+                      <DropzoneComponent
+                        preview={null}
+                        setPreview={(url) => {
+                          setChapterPreviews((prev) =>
+                            prev.map((p, i) => (i === chapterIndex ? url : p))
+                          );
+                        }}
+                        onFileSelect={(file: File) => handleChapterImageSelect(chapterIndex, file)}
+                      />
+                    </div>
+                  ) : (
+                    <DropzoneComponent
+                      preview={chapterPreviews[chapterIndex] || null}
+                      setPreview={(url) => {
+                        setChapterPreviews((prev) =>
+                          prev.map((p, i) => (i === chapterIndex ? url : p))
+                        );
+                      }}
+                      onFileSelect={(file: File) => handleChapterImageSelect(chapterIndex, file)}
+                    />
+                  )}
                 </div>
 
                 {/* Topics Section */}

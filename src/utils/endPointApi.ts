@@ -82,6 +82,7 @@ export interface EndPointApi {
     getByIdSubjectInfo?: string;
     updateSubjectInfo?: string;
     bulkUploadSubjectInfo?: string;
+    uploadImageForExcel?: string;
 
     //Cart
     getAllCart?: string;
@@ -213,6 +214,7 @@ const endPointApi: EndPointApi = {
     getByExamIdSubjectInfo: 'subject-info/getByExamId',
     updateSubjectInfo: 'subject-info/update',
     bulkUploadSubjectInfo: 'subject-info/bulk-upload',
+    uploadImageForExcel: 'subject-info/upload-image',
 
     //Cart
     getAllCart: 'cart/get-all-cart',

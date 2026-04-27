@@ -35,6 +35,42 @@ const page = () => {
   const [formKey, setFormKey] = useState(0);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showImageUploader, setShowImageUploader] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState('');
+  const [copied, setCopied] = useState(false);
+  const imageUploadRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUploadForExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageUploading(true);
+    setUploadedImageUrl('');
+    setCopied(false);
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      form.append('project', 'mendel-academy');
+      form.append('folder_structure', 'subject-info');
+      const res = await api.post(`${endPointApi.uploadImageForExcel}`, form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const url = res.data?.file_url || res.data?.url || res.data?.data?.url || '';
+      setUploadedImageUrl(url);
+    } catch (error: any) {
+      alert(error?.response?.data?.message || 'Image upload failed');
+    } finally {
+      setImageUploading(false);
+      if (imageUploadRef.current) imageUploadRef.current.value = '';
+    }
+  };
+
+  const handleCopyUrl = () => {
+    if (!uploadedImageUrl) return;
+    navigator.clipboard.writeText(uploadedImageUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const fetchSubjects = async () => {
     if (!examId) return;
@@ -111,37 +147,23 @@ const page = () => {
 
     const rows = [
       // Biology - Cell Biology - Cell Structure
-      { subject_name: 'Biology', subject_sku: 'BIO-001', subject_title: 'Biology Subject', subject_slogan: 'Life Science', chapter_title: 'Cell Biology', chapter_long_title: 'Intro to Cell Biology', topic_title: 'Cell Structure', subtopic_name: 'Nucleus' },
-      { subject_name: '',        subject_sku: '',        subject_title: '',               subject_slogan: '',            chapter_title: '',            chapter_long_title: '',                    topic_title: '',             subtopic_name: 'Mitochondria' },
-      { subject_name: '',        subject_sku: '',        subject_title: '',               subject_slogan: '',            chapter_title: '',            chapter_long_title: '',                    topic_title: '',             subtopic_name: 'Cell Membrane' },
-      // Biology - Cell Biology - Cell Division
-      { subject_name: '',        subject_sku: '',        subject_title: '',               subject_slogan: '',            chapter_title: '',            chapter_long_title: '',                    topic_title: 'Cell Division', subtopic_name: 'Mitosis' },
-      { subject_name: '',        subject_sku: '',        subject_title: '',               subject_slogan: '',            chapter_title: '',            chapter_long_title: '',                    topic_title: '',             subtopic_name: 'Meiosis' },
-      // Biology - Genetics - DNA Structure
-      { subject_name: '',        subject_sku: '',        subject_title: '',               subject_slogan: '',            chapter_title: 'Genetics',    chapter_long_title: 'Fundamentals of Genetics', topic_title: 'DNA Structure', subtopic_name: 'Double Helix' },
-      { subject_name: '',        subject_sku: '',        subject_title: '',               subject_slogan: '',            chapter_title: '',            chapter_long_title: '',                    topic_title: '',             subtopic_name: 'Base Pairing' },
-      // Biology - Genetics - Heredity
-      { subject_name: '',        subject_sku: '',        subject_title: '',               subject_slogan: '',            chapter_title: '',            chapter_long_title: '',                    topic_title: 'Heredity',     subtopic_name: 'Dominant Traits' },
-      { subject_name: '',        subject_sku: '',        subject_title: '',               subject_slogan: '',            chapter_title: '',            chapter_long_title: '',                    topic_title: '',             subtopic_name: 'Recessive Traits' },
-      // Chemistry - Atomic Structure - Subatomic Particles
-      { subject_name: 'Chemistry', subject_sku: 'CHEM-001', subject_title: 'Chemistry Subject', subject_slogan: 'Matter & Energy', chapter_title: 'Atomic Structure', chapter_long_title: 'Structure of Atom', topic_title: 'Subatomic Particles', subtopic_name: 'Proton' },
-      { subject_name: '',          subject_sku: '',          subject_title: '',                 subject_slogan: '',               chapter_title: '',                chapter_long_title: '',               topic_title: '',                   subtopic_name: 'Neutron' },
-      { subject_name: '',          subject_sku: '',          subject_title: '',                 subject_slogan: '',               chapter_title: '',                chapter_long_title: '',               topic_title: '',                   subtopic_name: 'Electron' },
-      // Chemistry - Atomic Structure - Atomic Models
-      { subject_name: '',          subject_sku: '',          subject_title: '',                 subject_slogan: '',               chapter_title: '',                chapter_long_title: '',               topic_title: 'Atomic Models',      subtopic_name: 'Bohr Model' },
-      { subject_name: '',          subject_sku: '',          subject_title: '',                 subject_slogan: '',               chapter_title: '',                chapter_long_title: '',               topic_title: '',                   subtopic_name: 'Quantum Model' },
-      // Chemistry - Chemical Bonding - Ionic Bonds
-      { subject_name: '',          subject_sku: '',          subject_title: '',                 subject_slogan: '',               chapter_title: 'Chemical Bonding', chapter_long_title: 'Types of Chemical Bonds', topic_title: 'Ionic Bonds', subtopic_name: 'Cation Formation' },
-      { subject_name: '',          subject_sku: '',          subject_title: '',                 subject_slogan: '',               chapter_title: '',                 chapter_long_title: '',               topic_title: '',            subtopic_name: 'Anion Formation' },
-      // Chemistry - Chemical Bonding - Covalent Bonds
-      { subject_name: '',          subject_sku: '',          subject_title: '',                 subject_slogan: '',               chapter_title: '',                 chapter_long_title: '',               topic_title: 'Covalent Bonds', subtopic_name: 'Single Bond' },
-      { subject_name: '',          subject_sku: '',          subject_title: '',                 subject_slogan: '',               chapter_title: '',                 chapter_long_title: '',               topic_title: '',               subtopic_name: 'Double Bond' },
+      { subject_name: 'Biology', subject_sku: 'BIO-001', subject_title: 'Biology Subject', subject_slogan: 'Life Science', subject_image_url: 'https://example.com/biology.jpg', chapter_title: 'Cell Biology', chapter_long_title: 'Intro to Cell Biology', chapter_image_url: 'https://example.com/cell-bio.jpg', topic_title: 'Cell Structure', subtopic_name: 'Nucleus' },
+      { subject_name: '',        subject_sku: '',        subject_title: '',               subject_slogan: '',            subject_image_url: '',                                  chapter_title: '',            chapter_long_title: '',                    chapter_image_url: '',                                       topic_title: '',             subtopic_name: 'Mitochondria' },
+      { subject_name: '',        subject_sku: '',        subject_title: '',               subject_slogan: '',            subject_image_url: '',                                  chapter_title: '',            chapter_long_title: '',                    chapter_image_url: '',                                       topic_title: '',             subtopic_name: 'Cell Membrane' },
+      { subject_name: '',        subject_sku: '',        subject_title: '',               subject_slogan: '',            subject_image_url: '',                                  chapter_title: '',            chapter_long_title: '',                    chapter_image_url: '',                                       topic_title: 'Cell Division', subtopic_name: 'Mitosis' },
+      { subject_name: '',        subject_sku: '',        subject_title: '',               subject_slogan: '',            subject_image_url: '',                                  chapter_title: '',            chapter_long_title: '',                    chapter_image_url: '',                                       topic_title: '',             subtopic_name: 'Meiosis' },
+      { subject_name: '',        subject_sku: '',        subject_title: '',               subject_slogan: '',            subject_image_url: '',                                  chapter_title: 'Genetics',    chapter_long_title: 'Fundamentals of Genetics', chapter_image_url: 'https://example.com/genetics.jpg',      topic_title: 'DNA Structure', subtopic_name: 'Double Helix' },
+      { subject_name: '',        subject_sku: '',        subject_title: '',               subject_slogan: '',            subject_image_url: '',                                  chapter_title: '',            chapter_long_title: '',                    chapter_image_url: '',                                       topic_title: '',             subtopic_name: 'Base Pairing' },
+      { subject_name: 'Chemistry', subject_sku: 'CHEM-001', subject_title: 'Chemistry Subject', subject_slogan: 'Matter & Energy', subject_image_url: 'https://example.com/chemistry.jpg', chapter_title: 'Atomic Structure', chapter_long_title: 'Structure of Atom', chapter_image_url: 'https://example.com/atomic.jpg', topic_title: 'Subatomic Particles', subtopic_name: 'Proton' },
+      { subject_name: '',          subject_sku: '',          subject_title: '',                 subject_slogan: '',               subject_image_url: '',                                    chapter_title: '',                chapter_long_title: '',               chapter_image_url: '',                                    topic_title: '',                   subtopic_name: 'Neutron' },
+      { subject_name: '',          subject_sku: '',          subject_title: '',                 subject_slogan: '',               subject_image_url: '',                                    chapter_title: '',                chapter_long_title: '',               chapter_image_url: '',                                    topic_title: '',                   subtopic_name: 'Electron' },
     ];
 
     const ws = XLSX.utils.json_to_sheet(rows);
     ws['!cols'] = [
-      { wch: 18 }, { wch: 14 }, { wch: 20 }, { wch: 18 },
-      { wch: 22 }, { wch: 28 }, { wch: 22 }, { wch: 22 },
+      { wch: 16 }, { wch: 12 }, { wch: 18 }, { wch: 16 }, { wch: 35 },
+      { wch: 20 }, { wch: 26 }, { wch: 35 },
+      { wch: 20 }, { wch: 20 },
     ];
     XLSX.utils.book_append_sheet(wb, ws, 'Subjects');
     XLSX.writeFile(wb, 'sample_subjects.xlsx');
@@ -193,6 +215,11 @@ const page = () => {
             onClick={handleDownloadSample}
             className="border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2">
             Sample Excel
+          </button>
+          <button
+            onClick={() => { setShowImageUploader(true); setUploadedImageUrl(''); setCopied(false); }}
+            className="border border-blue-400 hover:bg-blue-50 text-blue-700 px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2">
+            🖼 Upload Image → URL
           </button>
           <button
             onClick={() => fileInputRef.current?.click()}
@@ -360,6 +387,76 @@ const page = () => {
         )}
       </div>
       */}
+
+      {/* Image Upload Helper Modal */}
+      {showImageUploader && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gray-900">Upload Image → Get URL</h3>
+              <button onClick={() => setShowImageUploader(false)} className="text-gray-400 hover:text-black text-xl">✕</button>
+            </div>
+
+            <p className="text-sm text-gray-500 mb-4">
+              Image upload કરો, URL copy કરો, Excel ની <b>subject_image_url</b> અથવા <b>chapter_image_url</b> column માં paste કરો.
+            </p>
+
+            <input
+              ref={imageUploadRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageUploadForExcel}
+            />
+
+            <button
+              onClick={() => imageUploadRef.current?.click()}
+              disabled={imageUploading}
+              className="w-full border-2 border-dashed border-gray-300 hover:border-[#ffcb07] rounded-xl py-8 text-center text-gray-500 hover:text-gray-700 transition disabled:opacity-50"
+            >
+              {imageUploading ? (
+                <span className="text-sm">⏳ Uploading...</span>
+              ) : (
+                <div>
+                  <div className="text-3xl mb-2">🖼️</div>
+                  <div className="text-sm font-medium">Click to select image</div>
+                  <div className="text-xs text-gray-400 mt-1">JPG, PNG, WEBP</div>
+                </div>
+              )}
+            </button>
+
+            {uploadedImageUrl && (
+              <div className="mt-4">
+                <img src={uploadedImageUrl} alt="preview" className="w-full h-32 object-cover rounded-lg mb-3 border" />
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={uploadedImageUrl}
+                    className="flex-1 text-xs border border-gray-200 rounded-lg px-3 py-2 bg-gray-50 text-gray-600 truncate"
+                  />
+                  <button
+                    onClick={handleCopyUrl}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                      copied ? 'bg-green-500 text-white' : 'bg-[#ffcb07] hover:bg-[#e6b800] text-black'
+                    }`}
+                  >
+                    {copied ? '✓ Copied!' : 'Copy URL'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={() => { imageUploadRef.current?.click(); }}
+              disabled={imageUploading}
+              className="mt-4 w-full text-sm text-gray-400 hover:text-gray-600 disabled:opacity-50"
+            >
+              Upload another image
+            </button>
+          </div>
+        </div>
+      )}
 
       <CommonDialog
         visible={isDeleteModalOpen}
