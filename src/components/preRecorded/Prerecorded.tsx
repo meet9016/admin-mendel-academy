@@ -637,18 +637,26 @@ const Prerecorded = () => {
             </div>
             <div>
               <Label>Rating</Label>
-              <Input
-                placeholder="Enter rating"
-                type="text"
-                value={formData.rating}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (/^\d*$/.test(value)) {
-                    handleChange("rating", e.target.value);
-                  }
-                }}
-                error={errors.rating}
-              />
+              <div className="relative">
+                <Input
+                  placeholder="Enter rating"
+                  type="text"
+                  value={formData.rating}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^\d*\.?\d*$/.test(value)) {
+                      const num = parseFloat(value);
+                      if (value === '' || value === '.' || (num >= 0 && num <= 5)) {
+                        handleChange('rating', value);
+                      }
+                    }
+                  }}
+                  error={errors.rating}
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium pointer-events-none">
+                  / 5
+                </span>
+              </div>
               {errors.rating && <p className="text-sm text-error-500 mt-1">{errors.rating}</p>}
             </div>
           </div>
