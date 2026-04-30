@@ -6,12 +6,14 @@ interface DropzoneProps {
   preview: string | null;
   setPreview: React.Dispatch<React.SetStateAction<string | null>>;
   onFileSelect?: (file: File) => void;
+  className?: string;
 }
 
 const DropzoneComponent: React.FC<DropzoneProps> = ({
   preview,
   setPreview,
   onFileSelect,
+  className,
 }) => {
   const onDrop = (acceptedFiles: File[]) => {
     if (acceptedFiles && acceptedFiles.length > 0) {
@@ -38,8 +40,8 @@ const DropzoneComponent: React.FC<DropzoneProps> = ({
         {...getRootProps()}
         // 🔹 Fixed overall height
         className={`transition border border-gray-300 border-dashed rounded-xl 
-          p-8 flex flex-col items-center justify-center cursor-pointer 
-          h-80 sm:h-90
+          p-4 flex flex-col items-center justify-center cursor-pointer 
+          ${className ? className : "h-80 sm:h-90"}
           ${
             isDragActive
               ? "border-brand-500 bg-gray-100 dark:bg-gray-800"
@@ -50,17 +52,18 @@ const DropzoneComponent: React.FC<DropzoneProps> = ({
 
         {/* If preview exists, show image inside box */}
         {preview ? (
-          <div className="relative flex flex-col items-center justify-center">
+          <div className="relative flex flex-col items-center justify-center h-full w-full">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={preview}
               alt="Preview"
-              className="max-w-full rounded-lg border border-gray-300 shadow-md"
-              style={{ maxHeight: '300px' }}
+              className="max-h-full max-w-full rounded-lg border border-gray-300 shadow-sm object-contain"
             />
-            <p className="text-sm text-gray-600 dark:text-gray-300 mt-4 text-center">
-              Drag & drop another image or click to change
-            </p>
+            {!className?.includes('h-[') && (
+               <p className="text-sm text-gray-600 dark:text-gray-300 mt-4 text-center">
+                Drag & drop another image or click to change
+              </p>
+            )}
           </div>
         ) : (
           // Default state (no image)
@@ -87,9 +90,11 @@ const DropzoneComponent: React.FC<DropzoneProps> = ({
               {isDragActive ? "Drop Files Here" : "Drag & Drop Files Here"}
             </h4>
 
+            {!className?.includes('h-[') && (
             <span className="mb-4 block w-full max-w-[290px] text-sm text-gray-700 dark:text-gray-400">
               Drag and drop your PNG, JPG, WebP, SVG images here or browse
             </span>
+            )}
 
             <span className="font-medium underline text-theme-sm text-brand-500">
               Browse File

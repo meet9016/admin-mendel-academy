@@ -7,13 +7,14 @@ import Button from "../ui/button/Button";
 import ComponentCard from "../common/ComponentCard";
 import Radio from "../form/input/Radio";
 import DatePicker from "../form/date-picker";
-import { FaMinus, FaPlus } from "react-icons/fa6";
+import { FaMinus, FaPlus, FaBook, FaInfoCircle, FaUserTie, FaImages, FaLayerGroup, FaGraduationCap } from "react-icons/fa";
 import Checkbox from "../form/input/Checkbox";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import { toast } from "react-toastify";
 import { LiveCoursesSkeleton } from "../skeltons/Skeltons";
+import DropzoneComponent from "../blogs/DropZone";
 
 interface ModuleType {
   module_number: number | string;
@@ -27,8 +28,17 @@ interface ModuleType {
 
 interface FormDataType {
   title: string;
+  hero_subtitle: string;
+  course_image: string;
+  students_enrolled: string;
+  left_this_week: string;
+  master_features: string[];
+  course_includes: string[];
   instructor_name: string;
   instructor_qualification: string;
+  instructor_experience: string;
+  instructor_students_taught: string;
+  instructor_quote: string;
   duration: string;
   zoom_link: string;
   date: string;
@@ -46,8 +56,17 @@ const LiveCourses = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<FormDataType>({
     title: "",
+    hero_subtitle: "",
+    course_image: "",
+    students_enrolled: "",
+    left_this_week: "",
+    master_features: [""],
+    course_includes: [""],
     instructor_name: "",
     instructor_qualification: "",
+    instructor_experience: "",
+    instructor_students_taught: "",
+    instructor_quote: "",
     duration: "",
     zoom_link: "",
     date: "",
@@ -85,6 +104,9 @@ const LiveCourses = () => {
     ],
   });
 
+  const [preview, setPreview] = useState<string | null>(null);
+  const [mainImage, setMainImage] = useState<File | null>(null);
+
   const handleChange = (e: any) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -111,6 +133,40 @@ const LiveCourses = () => {
     setFormData((prev) => ({
       ...prev,
       tags: prev.tags.filter((_, idx) => idx !== i),
+    }));
+  };
+
+  const addMasterFeature = () => {
+    setFormData((prev) => ({ ...prev, master_features: [...prev.master_features, ""] }));
+  };
+
+  const handleMasterFeatureChange = (i: number, value: string) => {
+    const features = [...formData.master_features];
+    features[i] = value;
+    setFormData((prev) => ({ ...prev, master_features: features }));
+  };
+
+  const removeMasterFeature = (i: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      master_features: prev.master_features.filter((_, idx) => idx !== i),
+    }));
+  };
+
+  const addCourseInclude = () => {
+    setFormData((prev) => ({ ...prev, course_includes: [...prev.course_includes, ""] }));
+  };
+
+  const handleCourseIncludeChange = (i: number, value: string) => {
+    const includes = [...formData.course_includes];
+    includes[i] = value;
+    setFormData((prev) => ({ ...prev, course_includes: includes }));
+  };
+
+  const removeCourseInclude = (i: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      course_includes: prev.course_includes.filter((_, idx) => idx !== i),
     }));
   };
 
@@ -162,8 +218,17 @@ const LiveCourses = () => {
           setFormData((prev) => ({
             ...prev,
             title: data.course_title ?? "",
+            hero_subtitle: data.hero_subtitle ?? "",
+            course_image: data.course_image ?? "",
+            students_enrolled: data.students_enrolled ?? "",
+            left_this_week: data.left_this_week ?? "",
+            master_features: data.master_features ?? [""],
+            course_includes: data.course_includes ?? [""],
             instructor_name: data.instructor?.name ?? "",
             instructor_qualification: data.instructor?.qualification ?? "",
+            instructor_experience: data.instructor?.experience ?? "",
+            instructor_students_taught: data.instructor?.students_taught ?? "",
+            instructor_quote: data.instructor?.quote ?? "",
             duration: data.duration ?? "",
             zoom_link: data.zoom_link ?? "",
             date: data.date ?? "",
@@ -197,12 +262,25 @@ const LiveCourses = () => {
               return apiModules;
             })(),
           }));
+
+          if (data.course_image) {
+            setPreview(data.course_image);
+          }
         } else {
           // Create mode - set default empty form
           setFormData({
             title: "",
+            hero_subtitle: "",
+            course_image: "",
+            students_enrolled: "",
+            left_this_week: "",
+            master_features: [""],
+            course_includes: [""],
             instructor_name: "",
             instructor_qualification: "",
+            instructor_experience: "",
+            instructor_students_taught: "",
+            instructor_quote: "",
             duration: "",
             zoom_link: "",
             date: "",
@@ -258,9 +336,24 @@ const LiveCourses = () => {
     try {
       setIsSubmitting(true);
 
+      let uploadedImageUrl = formData.course_image;
+      if (mainImage) {
+        const formDataUpload = new FormData();
+        formDataUpload.append("file", mainImage);
+        const resUpload = await api.post(endPointApi.uploadImageForExcel!, formDataUpload, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        if (resUpload.data.success) {
+          uploadedImageUrl = resUpload.data.file_url;
+        }
+      }
+
       const instructorObj = {
         name: formData.instructor_name,
         qualification: formData.instructor_qualification,
+        experience: formData.instructor_experience,
+        students_taught: formData.instructor_students_taught,
+        quote: formData.instructor_quote,
         image: ""
       };
 
@@ -297,6 +390,12 @@ const LiveCourses = () => {
 
       const body = {
         course_title: formData.title,
+        hero_subtitle: formData.hero_subtitle,
+        course_image: uploadedImageUrl,
+        students_enrolled: formData.students_enrolled,
+        left_this_week: formData.left_this_week,
+        master_features: formData.master_features.filter(f => f.trim() !== ""),
+        course_includes: formData.course_includes.filter(i => i.trim() !== ""),
         date: formData.date,
         instructor_name: formData.instructor_name,
         status: formData.status,
@@ -331,159 +430,392 @@ const LiveCourses = () => {
   }
 
   return (
-    <>
-      <div className="space-y-6">
-        <ComponentCard title={id ? "Edit Live Course" : "Add Live Courses"} name="">
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <Label>Course Title</Label>
-                <Input
-                  placeholder="Enter course title"
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                />
-              </div>
-              <div>
-                <Label>Instructor Name</Label>
-                <Input
-                  placeholder="Enter instructor name"
-                  type="text"
-                  name="instructor_name"
-                  value={formData.instructor_name}
-                  onChange={handleChange}
-                />
-              </div>
-              <div>
-                <Label>Instructor Qualification</Label>
-                <Input
-                  placeholder="Enter instructor qualification"
-                  type="text"
-                  name="instructor_qualification"
-                  value={formData.instructor_qualification}
-                  onChange={handleChange}
-                />
-              </div>
+    <div className="max-w-[1200px] mx-auto pb-20">
+
+ <ComponentCard title={id ? "Edit Live Course" : "Add Live Courses"} name="">
+      <div className="space-y-8">
+        {/* SECTION 1: BASIC INFORMATION */}
+        <div className="bg-white p-4 rounded-3xl shadow-sm border border-gray-100">
+          <div className="flex items-center gap-3 mb-2 pb-2 border-b border-gray-50">
+            <div className="w-10 h-10 rounded-xl bg-[#FFCA00]/10 flex items-center justify-center text-[#FFCA00]">
+              <FaBook size={20} />
+            </div>
+            <h2 className="text-xl font-bold text-gray-800">Basic Information</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-2">
+              <Label className="text-gray-700 font-semibold">Course Title</Label>
+                 <Input
+                placeholder="Enter course title"
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                className="h-12 bg-gray-50/50 border-gray-200 focus:bg-white transition-all"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-gray-700 font-semibold">Hero Subtitle</Label>
+              <Input
+                placeholder="Brief course overview for the hero section"
+                type="text"
+                name="hero_subtitle"
+                value={formData.hero_subtitle}
+                onChange={handleChange}
+                className="h-12 bg-gray-50/50 border-gray-200 focus:bg-white transition-all"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* SECTION 2: VISUALS & CORE METRICS */}
+        <div className="bg-white p-4 rounded-3xl shadow-sm border border-gray-100">
+          <div className="flex items-center gap-3 mb-2 pb-2 border-b border-gray-50">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500">
+              <FaImages size={20} />
+            </div>
+            <h2 className="text-xl font-bold text-gray-800">Visuals & Metrics</h2>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Left: Specimen Image */}
+            <div className="lg:col-span-4 space-y-1">
+              <Label className="text-gray-700 font-semibold">Course Specimen Image</Label>
+              <DropzoneComponent
+                preview={preview}
+                setPreview={setPreview}
+                onFileSelect={(file: File) => setMainImage(file)}
+                className="h-[180px]"
+              />
+              <p className="text-xs text-gray-400">High-quality pathology images recommended (16:9 ratio)</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <Label>Duration</Label>
-                <Input
-                  type="text"
-                  placeholder="Enter duration"
-                  name="duration"
-                  value={formData.duration}
-                  onChange={handleChange}
-                />
+            {/* Right: Core Metrics */}
+            <div className="lg:col-span-8 space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label className="text-gray-700 font-semibold">Students Enrolled</Label>
+                  <Input
+                    placeholder="Enter instructor qualification"
+                    type="text"
+                    name="students_enrolled"
+                    value={formData.students_enrolled}
+                    onChange={handleChange}
+                    className="h-12"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-gray-700 font-semibold">Left This Week</Label>
+                  <Input
+                    placeholder="e.g. 36"
+                    type="text"
+                    name="left_this_week"
+                    value={formData.left_this_week}
+                    onChange={handleChange}
+                    className="h-12"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-gray-700 font-semibold">Course Duration</Label>
+                  <Input
+                    type="text"
+                    placeholder="e.g. 8 weeks"
+                    name="duration"
+                    value={formData.duration}
+                    onChange={handleChange}
+                    className="h-12"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <DatePicker
+                    id="date-picker"
+                    label="Next Session Date"
+                    placeholder="Select date"
+                    defaultDate={formData.date}
+                    onChange={handleDateChange}
+                  />
+                </div>
               </div>
-              <div>
-                <Label>Zoom Link</Label>
+              
+              <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <FaInfoCircle />
+                  <span className="text-sm font-medium text-gray-600">These metrics are displayed in the feature cards.</span>
+                </div>
+                <div className="flex items-center gap-4">
+                   <div className="flex items-center gap-2">
+                     <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Sold Out</span>
+                     <Checkbox
+                        checked={formData.soldOut}
+                        onChange={(checked: boolean) =>
+                          setFormData(prev => ({ ...prev, soldOut: checked }))
+                        }
+                      />
+                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* SECTION 3: INSTRUCTOR DETAILS */}
+        <div className="bg-white p-4 rounded-3xl shadow-sm border border-gray-100">
+          <div className="flex items-center gap-3 mb-2 pb-2 border-b border-gray-50">
+            <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-500">
+              <FaUserTie size={20} />
+            </div>
+            <h2 className="text-xl font-bold text-gray-800">Instructor Profile</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="space-y-2">
+              <Label className="text-gray-700 font-semibold">Name</Label>
+              <Input
+                placeholder="Dr. Nandkishore Managoli"
+                type="text"
+                name="instructor_name"
+                value={formData.instructor_name}
+                onChange={handleChange}
+                className="h-12"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-gray-700 font-semibold">Qualification</Label>
+              <Input
+                placeholder="MD, Senior Surgical Pathologist"
+                type="text"
+                name="instructor_qualification"
+                value={formData.instructor_qualification}
+                onChange={handleChange}
+                className="h-12"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-gray-700 font-semibold">Experience</Label>
+              <Input
+                placeholder="e.g. 30+ Years Experience"
+                type="text"
+                name="instructor_experience"
+                value={formData.instructor_experience}
+                onChange={handleChange}
+                className="h-12"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-gray-700 font-semibold">Students Taught</Label>
+              <Input
+                placeholder="e.g. 1000+ Students"
+                type="text"
+                name="instructor_students_taught"
+                value={formData.instructor_students_taught}
+                onChange={handleChange}
+                className="h-12"
+              />
+            </div>
+            <div className="md:col-span-2 space-y-2">
+              <Label className="text-gray-700 font-semibold">Instructor Quote</Label>
+              <Input
+                placeholder="A professional quote from the instructor"
+                type="text"
+                name="instructor_quote"
+                value={formData.instructor_quote}
+                onChange={handleChange}
+                className="h-12"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* SECTION 4: LOGISTICS & CATEGORY */}
+        <div className="bg-white p-4  rounded-3xl shadow-sm border border-gray-100">
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#FFCA00]/10 flex items-center justify-center text-[#FFCA00]">
+                    <FaLayerGroup size={16} />
+                  </div>
+                  <h3 className="font-bold text-gray-800">Course Status</h3>
+                </div>
+                <div className="flex items-center gap-6 p-2 bg-gray-50 rounded-2xl border border-gray-100 w-fit">
+                   <Radio
+                      id="status_live"
+                      label="Live"
+                      name="status"
+                      value="live"
+                      checked={formData.status === "live"}
+                      onChange={() => handleRadioChange("live")}
+                    />
+                    <Radio
+                      id="status_recorded"
+                      label="Recorded"
+                      name="status"
+                      value="recorded"
+                      checked={formData.status === "recorded"}
+                      onChange={() => handleRadioChange("recorded")}
+                    />
+                    <Radio
+                      id="status_upcoming"
+                      label="Upcoming"
+                      name="status"
+                      value="upcoming"
+                      checked={formData.status === "upcoming"}
+                      onChange={() => handleRadioChange("upcoming")}
+                    />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                   <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center text-green-500">
+                    <FaInfoCircle size={16} />
+                  </div>
+                  <h3 className="font-bold text-gray-800">Session Link</h3>
+                </div>
                 <Input
-                  placeholder="Enter zoom link"
+                  placeholder="Enter Zoom or Meeting Link"
                   type="text"
                   name="zoom_link"
                   value={formData.zoom_link}
                   onChange={handleChange}
+                  className="h-10"
                 />
               </div>
-              <div>
-                <DatePicker
-                  id="date-picker"
-                  label="Date Picker Input"
-                  placeholder="Select a date"
-                  defaultDate={formData.date}
-                  onChange={handleDateChange}
-                />
-              </div>
-            </div>
+           </div>
+        </div>
 
-            <div className="mt-6">
-              <div className="flex items-center justify-between mb-2">
-                <Label>Instructor Tags</Label>
-                <button
-                  type="button"
-                  onClick={addTag}
-                  className="bg-[#FFCA00] text-white w-8 h-8 flex items-center justify-center rounded-md hover:bg-[#FFCA00] transition-colors duration-200"
-                >
-                  <FaPlus />
-                </button>
-              </div>
+        {/* SECTION 5: CURRICULUM & FEATURES */}
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+  
+  {/* What You'll Master */}
+  <div className="bg-white p-4 rounded-3xl shadow-sm border border-gray-100 h-[250px] flex flex-col">
+    
+    {/* Header */}
+    <div className="flex justify-between items-center mb-2">
+      <h3 className="font-bold text-gray-800 flex items-center gap-2">
+        <div className="w-2 h-6 bg-[#FFCA00] rounded-full"></div>
+        What You'll Master
+      </h3>
+      <button
+        type="button"
+        onClick={addMasterFeature}
+        className="bg-[#FFCA00] text-white w-8 h-8 rounded-md flex items-center justify-center transition-all hover:bg-[#FFB000]"
+      >
+        <FaPlus size={14} />
+      </button>
+    </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {formData.tags.map((tag, i) => (
-                  <div key={i} className="relative">
-                    <Input
-                      type="text"
-                      placeholder={`Tag ${i + 1}`}
-                      value={tag}
-                      onChange={(e) => handleTagChange(i, e.target.value)}
-                    />
+    {/* Scroll Area */}
+    <div className="space-y-4 overflow-y-auto pr-2 flex-1">
+      {formData.master_features.map((feature, i) => (
+        <div key={i} className="relative group">
+            <Input
+              placeholder={`Outcome ${i + 1}`}
+              value={feature}
+              onChange={(e) =>
+                handleMasterFeatureChange(i, e.target.value)
+              }
+              className="pr-10"
+            />
+          {formData.master_features.length > 1 && (
+            <button
+              type="button"
+              onClick={() => removeMasterFeature(i)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 border border-[#FFCA00] w-7 h-7 text-[#FFCA00] rounded-md flex items-center justify-center hover:bg-[#FFCA00] hover:text-white transition-all"
+            >
+              <FaMinus size={12} />
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
 
-                    {formData.tags.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeTag(i)}
-                        className="absolute right-3 top-[22px] transform -translate-y-1/2 
-                       border border-[#FFCA00] text-[#FFCA00] w-8 h-8 rounded-md 
-                       flex items-center justify-center hover:bg-[#FFCA00] 
-                       hover:text-white transition-colors duration-200"
-                      >
-                        <FaMinus />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
+  {/* Course Includes */}
+  <div className="bg-white p-4 rounded-3xl shadow-sm border border-gray-100 h-[250px] flex flex-col">
+    
+    {/* Header */}
+    <div className="flex justify-between items-center mb-2">
+      <h3 className="font-bold text-gray-800 flex items-center gap-2">
+        <div className="w-2 h-6 bg-[#FFCA00] rounded-full"></div>
+        Course Includes
+      </h3>
+      <button
+        type="button"
+        onClick={addCourseInclude}
+        className="bg-[#FFCA00] text-white w-8 h-8 rounded-md flex items-center justify-center transition-all hover:bg-[#FFB000]"
+      >
+        <FaPlus size={14} />
+      </button>
+    </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label>Status</Label>
-                <div className="flex flex-wrap items-center gap-8 mt-2">
-                  <Radio
-                    id="status_live"
-                    label="live"
-                    name="status"
-                    value="live"
-                    checked={formData.status === "live"}
-                    onChange={() => handleRadioChange("live")}
+    {/* Scroll Area */}
+    <div className="space-y-4 overflow-y-auto pr-2 flex-1">
+      {formData.course_includes.map((include, i) => (
+        <div key={i} className="relative group">
+            <Input
+              placeholder={`Benefit ${i + 1}`}
+              value={include}
+              onChange={(e) =>
+                handleCourseIncludeChange(i, e.target.value)
+              }
+              className="pr-10"
+            />
+          {formData.course_includes.length > 1 && (
+            <button
+              type="button"
+              onClick={() => removeCourseInclude(i)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 border border-[#FFCA00] w-7 h-7 text-[#FFCA00] rounded-md flex items-center justify-center hover:bg-[#FFCA00] hover:text-white transition-all"
+            >
+              <FaMinus size={12} />
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+
+        {/* Tags Section */}
+        <div className="bg-white p-4 rounded-3xl shadow-sm border border-gray-100">
+           <div className="flex justify-between items-center mb-2">
+              <h3 className="font-bold text-gray-800 flex items-center gap-2">
+                <FaGraduationCap className="text-[#FFCA00]" />
+                Instructor Tags
+              </h3>
+              <button 
+                type="button" 
+                onClick={addTag} 
+                className="bg-[#FFCA00] text-white w-8 h-8 rounded-md flex items-center justify-center transition-all hover:bg-[#FFB000]"
+              >
+                <FaPlus size={14} />
+              </button>
+           </div>
+           <div className="flex flex-wrap gap-4">
+             {formData.tags.map((tag, i) => (
+               <div key={i} className="relative group">
+                 <input
+                    type="text"
+                    placeholder="Tag name"
+                    value={tag}
+                    onChange={(e) => handleTagChange(i, e.target.value)}
+                    className="bg-gray-50 p-2 pr-10 rounded-xl border border-gray-100 text-sm font-medium w-36 focus:ring-2 focus:ring-[#FFCA00] outline-none transition-all"
                   />
-                  <Radio
-                    id="status_recorded"
-                    label="recorded"
-                    name="status"
-                    value="recorded"
-                    checked={formData.status === "recorded"}
-                    onChange={() => handleRadioChange("recorded")}
-                  />
-                  <Radio
-                    id="status_upcoming"
-                    label="upcoming"
-                    name="status"
-                    value="upcoming"
-                    checked={formData.status === "upcoming"}
-                    onChange={() => handleRadioChange("upcoming")}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label>Sold Out</Label>
-                <Checkbox
-                  checked={formData.soldOut}
-                  onChange={(checked: boolean) =>
-                    setFormData(prev => ({ ...prev, soldOut: checked }))
-                  }
-                />
-              </div>
-            </div>
-          </div>
-        </ComponentCard>
+                  {formData.tags.length > 1 && (
+                    <button 
+                      type="button" 
+                      onClick={() => removeTag(i)} 
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 hover:text-red-400 transition-colors"
+                    >
+                      <FaMinus size={10} />
+                    </button>
+                  )}
+               </div>
+             ))}
+           </div>
+        </div>
       </div>
-
+</ComponentCard>
       {/* MODULE SECTION */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
         {formData.modules.map((module, mIndex) => (
@@ -604,7 +936,8 @@ const LiveCourses = () => {
           Cancel
         </Button>
       </div>
-    </>
+    </div>
+    
   );
 };
 
