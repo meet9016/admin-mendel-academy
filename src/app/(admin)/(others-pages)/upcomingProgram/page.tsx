@@ -11,7 +11,7 @@ import { PlusIcon } from "@/icons";
 import { Skeleton } from "primereact/skeleton";
 
 type PreRecordType = {
-  id: number;
+  _id: number;
   title: string;
   waitlistCount: string;
   createdAt: string;
@@ -50,7 +50,7 @@ export default function Page() {
     if (!selectedRow) return;
 
     try {
-      const res = await api.delete(`${endPointApi.deleteUpcomeingProgram}/${selectedRow.id}`);
+      const res = await api.delete(`${endPointApi.deleteUpcomeingProgram}/${selectedRow._id}`);
 
       if (res?.data?.message) {
         getPreRecordData(); // Refresh the table/list after deletion
@@ -84,7 +84,7 @@ export default function Page() {
               loading={false}
               totalRecords={totalRecords}
               rows={rows}
-              onPageChange={(newPage: number, newRows:number) => {
+              onPageChange={(newPage: number, newRows: number) => {
                 setPage(newPage);
                 setRows(newRows);
               }}
