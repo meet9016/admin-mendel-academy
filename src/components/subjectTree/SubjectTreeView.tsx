@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronRight, ChevronDown } from "lucide-react";
+import { FiChevronRight, FiChevronDown } from "react-icons/fi";
 import { GoPencil } from "react-icons/go";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { Button } from "primereact/button";
@@ -76,8 +76,8 @@ const SubjectRow = ({ subject, onEdit, onDelete }: {
         onClick={handleToggle}
       >
         {open
-          ? <ChevronDown size={15} className="text-[#FFCA00] shrink-0" />
-          : <ChevronRight size={15} className="text-gray-400 shrink-0" />}
+          ? <FiChevronDown size={15} className="text-[#FFCA00] shrink-0" />
+          : <FiChevronRight size={15} className="text-gray-400 shrink-0" />}
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-1 flex-1 min-w-0">
@@ -86,7 +86,7 @@ const SubjectRow = ({ subject, onEdit, onDelete }: {
               const isLast = i === breadcrumbs.length - 1;
               return (
                 <React.Fragment key={i}>
-                  {i > 0 && <ChevronRight size={12} className="text-gray-400 shrink-0" />}
+                  {i > 0 && <FiChevronRight size={12} className="text-gray-400 shrink-0" />}
                   <button
                     onClick={e => { e.stopPropagation(); if (!isLast) crumb.onClick(); }}
                     className={`text-theme-sm font-medium transition-colors ${isLast ? "text-gray-900 cursor-default" : "text-gray-500 hover:text-gray-800 hover:underline"}`}
@@ -137,7 +137,7 @@ const SubjectRow = ({ subject, onEdit, onDelete }: {
               >
                 {isLeaf
                   ? <span className="w-1.5 h-1.5 rounded-full bg-gray-300 shrink-0" />
-                  : <ChevronRight size={13} className="text-gray-400 shrink-0" />}
+                  : <FiChevronRight size={13} className="text-gray-400 shrink-0" />}
                 <span className="text-theme-sm font-medium text-gray-700">
                   {item.title || item.name}
                 </span>
