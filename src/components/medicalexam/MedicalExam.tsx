@@ -20,6 +20,12 @@ import { decodeHtml, generateSlug } from "@/utils/helper";
 import { examListSchema } from "@/ValidationSchema/validationSchema";
 import { toast } from "react-toastify";
 import { MedicalExamSkeleton } from "../skeltons/Skeltons";
+import GalaxyAppSectionForm, {
+    GalaxyAppSectionData,
+    getDefaultGalaxyAppSection,
+    mapGalaxySectionFromApi,
+    buildGalaxySectionForSubmit,
+} from "./GalaxyAppSectionForm";
 
 interface PlanData {
     id: number | string;
@@ -53,6 +59,15 @@ interface TsunamiData {
     includedServicePriceINR: number | string;
     includedServices: string;
     description: string;
+}
+
+interface SampleRecordedLecture {
+    id?: string;
+    title: string;
+    videoLink: string;
+    subject: string;
+    stripLeft: string;
+    stripRight: string;
 }
 
 interface FormData {
@@ -142,6 +157,8 @@ const MedicalExam = () => {
 
     const [enrollPreview, setEnrollPreview] = useState<string | null>(null);
     const [mainImage, setMainImage] = useState<File | null>(null);
+    const [galaxyAppSection, setGalaxyAppSection] = useState<GalaxyAppSectionData>(getDefaultGalaxyAppSection());
+    const [sampleRecordedLectures, setSampleRecordedLectures] = useState<SampleRecordedLecture[]>([]);
     const descriptionRef = useRef<string>("");
     const enrollDescriptionRef = useRef<string>("");
 
@@ -422,8 +439,24 @@ const MedicalExam = () => {
                     if (data?.who_can_enroll_image) {
                         setEnrollPreview(data.who_can_enroll_image);
                     }
+
+                    setSampleRecordedLectures(
+                        data.sample_recorded_lectures && data.sample_recorded_lectures.length > 0
+                            ? data.sample_recorded_lectures.map((lecture: any) => ({
+                                id: lecture._id,
+                                title: lecture.title ?? "",
+                                videoLink: lecture.video_link ?? "",
+                                subject: lecture.subject ?? "",
+                                stripLeft: lecture.strip_left ?? "",
+                                stripRight: lecture.strip_right ?? "",
+                            }))
+                            : []
+                    );
+
+                    setGalaxyAppSection(mapGalaxySectionFromApi(data));
                 } else {
                     // Create mode - initialize empty form
+                    setSampleRecordedLectures([]);
                     setFormData({
                         country: "",
                         status: "Active",
@@ -458,6 +491,7 @@ const MedicalExam = () => {
                         description: "",
                         image: null,
                     });
+                    setGalaxyAppSection(getDefaultGalaxyAppSection());
                 }
             } catch (err) {
                 console.error("Error fetching data by ID:", err);
@@ -573,6 +607,35 @@ const MedicalExam = () => {
             // Add visibility flags
             formDataToSend.append("is_plan_visible", String(formData.isPlanVisible));
             formDataToSend.append("is_rapid_tools_visible", String(formData.isRapidToolsVisible));
+
+            formDataToSend.append(
+                "sample_recorded_lectures",
+                JSON.stringify(
+                    sampleRecordedLectures
+                        .filter(lecture => lecture.title || lecture.videoLink)
+                        .map(lecture => ({
+                            ...(lecture.id && { _id: lecture.id }),
+                            title: lecture.title,
+                            video_link: lecture.videoLink,
+                            subject: lecture.subject,
+                        }))
+                )
+            );
+
+            formDataToSend.append(
+                "galaxy_app_section",
+                JSON.stringify(buildGalaxySectionForSubmit(galaxyAppSection))
+            );
+            galaxyAppSection.tools.forEach((tool, ti) => {
+                if (tool.sampleImageFile) {
+                    formDataToSend.append(`galaxy_tool_sample_image_${ti}`, tool.sampleImageFile);
+                }
+                tool.cards.forEach((card, ci) => {
+                    if (card.imageFile) {
+                        formDataToSend.append(`galaxy_card_image_${ti}_${ci}`, card.imageFile);
+                    }
+                });
+            });
 
             if (mainImage) {
                 formDataToSend.append("image", mainImage);
@@ -1215,6 +1278,84 @@ const MedicalExam = () => {
                     })}
                 </div>
             </ComponentCard>
+
+            {/* SAMPLE RECORDED LECTURES SECTION */}
+            <ComponentCard
+                title="Sample Recorded Lectures"
+                name=""
+                action={
+                    <button
+                        type="button"
+                        onClick={() => setSampleRecordedLectures([...sampleRecordedLectures, { title: "", videoLink: "", subject: "", stripLeft: "", stripRight: "" }])}
+                        className="bg-[#ffcb07] text-black px-4 py-2 flex items-center gap-2 rounded-md hover:bg-[#ffcb07] transition-colors duration-200"
+                    >
+                        <FaPlus /> Add Lecture
+                    </button>
+                }
+            >
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {sampleRecordedLectures.map((lecture, index) => (
+                        <div key={index} className="relative border border-gray-200 rounded-lg p-4">
+                            <div className="space-y-4">
+                                <div>
+                                    <Label>Lecture Title</Label>
+                                    <Input
+                                        type="text"
+                                        placeholder="e.g. Heart Failure: Compensation Mechanisms"
+                                        value={lecture.title}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                            const updated = [...sampleRecordedLectures];
+                                            updated[index].title = e.target.value;
+                                            setSampleRecordedLectures(updated);
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <Label>Video Link (URL)</Label>
+                                    <Input
+                                        type="text"
+                                        placeholder="https://..."
+                                        value={lecture.videoLink}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                            const updated = [...sampleRecordedLectures];
+                                            updated[index].videoLink = e.target.value;
+                                            setSampleRecordedLectures(updated);
+                                        }}
+                                    />
+                                </div>
+                                <div className="grid grid-cols-3 gap-4">
+                                    <div>
+                                        <Label>Subject</Label>
+                                        <Input
+                                            type="text"
+                                            placeholder="e.g. CARDIOLOGY"
+                                            value={lecture.subject}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                const updated = [...sampleRecordedLectures];
+                                                updated[index].subject = e.target.value;
+                                                setSampleRecordedLectures(updated);
+                                            }}
+                                        />
+                                    </div>
+                                            
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setSampleRecordedLectures(sampleRecordedLectures.filter((_, i) => i !== index))}
+                                className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
+                            >
+                                <IoClose size={14} />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            </ComponentCard>
+
+            <GalaxyAppSectionForm
+                data={galaxyAppSection}
+                onChange={setGalaxyAppSection}
+            />
 
             <div className="flex items-center gap-5">
                 <Button size="sm" variant="primary" onClick={handleSave}>
