@@ -1048,6 +1048,77 @@ const MedicalExam = () => {
                         </div>
                     ))}
                 </div>
+
+                {/* Embedded Sample Recorded Lectures inside Elite Mentorship */}
+                <hr className="my-8 border-gray-200" />
+                
+                <div className="flex justify-between items-center mb-6">
+                    <Label className="text-lg font-bold text-gray-800 mb-0">Sample Recorded Lectures</Label>
+                    <button
+                        type="button"
+                        onClick={() => setSampleRecordedLectures([...sampleRecordedLectures, { title: "", videoLink: "", subject: "", stripLeft: "", stripRight: "" }])}
+                        className="bg-[#ffcb07] text-black px-4 py-2 flex items-center gap-2 rounded-md hover:bg-[#ffcb07] transition-colors duration-200 text-sm font-semibold"
+                    >
+                        <FaPlus /> Add Lecture
+                    </button>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {sampleRecordedLectures.map((lecture, index) => (
+                        <div key={index} className="relative border border-gray-200 rounded-lg p-4">
+                            <div className="space-y-4">
+                                <div>
+                                    <Label>Lecture Title</Label>
+                                    <Input
+                                        type="text"
+                                        placeholder="e.g. Heart Failure: Compensation Mechanisms"
+                                        value={lecture.title}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                            const updated = [...sampleRecordedLectures];
+                                            updated[index].title = e.target.value;
+                                            setSampleRecordedLectures(updated);
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <Label>Video Link (URL)</Label>
+                                    <Input
+                                        type="text"
+                                        placeholder="https://..."
+                                        value={lecture.videoLink}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                            const updated = [...sampleRecordedLectures];
+                                            updated[index].videoLink = e.target.value;
+                                            setSampleRecordedLectures(updated);
+                                        }}
+                                    />
+                                </div>
+                                <div className="grid grid-cols-3 gap-4">
+                                    <div>
+                                        <Label>Subject</Label>
+                                        <Input
+                                            type="text"
+                                            placeholder="e.g. CARDIOLOGY"
+                                            value={lecture.subject}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                const updated = [...sampleRecordedLectures];
+                                                updated[index].subject = e.target.value;
+                                                setSampleRecordedLectures(updated);
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setSampleRecordedLectures(sampleRecordedLectures.filter((_, i) => i !== index))}
+                                className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
+                            >
+                                <IoClose size={14} />
+                            </button>
+                        </div>
+                    ))}
+                </div>
             </ComponentCard>
 
             {/* TSUNAMI SECTION */}
@@ -1276,79 +1347,6 @@ const MedicalExam = () => {
                             </div>
                         );
                     })}
-                </div>
-            </ComponentCard>
-
-            {/* SAMPLE RECORDED LECTURES SECTION */}
-            <ComponentCard
-                title="Sample Recorded Lectures"
-                name=""
-                action={
-                    <button
-                        type="button"
-                        onClick={() => setSampleRecordedLectures([...sampleRecordedLectures, { title: "", videoLink: "", subject: "", stripLeft: "", stripRight: "" }])}
-                        className="bg-[#ffcb07] text-black px-4 py-2 flex items-center gap-2 rounded-md hover:bg-[#ffcb07] transition-colors duration-200"
-                    >
-                        <FaPlus /> Add Lecture
-                    </button>
-                }
-            >
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {sampleRecordedLectures.map((lecture, index) => (
-                        <div key={index} className="relative border border-gray-200 rounded-lg p-4">
-                            <div className="space-y-4">
-                                <div>
-                                    <Label>Lecture Title</Label>
-                                    <Input
-                                        type="text"
-                                        placeholder="e.g. Heart Failure: Compensation Mechanisms"
-                                        value={lecture.title}
-                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                            const updated = [...sampleRecordedLectures];
-                                            updated[index].title = e.target.value;
-                                            setSampleRecordedLectures(updated);
-                                        }}
-                                    />
-                                </div>
-                                <div>
-                                    <Label>Video Link (URL)</Label>
-                                    <Input
-                                        type="text"
-                                        placeholder="https://..."
-                                        value={lecture.videoLink}
-                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                            const updated = [...sampleRecordedLectures];
-                                            updated[index].videoLink = e.target.value;
-                                            setSampleRecordedLectures(updated);
-                                        }}
-                                    />
-                                </div>
-                                <div className="grid grid-cols-3 gap-4">
-                                    <div>
-                                        <Label>Subject</Label>
-                                        <Input
-                                            type="text"
-                                            placeholder="e.g. CARDIOLOGY"
-                                            value={lecture.subject}
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                                const updated = [...sampleRecordedLectures];
-                                                updated[index].subject = e.target.value;
-                                                setSampleRecordedLectures(updated);
-                                            }}
-                                        />
-                                    </div>
-                                            
-                                </div>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => setSampleRecordedLectures(sampleRecordedLectures.filter((_, i) => i !== index))}
-                                className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
-                            >
-                                <IoClose size={14} />
-                            </button>
-                        </div>
-                    ))}
                 </div>
             </ComponentCard>
 
