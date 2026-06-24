@@ -46,6 +46,7 @@ export interface GalaxyTool {
   sampleImage: string;
   sampleImageFile?: File | null;
   cards: GalaxyCard[];
+  toolLink: string;
 }
 
 export interface GalaxyAppSectionData {
@@ -64,8 +65,8 @@ const DEFAULT_TOOL_NAMES = [
   "Fast Facts",
 ];
 
-const emptyOption = (): GalaxyCardOption => ({ text: "", isCorrect: false });
-const emptyCard = (): GalaxyCard => ({
+export const emptyOption = (): GalaxyCardOption => ({ text: "", isCorrect: false });
+export const emptyCard = (): GalaxyCard => ({
   badge: "",
   title: "",
   image: "",
@@ -74,15 +75,15 @@ const emptyCard = (): GalaxyCard => ({
   options: [emptyOption()],
 });
 
-const emptySampleQuestion = (): GalaxySampleQuestion => ({
+export const emptySampleQuestion = (): GalaxySampleQuestion => ({
   badge: "",
   question: "",
   options: [emptyOption(), emptyOption()],
 });
 
-const emptyFlashcardQA = (): GalaxyFlashcardQA => ({ question: "", answer: "" });
+export const emptyFlashcardQA = (): GalaxyFlashcardQA => ({ question: "", answer: "" });
 
-const emptyTool = (name: string): GalaxyTool => ({
+export const emptyTool = (name: string): GalaxyTool => ({
   toolName: name,
   sectionSubtitle: "",
   bottomText: "",
@@ -105,6 +106,7 @@ const emptyTool = (name: string): GalaxyTool => ({
   sampleImage: "",
   sampleImageFile: null,
   cards: [],
+  toolLink: "",
 });
 
 export const getDefaultGalaxyAppSection = (): GalaxyAppSectionData => ({
@@ -180,6 +182,7 @@ export const mapGalaxySectionFromApi = (data: any): GalaxyAppSectionData => {
         galaxyPer: t.galaxy_per || "Everything included · 1 month+",
         sampleImage: t.sample_image || "",
         sampleImageFile: null,
+        toolLink: t.tool_link || "",
         cards: (t.cards || []).map((c: any) => ({
           badge: c.badge || "",
           title: c.title || "",
@@ -230,6 +233,7 @@ export const buildGalaxySectionForSubmit = (data: GalaxyAppSectionData) => ({
     galaxy_price: tool.galaxyPrice,
     galaxy_per: tool.galaxyPer,
     sample_image: tool.sampleImage,
+    tool_link: tool.toolLink,
     cards: tool.cards.map(({ imageFile, ...card }) => ({
       badge: card.badge,
       title: card.title,

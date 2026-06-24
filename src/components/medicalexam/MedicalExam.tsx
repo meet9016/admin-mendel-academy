@@ -1352,17 +1352,13 @@ const MedicalExam = () => {
                 </div>
             </ComponentCard>
 
-            <GalaxyAppSectionForm
-                data={galaxyAppSection}
-                onChange={setGalaxyAppSection}
-            />
 
-            <div className="flex items-center gap-5">
-                <Button size="sm" variant="primary" onClick={handleSave}>
-                    {id ? "Update" : "Save"}
-                </Button>
+            <div className="sticky bottom-0 z-50 bg-white p-4 border-t border-gray-200 mt-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] rounded-xl flex items-center justify-end gap-5">
                 <Button size="sm" variant="outline" onClick={() => router.push("/medicalexamlist")}>
                     Cancel
+                </Button>
+                <Button size="sm" variant="primary" onClick={handleSave}>
+                    {id ? "Update" : "Save"}
                 </Button>
             </div>
         </div>

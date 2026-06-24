@@ -9,6 +9,7 @@ import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import CommonDialog from "@/components/tables/CommonDialog";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 interface Plan {
   plan_month: string | number;
@@ -112,6 +113,23 @@ export default function DemoPage() {
     router.push(`/medicalexamlist/subject?id=${examId}`);
   };
 
+  const handleOpenToolsList = (row: FormattedData) => {
+    const examId = row.id;
+    if (!examId || examId === 'undefined') {
+      toast.error('Invalid exam ID');
+      return;
+    }
+    
+    // Only allow for USMLE STEP 1 and USMLE STEP 2 CK
+    if (row.exam_name !== "USMLE STEP 1" && row.exam_name !== "USMLE STEP 2 CK") {
+      toast.error('Tool management is only available for USMLE STEP 1 and USMLE STEP 2 CK');
+      return;
+    }
+
+    // Go to tools management page with exam_id
+    router.push(`/medicalexamlist/tools?id=${examId}`);
+  };
+
   useEffect(() => {
     getExamData();
   }, [getExamData]);
@@ -171,6 +189,7 @@ export default function DemoPage() {
                 row.exam_name === "USMLE STEP 2 CK" || 
                 row.exam_name === "USMLE STEP 2 CE"
               }
+              onManageTools={handleOpenToolsList}
             />
           )}
         </div>
@@ -192,6 +211,7 @@ export default function DemoPage() {
           )}
         </div>
       </CommonDialog>
+
     </div>
   );
 }

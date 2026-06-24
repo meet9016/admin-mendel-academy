@@ -11,6 +11,7 @@ import { GoPencil } from "react-icons/go";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { MdOutlineSwapHorizontalCircle } from "react-icons/md";
 import { FaInfoCircle } from "react-icons/fa";
+import { BsThreeDotsVertical } from "react-icons/bs";
 
 type ColumnType<T> = {
     field?: keyof T;
@@ -32,6 +33,7 @@ interface PrimeReactTreeTableProps<T> {
     onSubjectInfo?: (row: T) => void;
     isSubjectInfoVisible?: (row: T) => boolean;
     headerNameMap?: Record<string, string>;
+    onManageTools?: (row: T) => void;
 }
 
 export default function PrimeReactTreeTable<
@@ -48,6 +50,7 @@ export default function PrimeReactTreeTable<
     onSubjectInfo,
     isSubjectInfoVisible,
     headerNameMap = {},
+    onManageTools,
 }: PrimeReactTreeTableProps<T>) {
     const [expandedRows, setExpandedRows] =
         useState<DataTableExpandedRows | null>(null);
@@ -148,6 +151,20 @@ export default function PrimeReactTreeTable<
                 className="p-0"
                 style={{ width: "2rem", height: "2rem" }}
             />
+            {onManageTools && (!isSubjectInfoVisible || isSubjectInfoVisible(rowData)) && (
+                <>
+                    <Button
+                        icon={<BsThreeDotsVertical size={16} />}
+                        rounded
+                        outlined
+                        severity="secondary"
+                        onClick={() => onManageTools(rowData)}
+                        className="p-0"
+                        title="Tool Management"
+                        style={{ width: "2rem", height: "2rem" }}
+                    />
+                </>
+            )}
         </div>
     );
 
