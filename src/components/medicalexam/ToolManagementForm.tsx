@@ -264,6 +264,146 @@ const ToolManagementForm = forwardRef<ToolManagementFormRef, Props>(({ examId, t
   const showChitraCards = ["Mendel Chitras"].includes(toolName);
   const showFlashcardQA = ["Mendel Flashcards"].includes(toolName);
 
+  const renderWhatsIncluded = (isSideBySide: boolean) => (
+        <div className="flex flex-col h-full">
+            <div className={`flex items-center justify-between ${isSideBySide ? "mb-2" : "mb-4"}`}>
+                <Label className="font-bold text-sm">What's Included (Features)</Label>
+                <button
+                    type="button"
+                    onClick={() => updateTool((t) => ({ ...t, includedPoints: [...t.includedPoints, ""] }))}
+                    className="bg-[#ffcb07] text-black px-2 py-1 flex items-center justify-center rounded-md text-xs font-semibold hover:bg-yellow-400 transition-colors"
+                >
+                    <FaPlus className="mr-1" /> Add
+                </button>
+            </div>
+            <div className={isSideBySide ? "grid grid-cols-2 gap-2 max-h-[160px] overflow-y-auto pr-2" : "flex flex-wrap gap-4"}>
+                {tool.includedPoints.map((point, pi) => (
+                    <div key={pi} className={`flex gap-2 ${isSideBySide ? "w-full" : "mb-2 w-full md:w-[calc(20%-1rem)]"}`}>
+                        <Input
+                            type="text"
+                            placeholder={`Feature ${pi + 1}`}
+                            value={point}
+                            onChange={(e: any) => updateTool((t) => {
+                                const newPoints = [...t.includedPoints];
+                                newPoints[pi] = e.target.value;
+                                return { ...t, includedPoints: newPoints };
+                            })}
+                        />
+                        {tool.includedPoints.length > 1 && (
+                            <button
+                                type="button"
+                                onClick={() => updateTool((t) => ({
+                                    ...t, includedPoints: t.includedPoints.filter((_, i) => i !== pi)
+                                }))}
+                                className="border border-red-400 text-red-500 min-w-[36px] w-9 h-[38px] rounded-md flex items-center justify-center hover:bg-red-50 transition-colors"
+                            >
+                                <FaMinus />
+                            </button>
+                        )}
+                    </div>
+                ))}
+            </div>
+        </div>
+  );
+
+  const renderFlashcardQA = (isSideBySide: boolean) => (
+        <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between mb-2">
+                <Label className="text-sm font-bold text-gray-800 mb-0">Flashcard Q&amp;A Pairs</Label>
+                <button
+                    type="button"
+                    onClick={() => updateTool((t) => ({ ...t, flashcardQA: [...t.flashcardQA, { question: "", answer: "", hardDays: 1, mediumDays: 3, easyDays: 7 }] }))}
+                    className="bg-[#ffcb07] text-black px-2 py-1 flex items-center justify-center rounded-md text-xs font-semibold hover:bg-yellow-400 transition-colors"
+                >
+                    <FaPlus className="mr-1" /> Add Card
+                </button>
+            </div>
+            <div className={`grid grid-cols-1 ${isSideBySide ? "gap-4 max-h-[160px] overflow-y-auto pr-2" : "md:grid-cols-2 gap-6"}`}>
+            {tool.flashcardQA.map((card, ci) => (
+                <div key={ci} className="flashcard-qa-item bg-white p-3 rounded-lg border border-gray-200 relative space-y-3 shadow-sm">
+                    <button
+                        type="button"
+                        onClick={() => updateTool((t) => ({ ...t, flashcardQA: t.flashcardQA.filter((_, i) => i !== ci) }))}
+                        className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 border-2 border-white text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md transition-colors z-10"
+                    >
+                        <IoClose size={12} />
+                    </button>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                        <div>
+                            <Label className="text-gray-700 text-xs font-semibold">Question</Label>
+                            <textarea
+                                className={`w-full border border-gray-300 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20 rounded-lg p-2 text-xs ${isSideBySide ? "min-h-[40px]" : "min-h-[80px]"} transition-shadow`}
+                                placeholder="Enter the question..."
+                                value={card.question}
+                                onChange={(e: any) => updateTool((t) => {
+                                    const fqa = [...t.flashcardQA];
+                                    fqa[ci] = { ...fqa[ci], question: e.target.value };
+                                    return { ...t, flashcardQA: fqa };
+                                })}
+                            />
+                        </div>
+                        <div>
+                            <Label className="text-gray-700 text-xs font-semibold">Answer</Label>
+                            <textarea
+                                className={`w-full border border-gray-300 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20 rounded-lg p-2 text-xs ${isSideBySide ? "min-h-[40px]" : "min-h-[80px]"} transition-shadow`}
+                                placeholder="Enter the answer..."
+                                value={card.answer}
+                                onChange={(e: any) => updateTool((t) => {
+                                    const fqa = [...t.flashcardQA];
+                                    fqa[ci] = { ...fqa[ci], answer: e.target.value };
+                                    return { ...t, flashcardQA: fqa };
+                                })}
+                            />
+                        </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-2">
+                        <div>
+                            <Label className="text-[10px] text-red-500 font-bold mb-0">Hard (Days)</Label>
+                            <Input
+                                type="number"
+                                className="h-7 text-xs"
+                                value={card.hardDays?.toString() || "1"}
+                                onChange={(e: any) => updateTool((t) => {
+                                    const fqa = [...t.flashcardQA];
+                                    fqa[ci] = { ...fqa[ci], hardDays: parseInt(e.target.value) || 1 };
+                                    return { ...t, flashcardQA: fqa };
+                                })}
+                            />
+                        </div>
+                        <div>
+                            <Label className="text-[10px] text-yellow-600 font-bold mb-0">Med (Days)</Label>
+                            <Input
+                                type="number"
+                                className="h-7 text-xs"
+                                value={card.mediumDays?.toString() || "3"}
+                                onChange={(e: any) => updateTool((t) => {
+                                    const fqa = [...t.flashcardQA];
+                                    fqa[ci] = { ...fqa[ci], mediumDays: parseInt(e.target.value) || 3 };
+                                    return { ...t, flashcardQA: fqa };
+                                })}
+                            />
+                        </div>
+                        <div>
+                            <Label className="text-[10px] text-green-600 font-bold mb-0">Easy (Days)</Label>
+                            <Input
+                                type="number"
+                                className="h-7 text-xs"
+                                value={card.easyDays?.toString() || "7"}
+                                onChange={(e: any) => updateTool((t) => {
+                                    const fqa = [...t.flashcardQA];
+                                    fqa[ci] = { ...fqa[ci], easyDays: parseInt(e.target.value) || 7 };
+                                    return { ...t, flashcardQA: fqa };
+                                })}
+                            />
+                        </div>
+                    </div>
+                </div>
+            ))}
+            </div>
+        </div>
+  );
+
   return (
     <div className="flex flex-col h-full relative">
       <div className="space-y-6 p-2 flex-grow">
@@ -339,68 +479,41 @@ const ToolManagementForm = forwardRef<ToolManagementFormRef, Props>(({ examId, t
                 />
             </div>
             
-            <div className="md:col-span-2">
-                <Label>Description</Label>
-                <textarea
-                    className="w-full border border-gray-300 rounded-lg p-3 text-sm min-h-[100px]"
-                    placeholder="Tool description..."
-                    value={tool.description}
-                    onChange={(e: any) => updateTool((t) => ({ ...t, description: e.target.value }))}
-                />
-            </div>
-        </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full md:col-span-2">
+                <div className="flex flex-col h-full">
+                    <Label>Description</Label>
+                    <textarea
+                        className="w-full border border-gray-300 rounded-lg p-3 text-sm min-h-[160px] flex-grow"
+                        placeholder="Tool description..."
+                        value={tool.description}
+                        onChange={(e: any) => updateTool((t) => ({ ...t, description: e.target.value }))}
+                    />
+                </div>
 
-        {showSampleImage && (
-            <div>
-                <Label>Detail Sample Image</Label>
-                <DropzoneComponent
-                    preview={tool.sampleImageFile ? URL.createObjectURL(tool.sampleImageFile) : tool.sampleImage || null}
-                    setPreview={() => {}}
-                    className="h-40"
-                    onFileSelect={(file: File) => updateTool((t) => ({ ...t, sampleImageFile: file }))}
-                />
-            </div>
-        )}
-
-        <div>
-            <div className="flex items-center justify-between mb-4">
-                <Label className="font-bold">What's Included (Features)</Label>
-                <button
-                    type="button"
-                    onClick={() => updateTool((t) => ({ ...t, includedPoints: [...t.includedPoints, ""] }))}
-                    className="bg-[#ffcb07] text-black px-3 py-1.5 flex items-center justify-center rounded-md text-sm font-semibold hover:bg-yellow-400 transition-colors"
-                >
-                    <FaPlus className="mr-2" /> Add Feature
-                </button>
-            </div>
-            <div className="flex flex-wrap gap-4">
-                {tool.includedPoints.map((point, pi) => (
-                    <div key={pi} className="flex gap-2 mb-2 w-full md:w-[calc(20%-1rem)]">
-                        <Input
-                            type="text"
-                            placeholder={`Feature ${pi + 1}`}
-                            value={point}
-                            onChange={(e: any) => updateTool((t) => {
-                                const newPoints = [...t.includedPoints];
-                                newPoints[pi] = e.target.value;
-                                return { ...t, includedPoints: newPoints };
-                            })}
+                {showSampleImage && (
+                    <div>
+                        <div className="flex justify-between items-center mb-1">
+                            <Label className="mb-0">Detail Sample Image</Label>
+                            {tool.sampleImage && (
+                                <a href={tool.sampleImage} target="_blank" rel="noreferrer" className="text-xs text-blue-500 hover:underline">
+                                    View Image
+                                </a>
+                            )}
+                        </div>
+                        <DropzoneComponent
+                            preview={tool.sampleImageFile ? URL.createObjectURL(tool.sampleImageFile) : tool.sampleImage || null}
+                            setPreview={() => {}}
+                            className="h-40"
+                            onFileSelect={(file: File) => updateTool((t) => ({ ...t, sampleImageFile: file }))}
                         />
-                        {tool.includedPoints.length > 1 && (
-                            <button
-                                type="button"
-                                onClick={() => updateTool((t) => ({
-                                    ...t, includedPoints: t.includedPoints.filter((_, i) => i !== pi)
-                                }))}
-                                className="border border-red-400 text-red-500 min-w-[40px] w-10 h-[42px] rounded-md flex items-center justify-center hover:bg-red-50 transition-colors"
-                            >
-                                <FaMinus />
-                            </button>
-                        )}
                     </div>
-                ))}
+                )}
+
+                {(toolName === "Mendel Qbanks" || toolName === "Mendel Flashcards") && renderWhatsIncluded(true)}
             </div>
         </div>
+
+        {toolName !== "Mendel Qbanks" && toolName !== "Mendel Flashcards" && renderWhatsIncluded(false)}
 
         {showSampleQuestions && (
             <div className="">
@@ -524,7 +637,7 @@ const ToolManagementForm = forwardRef<ToolManagementFormRef, Props>(({ examId, t
                     <button
                         type="button"
                         onClick={() => updateTool((t) => ({ ...t, cards: [...t.cards, emptyCard()] }))}
-                        className="bg-[#ffcb07] text-black px-3 py-1.5 flex mb-0.5 items-center gap-1 rounded-md text-sm font-semibold"
+                        className="bg-[#ffcb07] text-black px-3 py-1.5 flex mb-2 items-center gap-1 rounded-md text-sm font-semibold"
                     >
                         <FaPlus /> Add Card
                     </button>
@@ -586,54 +699,7 @@ const ToolManagementForm = forwardRef<ToolManagementFormRef, Props>(({ examId, t
             </div>
         )}
 
-        {showFlashcardQA && (
-            <div>
-                <div className="mb-4">
-                    <Label className="text-sm font-bold text-gray-800 mb-0">Flashcard Q&amp;A Pairs</Label>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {tool.flashcardQA.map((card, ci) => (
-                    <div key={ci} className="flashcard-qa-item bg-white p-5 rounded-lg border border-gray-200 relative space-y-4 shadow-sm">
-                        <button
-                            type="button"
-                            onClick={() => updateTool((t) => ({ ...t, flashcardQA: t.flashcardQA.filter((_, i) => i !== ci) }))}
-                            className="absolute -top-3 -right-3 bg-red-500 hover:bg-red-600 border-2 border-white text-white w-7 h-7 rounded-full flex items-center justify-center shadow-md transition-colors z-10"
-                        >
-                            <IoClose size={16} />
-                        </button>
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            <div>
-                                <Label className="text-gray-700 font-semibold">Question</Label>
-                                <textarea
-                                    className="w-full border border-gray-300 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20 rounded-lg p-3 text-sm min-h-[80px] transition-shadow"
-                                    placeholder="Enter the question..."
-                                    value={card.question}
-                                    onChange={(e: any) => updateTool((t) => {
-                                        const fqa = [...t.flashcardQA];
-                                        fqa[ci] = { ...fqa[ci], question: e.target.value };
-                                        return { ...t, flashcardQA: fqa };
-                                    })}
-                                />
-                            </div>
-                            <div>
-                                <Label className="text-gray-700 font-semibold">Answer</Label>
-                                <textarea
-                                    className="w-full border border-gray-300 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20 rounded-lg p-3 text-sm min-h-[80px] transition-shadow"
-                                    placeholder="Enter the answer..."
-                                    value={card.answer}
-                                    onChange={(e: any) => updateTool((t) => {
-                                        const fqa = [...t.flashcardQA];
-                                        fqa[ci] = { ...fqa[ci], answer: e.target.value };
-                                        return { ...t, flashcardQA: fqa };
-                                    })}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-            </div>
-        )}
+        {showFlashcardQA && renderFlashcardQA(false)}
 
       </div>
       

@@ -21,6 +21,9 @@ export interface GalaxySampleQuestion {
 export interface GalaxyFlashcardQA {
   question: string;
   answer: string;
+  hardDays: number;
+  mediumDays: number;
+  easyDays: number;
 }
 
 export interface GalaxyTool {
@@ -81,7 +84,7 @@ export const emptySampleQuestion = (): GalaxySampleQuestion => ({
   options: [emptyOption(), emptyOption()],
 });
 
-export const emptyFlashcardQA = (): GalaxyFlashcardQA => ({ question: "", answer: "" });
+export const emptyFlashcardQA = (): GalaxyFlashcardQA => ({ question: "", answer: "", hardDays: 1, mediumDays: 3, easyDays: 7 });
 
 export const emptyTool = (name: string): GalaxyTool => ({
   toolName: name,
@@ -174,7 +177,13 @@ export const mapGalaxySectionFromApi = (data: any): GalaxyAppSectionData => {
                 }]
               : []),
         flashcardQA: t.flashcard_qa?.length
-          ? t.flashcard_qa.map((f: any) => ({ question: f.question || "", answer: f.answer || "" }))
+          ? t.flashcard_qa.map((f: any) => ({ 
+              question: f.question || "", 
+              answer: f.answer || "",
+              hardDays: f.hard_days || 1,
+              mediumDays: f.medium_days || 3,
+              easyDays: f.easy_days || 7,
+            }))
           : [],
         individualPrice: t.individual_price || "",
         individualPer: t.individual_per || "per subject / month",
@@ -227,7 +236,13 @@ export const buildGalaxySectionForSubmit = (data: GalaxyAppSectionData) => ({
     })),
     flashcard_qa: tool.flashcardQA
       .filter((f) => f.question.trim() || f.answer.trim())
-      .map((f) => ({ question: f.question, answer: f.answer })),
+      .map((f) => ({ 
+        question: f.question, 
+        answer: f.answer,
+        hard_days: f.hardDays,
+        medium_days: f.mediumDays,
+        easy_days: f.easyDays,
+      })),
     individual_price: tool.individualPrice,
     individual_per: tool.individualPer,
     galaxy_price: tool.galaxyPrice,
@@ -339,26 +354,35 @@ const GalaxyAppSectionForm: React.FC<Props> = ({ data, onChange }) => {
           />
         </div>
       </div>
-      <div>
-        <Label>Description</Label>
-        <textarea
-          className="w-full border border-gray-300 rounded-lg p-3 text-sm min-h-[100px]"
-          placeholder="Tool description for detail popup"
-          value={tool.description}
-          onChange={(e) => updateTool(toolIndex, (t) => ({ ...t, description: e.target.value }))}
-        />
-      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label>Description</Label>
+          <textarea
+            className="w-full border border-gray-300 rounded-lg p-3 text-sm min-h-[160px]"
+            placeholder="Tool description for detail popup"
+            value={tool.description}
+            onChange={(e) => updateTool(toolIndex, (t) => ({ ...t, description: e.target.value }))}
+          />
+        </div>
 
-      <div>
-        <Label>Detail Sample Image</Label>
-        <DropzoneComponent
-          preview={tool.sampleImageFile ? URL.createObjectURL(tool.sampleImageFile) : tool.sampleImage || null}
-          setPreview={() => {}}
-          className="h-40"
-          onFileSelect={(file: File) =>
-            updateTool(toolIndex, (t) => ({ ...t, sampleImageFile: file }))
-          }
-        />
+        <div>
+          <div className="flex justify-between items-center mb-1">
+            <Label className="mb-0">Detail Sample Image</Label>
+            {tool.sampleImage && (
+              <a href={tool.sampleImage} target="_blank" rel="noreferrer" className="text-xs text-blue-500 hover:underline">
+                View Image
+              </a>
+            )}
+          </div>
+          <DropzoneComponent
+            preview={tool.sampleImageFile ? URL.createObjectURL(tool.sampleImageFile) : tool.sampleImage || null}
+            setPreview={() => {}}
+            className="h-40"
+            onFileSelect={(file: File) =>
+              updateTool(toolIndex, (t) => ({ ...t, sampleImageFile: file }))
+            }
+          />
+        </div>
       </div>
 
       <div>
@@ -619,7 +643,7 @@ const GalaxyAppSectionForm: React.FC<Props> = ({ data, onChange }) => {
             </div>
 
             {tool.flashcardQA.map((card, ci) => (
-              <div key={ci} className="bg-white p-4 rounded-md border border-purple-200 relative space-y-3 shadow-sm">
+              <div key={ci} className="bg-white p-4 rounded-md border border-purple-200 relative space-y-4 shadow-sm">
                 <button
                   type="button"
                   onClick={() =>
@@ -632,35 +656,82 @@ const GalaxyAppSectionForm: React.FC<Props> = ({ data, onChange }) => {
                 >
                   <IoClose size={14} />
                 </button>
-                <div>
-                  <Label>Card {ci + 1} — Question</Label>
-                  <textarea
-                    className="w-full border border-gray-300 rounded-lg p-3 text-sm min-h-[70px]"
-                    placeholder="Enter the question side of the flashcard"
-                    value={card.question}
-                    onChange={(e) =>
-                      updateTool(toolIndex, (t) => {
-                        const flashcardQA = [...t.flashcardQA];
-                        flashcardQA[ci] = { ...flashcardQA[ci], question: e.target.value };
-                        return { ...t, flashcardQA };
-                      })
-                    }
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Card {ci + 1} — Question</Label>
+                    <textarea
+                      className="w-full border border-gray-300 rounded-lg p-3 text-sm min-h-[80px]"
+                      placeholder="Enter the question side of the flashcard"
+                      value={card.question}
+                      onChange={(e) =>
+                        updateTool(toolIndex, (t) => {
+                          const flashcardQA = [...t.flashcardQA];
+                          flashcardQA[ci] = { ...flashcardQA[ci], question: e.target.value };
+                          return { ...t, flashcardQA };
+                        })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label>Card {ci + 1} — Answer</Label>
+                    <textarea
+                      className="w-full border border-gray-300 rounded-lg p-3 text-sm min-h-[80px]"
+                      placeholder="Enter the answer side of the flashcard"
+                      value={card.answer}
+                      onChange={(e) =>
+                        updateTool(toolIndex, (t) => {
+                          const flashcardQA = [...t.flashcardQA];
+                          flashcardQA[ci] = { ...flashcardQA[ci], answer: e.target.value };
+                          return { ...t, flashcardQA };
+                        })
+                      }
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Label>Card {ci + 1} — Answer</Label>
-                  <textarea
-                    className="w-full border border-gray-300 rounded-lg p-3 text-sm min-h-[70px]"
-                    placeholder="Enter the answer side of the flashcard"
-                    value={card.answer}
-                    onChange={(e) =>
-                      updateTool(toolIndex, (t) => {
-                        const flashcardQA = [...t.flashcardQA];
-                        flashcardQA[ci] = { ...flashcardQA[ci], answer: e.target.value };
-                        return { ...t, flashcardQA };
-                      })
-                    }
-                  />
+                
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <Label className="text-xs text-red-500 font-bold">Hard (Days)</Label>
+                    <Input
+                      type="number"
+                      value={card.hardDays?.toString() || "1"}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        updateTool(toolIndex, (t) => {
+                          const flashcardQA = [...t.flashcardQA];
+                          flashcardQA[ci] = { ...flashcardQA[ci], hardDays: parseInt(e.target.value) || 1 };
+                          return { ...t, flashcardQA };
+                        })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-yellow-600 font-bold">Medium (Days)</Label>
+                    <Input
+                      type="number"
+                      value={card.mediumDays?.toString() || "3"}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        updateTool(toolIndex, (t) => {
+                          const flashcardQA = [...t.flashcardQA];
+                          flashcardQA[ci] = { ...flashcardQA[ci], mediumDays: parseInt(e.target.value) || 3 };
+                          return { ...t, flashcardQA };
+                        })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-green-600 font-bold">Easy (Days)</Label>
+                    <Input
+                      type="number"
+                      value={card.easyDays?.toString() || "7"}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        updateTool(toolIndex, (t) => {
+                          const flashcardQA = [...t.flashcardQA];
+                          flashcardQA[ci] = { ...flashcardQA[ci], easyDays: parseInt(e.target.value) || 7 };
+                          return { ...t, flashcardQA };
+                        })
+                      }
+                    />
+                  </div>
                 </div>
               </div>
             ))}
