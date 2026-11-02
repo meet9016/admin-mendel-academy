@@ -120,9 +120,9 @@ export default function DemoPage() {
       return;
     }
     
-    // Only allow for USMLE STEP 1 and USMLE STEP 2 CK
-    if (row.exam_name !== "USMLE STEP 1" && row.exam_name !== "USMLE STEP 2 CK") {
-      toast.error('Tool management is only available for USMLE STEP 1 and USMLE STEP 2 CK');
+    // Only allow for USMLE STEP 2 CK
+    if (row.exam_name !== "USMLE STEP 2 CK") {
+      toast.error('Tool management is only available for USMLE STEP 2 CK');
       return;
     }
 
@@ -181,13 +181,20 @@ export default function DemoPage() {
                 },
               ]}
               headerNameMap={headerNameMap}
-              onEdit={(row) => router.push(`/medicalexamlist/add?id=${row.id}`)}
+              onEdit={(row) => {
+                if (row.exam_name === "USMLE STEP 1") {
+                  router.push(`/medicalexamlist/usmle-step1?id=${row.id}`);
+                } else {
+                  router.push(`/medicalexamlist/add?id=${row.id}`);
+                }
+              }}
               onDelete={handleDeleteClick}
               onSubjectInfo={handleSubjectInfoClick}
               isSubjectInfoVisible={(row) => 
-                row.exam_name === "USMLE STEP 1" || 
-                row.exam_name === "USMLE STEP 2 CK" || 
-                row.exam_name === "USMLE STEP 2 CE"
+                row.exam_name !== "USMLE STEP 1" && (
+                  row.exam_name === "USMLE STEP 2 CK" || 
+                  row.exam_name === "USMLE STEP 2 CE"
+                )
               }
               onManageTools={handleOpenToolsList}
             />

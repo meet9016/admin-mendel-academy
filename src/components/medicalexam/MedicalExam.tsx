@@ -337,6 +337,12 @@ const MedicalExam = () => {
                 if (id) {
                     const res = await api.get(`${endPointApi.getByIdExamList}/${id}`);
                     const data = res.data || {};
+
+                    // Redirect USMLE Step 1 to dedicated landing page content manager
+                    if (data?.exams?.[0]?.slug === "usmle-step-1" || data?.exams?.[0]?.exam_name === "USMLE STEP 1") {
+                        router.replace(`/medicalexamlist/usmle-step1?id=${id}`);
+                        return;
+                    }
                     const decodedDescription = decodeHtml(data.exams[0].description ?? "");
 
                     descriptionRef.current = decodedDescription;

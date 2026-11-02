@@ -38,6 +38,7 @@ export interface EndPointApi {
     deleteExamList?: string;
     getByIdExamList?: string;
     updateExamList?: string;
+    updateStep1Detail?: string;
 
     //FAQ
     getAllFaq?: string;
@@ -170,6 +171,7 @@ const endPointApi: EndPointApi = {
     deleteExamList: 'examlist/delete',
     getByIdExamList: 'examlist/getById',
     updateExamList: 'examlist/update',
+    updateStep1Detail: 'examlist/update-step1',
 
     //FAQ
     getAllFaq: 'faq/getall',

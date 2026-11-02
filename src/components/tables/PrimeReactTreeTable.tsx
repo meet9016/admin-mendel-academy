@@ -161,7 +161,6 @@ export default function PrimeReactTreeTable<
                         onClick={() => onManageTools(rowData)}
                         className="p-0"
                         title="Tool Management"
-                        style={{ width: "2rem", height: "2rem" }}
                     />
                 </>
             )}

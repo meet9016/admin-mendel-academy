@@ -104,6 +104,7 @@ const Blogs = () => {
           setFormData({
             examName: "",
             title: "",
+            slug: "",
             date: "",
             status: "Active",
             shortDescription: "",
@@ -285,11 +286,40 @@ const Blogs = () => {
           </div>
         </div>
 
-        <DropzoneComponent
-          preview={preview}
-          setPreview={setPreview}
-          onFileSelect={(file: File) => setMainImage(file)}
-        />
+        <div className="pt-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+            <div>
+              <Label className="mb-0 text-base font-semibold">Featured Blog Image</Label>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                Displayed on blog cards, search lists, and at the top of the blog page.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium border border-blue-200 dark:border-blue-800">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                Recommended: 1200 × 675 px (16:9)
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-medium border border-amber-200 dark:border-amber-800">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                Min: 800 × 450 px
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-medium border border-emerald-200 dark:border-emerald-800">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                Max Size: 5 MB
+              </span>
+            </div>
+          </div>
+
+          <DropzoneComponent
+            preview={preview}
+            setPreview={setPreview}
+            onFileSelect={(file: File) => setMainImage(file)}
+            onRemove={() => {
+              setPreview(null);
+              setMainImage(null);
+            }}
+          />
+        </div>
         <div className="flex items-center gap-5 mt-6">
           <Button size="sm" variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
             {isSubmitting ? "Saving..." : (id ? "Update" : "Save")}
