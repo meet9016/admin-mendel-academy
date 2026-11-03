@@ -4,7 +4,7 @@ import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import DropzoneComponent from "../blogs/DropZone";
 import dynamic from "next/dynamic";
-const Editor = dynamic(() => import("primereact/editor").then((m) => m.Editor), { ssr: false });
+import CustomEditor from "../common/CustomEditor";
 
 interface EnrollData {
   title: string;
@@ -55,7 +55,7 @@ const EnrollSection: React.FC<EnrollSectionProps> = ({ data, onChange, preview, 
         <div className="grid grid-cols-2 gap-6">
           <div>
             <Label>Description</Label>
-            <Editor
+            <CustomEditor
               style={{ height: "320px" }}
               value={data.description}
               onTextChange={(e) => {

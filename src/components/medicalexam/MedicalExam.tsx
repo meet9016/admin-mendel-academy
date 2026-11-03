@@ -6,7 +6,7 @@ import Input from "../form/input/InputField";
 import { FaPlus, FaMinus } from "react-icons/fa6";
 import { IoClose } from "react-icons/io5";
 import dynamic from "next/dynamic";
-const Editor = dynamic(() => import("primereact/editor").then((m) => m.Editor), { ssr: false });
+import CustomEditor from "../common/CustomEditor";
 import Select from "../form/Select";
 import Button from "../ui/button/Button";
 import { useRouter } from "next/navigation";
@@ -813,7 +813,7 @@ const MedicalExam = () => {
                 <div className="grid grid-cols-2 gap-3">
                     <div>
                         <Label>Description</Label>
-                        <Editor
+                        <CustomEditor
                             style={{ height: "320px" }}
                             value={formData.description}
                             onTextChange={(e) => {

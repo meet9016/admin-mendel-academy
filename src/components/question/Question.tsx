@@ -9,8 +9,8 @@ import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import ComponentCard from "../common/ComponentCard";
 import dynamic from "next/dynamic";
-const Editor = dynamic(() => import("primereact/editor").then((m) => m.Editor), { ssr: false });
-import type { EditorTextChangeEvent } from "primereact/editor";
+import CustomEditor from "../common/CustomEditor";
+import type { EditorTextChangeEvent } from "../common/CustomEditor";
 import MultiSelect from "../form/MultiSelect";
 import { decodeHtml } from "@/utils/helper";
 import { questionSchema } from "@/ValidationSchema/validationSchema";
@@ -258,14 +258,11 @@ const Question = () => {
           {/* Description */}
           <div>
             <Label>Description</Label>
-            <Editor
+            <CustomEditor
               value={formData.description}
-              style={{ height: "320px" }}
               onTextChange={handleEditorChange}
-              className={` ${errors.description
-                ? "border border-error-500"
-                : "border border-gray-100"
-                }`}
+              height="320px"
+              error={errors.description}
             />
             {errors.description && <p className="text-sm text-error-500 mt-1">{errors.description}</p>}
           </div>

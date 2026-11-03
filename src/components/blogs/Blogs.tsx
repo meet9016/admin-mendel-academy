@@ -12,8 +12,8 @@ import Button from "../ui/button/Button";
 import { useRouter, useSearchParams } from "next/navigation";
 import endPointApi from "@/utils/endPointApi";
 import dynamic from "next/dynamic";
-const Editor = dynamic(() => import("primereact/editor").then((m) => m.Editor), { ssr: false });
-import type { EditorTextChangeEvent } from "primereact/editor";
+import CustomEditor from "../common/CustomEditor";
+import type { EditorTextChangeEvent } from "../common/CustomEditor";
 import { toast } from 'react-toastify';
 import { decodeHtml, generateSlug } from "@/utils/helper";
 import { blogSchema } from "@/ValidationSchema/validationSchema";
@@ -271,14 +271,11 @@ const Blogs = () => {
           </div>
 
           <div>
-            <Editor
+            <CustomEditor
               value={formData.description}
               onTextChange={handleEditorChange}
-              style={{ height: "320px" }}
-              className={` ${errors.description
-                ? "border border-error-500"
-                : "border border-gray-100"
-                }`}
+              height="320px"
+              error={errors.description}
             />
             {errors.description && (
               <p className="text-sm text-error-500 mt-1">{errors.description}</p>

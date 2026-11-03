@@ -13,8 +13,8 @@ import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import DatePicker from "../form/date-picker";
 import dynamic from "next/dynamic";
-const Editor = dynamic(() => import("primereact/editor").then((mod) => mod.Editor), { ssr: false });
-import type { EditorTextChangeEvent } from "primereact/editor";
+import CustomEditor from "../common/CustomEditor";
+import type { EditorTextChangeEvent } from "../common/CustomEditor";
 import DropzoneComponent from "../blogs/DropZone";
 import { upcomingProgramSchema } from "@/ValidationSchema/validationSchema";
 import { UpcomingProgramsSkeleton } from "../skeltons/Skeltons";
@@ -244,15 +244,12 @@ const UpcomingPrograms = () => {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Description</Label>
-              <Editor
-                value={formData.description}
-                onTextChange={handleEditorChange}
-                style={{ height: "320px" }}
-                className={` ${errors.description
-                  ? "border border-error-500"
-                  : "border border-gray-100"
-                  }`}
-              />
+              <CustomEditor
+              value={formData.description}
+              onTextChange={handleEditorChange}
+              height="320px"
+              error={errors.description}
+            />
               {errors.description && (
                 <p className="text-sm text-error-500 mt-1">{errors.description}</p>
               )}

@@ -4,13 +4,8 @@ import ComponentCard from '../common/ComponentCard'
 import Button from '../ui/button/Button'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic';
-const Editor = dynamic(() => import('primereact/editor').then((m) => m.Editor), { 
-    ssr: false,
-    loading: () => (
-        <div className="h-[420px] bg-gray-100 animate-pulse rounded-lg"></div>
-    )
-});
-import type { EditorTextChangeEvent } from 'primereact/editor';
+import CustomEditor from "../common/CustomEditor";
+import type { EditorTextChangeEvent } from "../common/CustomEditor";
 import { api } from '@/utils/axiosInstance';
 import endPointApi from '@/utils/endPointApi';
 import { decodeHtml } from '@/utils/helper';
@@ -144,15 +139,11 @@ const TermsAndConditions = () => {
                 <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                     <div>
                         <div>
-                            <Editor
+                            <CustomEditor
                                 value={formData.description}
                                 onTextChange={handleEditorChange}
-                                style={{ height: "420px" }}
-                                headerTemplate={editorHeader}
-                                className={` ${errors.description
-                                    ? "border border-error-500"
-                                    : "border border-gray-100"
-                                    }`}
+                                height="420px"
+                                error={errors.description}
                             />
                             {errors.description && <p className="text-sm text-error-500 mt-1">{errors.description}</p>}
                         </div>

@@ -13,8 +13,8 @@ import ComponentCard from "../common/ComponentCard";
 import Radio from "../form/input/Radio";
 import DatePicker from "../form/date-picker";
 import dynamic from "next/dynamic";
-const Editor = dynamic(() => import("primereact/editor").then((m) => m.Editor), { ssr: false });
-import type { EditorTextChangeEvent } from "primereact/editor";
+import CustomEditor from "../common/CustomEditor";
+import type { EditorTextChangeEvent } from "../common/CustomEditor";
 import { decodeHtml } from "@/utils/helper";
 import { toast } from "react-toastify";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
@@ -714,12 +714,12 @@ const Prerecorded = () => {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Description *</Label>
-              <Editor
-                value={formData.description}
-                style={{ height: "320px" }}
-                onTextChange={handleEditorChange}
-                className={`${errors.description ? "border border-error-500" : "border border-gray-100"}`}
-              />
+              <CustomEditor
+              value={formData.description}
+              onTextChange={handleEditorChange}
+              height="320px"
+              error={errors.description}
+            />
               {errors.description && (
                 <p className="text-sm text-error-500 mt-1">{errors.description}</p>
               )}

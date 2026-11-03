@@ -6,15 +6,13 @@ import ComponentCard from "@/components/common/ComponentCard";
 import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
 import dynamic from "next/dynamic";
-import type { EditorTextChangeEvent } from "primereact/editor";
+import type { EditorTextChangeEvent } from "@/components/common/CustomEditor";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import { toast } from "react-toastify";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa6";
 
-const Editor = dynamic(() => import("primereact/editor").then((m) => m.Editor), {
-  ssr: false,
-});
+import CustomEditor from "@/components/common/CustomEditor";
 
 type MCQOption = {
   id: string;
@@ -292,7 +290,7 @@ function DemoQuestionForm() {
         <div className="space-y-6">
           <div>
             <Label>Question</Label>
-            <Editor
+            <CustomEditor
               value={question}
               onTextChange={handleQuestionChange}
               style={{ height: "200px" }}
@@ -366,7 +364,7 @@ function DemoQuestionForm() {
                         {option.showExplanation && (
                           <div className="mt-2">
                             <Label>Explain why this answer is incorrect</Label>
-                            <Editor
+                            <CustomEditor
                               value={option.explanation}
                               onTextChange={(e: EditorTextChangeEvent) =>
                                 updateMCQOptionExplanation(
@@ -420,7 +418,7 @@ function DemoQuestionForm() {
 
           <div>
             <Label>Description/Explanation</Label>
-            <Editor
+            <CustomEditor
               value={description}
               onTextChange={handleDescriptionChange}
               style={{ height: "200px" }}
